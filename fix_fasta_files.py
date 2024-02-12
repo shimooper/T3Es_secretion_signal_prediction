@@ -1,7 +1,9 @@
 from pathlib import Path
-from consts import POSITIVE_TRAIN_FILE, NEGATIVE_TRAIN_FILE, POSITIVE_TEST_FILE, NEGATIVE_TEST_FILE, POSITIVE_XANTOMONAS_FILE, NEGATIVE_XANTOMONAS_FILE
+import os
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
+from consts import (POSITIVE_TRAIN_FILE, NEGATIVE_TRAIN_FILE, POSITIVE_TEST_FILE, NEGATIVE_TEST_FILE,
+                    POSITIVE_XANTOMONAS_FILE, NEGATIVE_XANTOMONAS_FILE, DATASETS_FIXED_DIR)
 
 
 def fix_all_fasta_files():
@@ -16,10 +18,10 @@ def fix_all_fasta_files():
 def fix_fasta_file(file_path):
     with open(file_path, "r") as f:
         records = list(SeqIO.parse(f, "fasta"))
-    fixed_records = [SeqRecord(seq=record.seq, id=record.id, description=record.description.replace("/", " ")) for record in records]
+    fixed_records = [SeqRecord(seq=record.seq, id=record.id.replace("/", " ").replace("|", "_"), description="") for record in records]
 
-
-    SeqIO.write(fixed_records, f"{file_path}_fixed", "fasta")
+    fixed_file_path = os.path.join(DATASETS_FIXED_DIR, "fixed_" + Path(file_path).name)
+    SeqIO.write(fixed_records, fixed_file_path, "fasta")
 
 
 if __name__ == "__main__":
