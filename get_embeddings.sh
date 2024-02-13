@@ -37,5 +37,5 @@ echo $NEGATIVE_TEST_FILE
 python ~/esm/scripts/extract.py esm2_t33_650M_UR50D $NEGATIVE_TEST_FILE ~/secretion_signal_prediction/outputs/test_negative/ --repr_layers 33 --include mean
 
 NEGATIVE_XANTOMONAS_FILE=$(python -c "from consts import FIXED_NEGATIVE_XANTOMONAS_FILE; print(FIXED_NEGATIVE_XANTOMONAS_FILE)")
-echo NEGATIVE_XANTOMONAS_FILE
+echo $NEGATIVE_XANTOMONAS_FILE
 python ~/esm/scripts/extract.py esm2_t33_650M_UR50D $NEGATIVE_XANTOMONAS_FILE ~/secretion_signal_prediction/outputs/xantomonas_negative/ --repr_layers 33 --include mean
