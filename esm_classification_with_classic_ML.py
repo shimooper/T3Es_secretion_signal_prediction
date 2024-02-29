@@ -54,13 +54,14 @@ svm_grid = {
         'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
         'degree': [3],
         'gamma': ['scale'],
+        'probability': [True],
 }
 
 rfc_grid = {
         'n_estimators': [20],
-        'criterion' : ['gini', 'entropy'],
+        'criterion': ['gini', 'entropy'],
         'max_features': ['sqrt', 'log2'],
-        'min_samples_split' : [2, 5, 10],
+        'min_samples_split': [2, 5, 10],
         'min_samples_leaf': [1, 4]
 }
 
