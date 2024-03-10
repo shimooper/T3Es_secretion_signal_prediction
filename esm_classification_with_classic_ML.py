@@ -72,7 +72,7 @@ gbc_grid = {
     "min_samples_leaf": np.linspace(0.1, 0.5, 12),
     "max_depth": [3, 5, 8],
     "max_features": ["log2", "sqrt"],
-    "criterion": ["friedman_mse",  "mae"],
+    "criterion": ["friedman_mse",  "squared_error"],
     "subsample": [0.5, 0.618, 0.8, 0.85, 0.9, 0.95, 1.0],
     "n_estimators": [10]
 }
@@ -87,7 +87,8 @@ mlp_grid = {
     'activation': ['tanh', 'relu'],
     'solver': ['sgd', 'adam'],
     'alpha': [0.0001, 0.05],
-    'learning_rate': ['constant','adaptive'],
+    'learning_rate': ['constant', 'adaptive'],
+    'early_stopping': [True, False],
 }
 
 param_grid_list = [knn_grid, svm_grid, rfc_grid, gbc_grid, logistic_regression_grid, mlp_grid]
