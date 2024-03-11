@@ -59,6 +59,21 @@ svm_grid = {
         'probability': [True],
 }
 
+logistic_regression_grid = {
+    "penalty": [None, 'l2'],
+    "C": [0.001, 0.01, 0.1, 1, 10, 100, 1000],
+    "max_iter": [500],
+}
+
+mlp_grid = {
+    'hidden_layer_sizes': [(10,3),(30,5),(50,10)],
+    'activation': ['tanh', 'relu'],
+    'solver': ['sgd', 'adam'],
+    'alpha': [0.0001, 0.05],
+    'learning_rate': ['constant', 'adaptive'],
+    'max_iter': [500]
+}
+
 rfc_grid = {
         'n_estimators': [20],
         'criterion': ['gini', 'entropy'],
@@ -68,7 +83,7 @@ rfc_grid = {
 }
 
 gbc_grid = {
-    "loss": ["deviance"],
+    "loss": ["log_loss"],
     'min_samples_split': [2, 5, 10],
     'min_samples_leaf': [1, 4],
     "max_depth": [3, 5, 8],
@@ -77,39 +92,25 @@ gbc_grid = {
     "n_estimators": [100]
 }
 
-logistic_regression_grid = {
-    "penalty": ['l1', 'l2'],
-    "C": [0.001, 0.01, 0.1, 1, 10, 100, 1000],
-}
-
-mlp_grid = {
-    'hidden_layer_sizes': [(50,50,50), (50,100,50), (100,)],
-    'activation': ['tanh', 'relu'],
-    'solver': ['sgd', 'adam'],
-    'alpha': [0.0001, 0.05],
-    'learning_rate': ['constant', 'adaptive'],
-}
-
 xgboost_grid = {
-    'max_depth': [2, 4],
+    'max_depth': [0, 6, 10, 50],
     'n_estimators': [50, 100],
+    'learning_rate': [0.005, 0.01],
 }
 
 lgbm_grid = {
     'learning_rate': [0.005, 0.01],
-    'n_estimators': [8,16,24],
-    'num_leaves': [6,8,12,16], # large num_leaves helps improve accuracy but might lead to over-fitting
-    'boosting_type' : ['gbdt', 'dart'], # for better accuracy -> try dart
-    'objective' : ['binary'],
-    'max_bin':[255, 510], # large max_bin helps improve accuracy but might slow down training progress
-    'random_state' : [500],
-    'colsample_bytree' : [0.64, 0.65, 0.66],
-    'subsample' : [0.7,0.75],
-    'reg_alpha' : [1,1.2],
-    'reg_lambda' : [1,1.2,1.4],
+    'n_estimators': [25, 50, 100],
+    'num_leaves': [12, 25, 50, 100],  # large num_leaves helps improve accuracy but might lead to over-fitting
+    'max_depth': [-1, 3, 6, 12],
+    'boosting_type': ['gbdt', 'dart'],  # for better accuracy -> try dart
+    'objective': ['binary'],
+    'max_bin': [255, 510],  # large max_bin helps improve accuracy but might slow down training progress
+    'random_state': [500],
+    'subsample': [0.6, 0.8, 1],
 }
 
-param_grid_list = [knn_grid, svm_grid, rfc_grid, gbc_grid, logistic_regression_grid, mlp_grid, xgboost_grid, lgbm_grid]
+param_grid_list = [knn_grid, svm_grid, logistic_regression_grid, mlp_grid, rfc_grid, gbc_grid, xgboost_grid, lgbm_grid]
 
 
 def read_embeddings_from_dir(dir_path):
