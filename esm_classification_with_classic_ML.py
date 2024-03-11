@@ -14,12 +14,14 @@ from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.decomposition import PCA
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, GradientBoostingClassifier
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, GradientBoostingClassifier, GradientBoostingRegressor
 from sklearn.naive_bayes import GaussianNB
 from sklearn.linear_model import LogisticRegression, SGDRegressor
 from sklearn.neural_network import MLPClassifier, MLPRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import make_scorer, matthews_corrcoef, average_precision_score
+from xgboost import XGBClassifier
+from lightgbm import LGBMClassifier
 
 from consts import (OUTPUTS_DIR, EMBEDDINGS_POSITIVE_TRAIN_DIR, EMBEDDINGS_NEGATIVE_TRAIN_DIR,
                     EMBEDDINGS_POSITIVE_TEST_DIR, EMBEDDINGS_NEGATIVE_TEST_DIR,
@@ -38,8 +40,8 @@ logging.basicConfig(level=logging.INFO,
 
 EMB_LAYER = 33
 
-classifiers = [KNeighborsClassifier(), SVC(), RandomForestClassifier(), GradientBoostingClassifier(),
-               LogisticRegression(), MLPClassifier()]
+classifiers = [KNeighborsClassifier(), SVC(), LogisticRegression(), MLPClassifier(),
+               RandomForestClassifier(), GradientBoostingClassifier(), XGBClassifier(), LGBMClassifier()]
 
 knn_grid = {
         'n_neighbors': [5, 10],
@@ -67,14 +69,12 @@ rfc_grid = {
 
 gbc_grid = {
     "loss": ["deviance"],
-    "learning_rate": [0.01, 0.025, 0.05, 0.075, 0.1, 0.15, 0.2],
-    "min_samples_split": np.linspace(0.1, 0.5, 12),
-    "min_samples_leaf": np.linspace(0.1, 0.5, 12),
+    'min_samples_split': [2, 5, 10],
+    'min_samples_leaf': [1, 4],
     "max_depth": [3, 5, 8],
     "max_features": ["log2", "sqrt"],
     "criterion": ["friedman_mse",  "squared_error"],
-    "subsample": [0.5, 0.618, 0.8, 0.85, 0.9, 0.95, 1.0],
-    "n_estimators": [10]
+    "n_estimators": [100]
 }
 
 logistic_regression_grid = {
@@ -88,10 +88,28 @@ mlp_grid = {
     'solver': ['sgd', 'adam'],
     'alpha': [0.0001, 0.05],
     'learning_rate': ['constant', 'adaptive'],
-    'early_stopping': [True, False],
 }
 
-param_grid_list = [knn_grid, svm_grid, rfc_grid, gbc_grid, logistic_regression_grid, mlp_grid]
+xgboost_grid = {
+    'max_depth': [2, 4],
+    'n_estimators': [50, 100],
+}
+
+lgbm_grid = {
+    'learning_rate': [0.005, 0.01],
+    'n_estimators': [8,16,24],
+    'num_leaves': [6,8,12,16], # large num_leaves helps improve accuracy but might lead to over-fitting
+    'boosting_type' : ['gbdt', 'dart'], # for better accuracy -> try dart
+    'objective' : ['binary'],
+    'max_bin':[255, 510], # large max_bin helps improve accuracy but might slow down training progress
+    'random_state' : [500],
+    'colsample_bytree' : [0.64, 0.65, 0.66],
+    'subsample' : [0.7,0.75],
+    'reg_alpha' : [1,1.2],
+    'reg_lambda' : [1,1.2,1.4],
+}
+
+param_grid_list = [knn_grid, svm_grid, rfc_grid, gbc_grid, logistic_regression_grid, mlp_grid, xgboost_grid, lgbm_grid]
 
 
 def read_embeddings_from_dir(dir_path):
