@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -S /bin/bash
 #PBS -q power-pupko
-#PBS -l select=1:ncpus=20
+#PBS -l select=1:ncpus=60
 #PBS -o /groups/pupko/yairshimony/secretion_signal_prediction/outputs
 #PBS -e /groups/pupko/yairshimony/secretion_signal_prediction/outputs
 #PBS -N esm
