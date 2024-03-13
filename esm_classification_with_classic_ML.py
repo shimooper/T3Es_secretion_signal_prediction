@@ -58,6 +58,7 @@ svm_grid = {
         'gamma': ['scale'],
         'probability': [True],
         'random_state': [RANDOM_STATE],
+        'class_weight': ['balanced', None],
 }
 
 logistic_regression_grid = {
@@ -65,6 +66,7 @@ logistic_regression_grid = {
     "C": [0.001, 0.01, 0.1, 1, 10, 100, 1000],
     "max_iter": [500],
     'random_state': [RANDOM_STATE],
+    'class_weight': ['balanced', None],
 }
 
 mlp_grid = {
@@ -84,6 +86,7 @@ rfc_grid = {
         'min_samples_split': [2, 5, 10],
         'min_samples_leaf': [1, 4],
         'random_state': [RANDOM_STATE],
+        'class_weight': ['balanced', None],
 }
 
 gbc_grid = {
@@ -98,24 +101,32 @@ gbc_grid = {
 }
 
 xgboost_grid = {
-    'max_depth': [0, 6, 10, 50],
-    'n_estimators': [50, 100],
-    'learning_rate': [0.005, 0.01],
+    'learning_rate': [0.005, 0.05, 0.1],
+    'n_estimators': [10, 50, 100, 200, 1000],
+    'max_leaves': [10, 30, 50, 100, 200],
+    'max_depth': [0, 6, 10, 50, 100],
+    'boosting_type': ['gbtree', 'dart'],
     'n_jobs': [1],
     'random_state': [RANDOM_STATE],
+    'subsample': [0.6, 0.8, 1],
+    'reg_alpha': [0, 0.5, 1, 3, 10, 100],
+    'reg_lambda': [0, 0.5, 1.5, 3, 100, 500, 1000, 1200],
 }
 
 lgbm_grid = {
-    'learning_rate': [0.005, 0.01],
-    'n_estimators': [25, 50, 100],
-    'num_leaves': [12, 25, 50, 100],  # large num_leaves helps improve accuracy but might lead to over-fitting
-    'max_depth': [-1, 3, 6, 12],
-    'boosting_type': ['gbdt', 'dart'],  # for better accuracy -> try dart
+    'learning_rate': [0.005, 0.05, 0.1],
+    'n_estimators': [10, 50, 100, 200, 1000],
+    'num_leaves': [10, 30, 50, 100, 200],  # large num_leaves helps improve accuracy but might lead to over-fitting
+    'max_depth': [-1, 10, 100, 1000],
+    'boosting_type': ['gbdt', 'dart', 'rf'],  # for better accuracy -> try dart
     'objective': ['binary'],
     'max_bin': [255, 510],  # large max_bin helps improve accuracy but might slow down training progress
     'random_state': [RANDOM_STATE],
     'n_jobs': [1],
     'subsample': [0.6, 0.8, 1],
+    'reg_alpha': [0, 0.5, 1, 3, 10, 100],
+    'reg_lambda': [0, 0.5, 1.5, 3, 100, 500, 1000, 1200],
+    'is_unbalance': [True, False],
 }
 
 param_grid_list = [knn_grid, svm_grid, logistic_regression_grid,
@@ -160,6 +171,12 @@ def pca(Xs, Ys, n_components=2):
     fig.savefig(os.path.join(OUTPUTS_DIR, 'pca.png'))
 
 
+def update_grid_params(train_labels):
+    # See https://xgboost.readthedocs.io/en/stable/parameter.html - 'scale_pos_weight' parameter guidelines
+    scale_pos_weight = Counter(train_labels)[0] / Counter(train_labels)[1]
+    xgboost_grid['scale_pos_weight'] = [1, scale_pos_weight]
+
+
 def main():
     Xs_train, Ys_train = prepare_Xs_and_Ys(EMBEDDINGS_POSITIVE_TRAIN_DIR, EMBEDDINGS_NEGATIVE_TRAIN_DIR)
     logging.info(f"Loadded train data: Xs_train.shape = {Xs_train.shape}, Ys_train.shape = {len(Ys_train)}")
@@ -167,6 +184,8 @@ def main():
     logging.info(f"Loadded test data: Xs_test.shape = {Xs_test.shape}, Ys_test.shape = {len(Ys_test)}")
     Xs_xantomonas, Ys_xantomonas = prepare_Xs_and_Ys(EMBEDDINGS_POSITIVE_XANTOMONAS_DIR, EMBEDDINGS_NEGATIVE_XANTOMONAS_DIR)
     logging.info(f"Loadded xantomonas data: Xs_xantomonas.shape = {Xs_xantomonas.shape}, Ys_xantomonas.shape = {len(Ys_xantomonas)}")
+
+    update_grid_params(Ys_train)
 
     pca(Xs_train, Ys_train)
 
@@ -192,8 +211,6 @@ def main():
         logging.info(f"Best estimator - Mean MCC on held-out folds: {grid_results['mean_test_mcc'][grid.best_index_]}, "
                      f"Mean AUPRC on held-out folds: {grid_results['mean_test_auprc'][grid.best_index_]}")
 
-        best_classifiers[class_name] = (grid.best_index_, grid.best_score_)
-
         mcc_on_test = grid.score(Xs_test, Ys_test)
         mcc_on_xantomonas = grid.score(Xs_xantomonas, Ys_xantomonas)
         auprc_on_test = average_precision_score(Ys_test, grid.predict_proba(Xs_test)[:, 1])
@@ -201,8 +218,10 @@ def main():
         logging.info(f"Best estimator - MCC on test: {mcc_on_test}, MCC on xantomonas: {mcc_on_xantomonas}, "
                      f"AUPRC on test: {auprc_on_test}, AUPRC on xantomonas: {auprc_on_xantomonas}")
 
+        best_classifiers[class_name] = (grid.best_index_, grid.best_score_, grid_results['mean_test_auprc'][grid.best_index_], mcc_on_test, auprc_on_test)
+
     logging.info(f"Best classifiers scores (on held-out validation folds): {best_classifiers}")
-    best_classifiers_df = pd.DataFrame.from_dict(best_classifiers, orient='index', columns=['best_index', 'best_score'])
+    best_classifiers_df = pd.DataFrame.from_dict(best_classifiers, orient='index', columns=['best_index', 'mean_mcc_on_held_out_folds', 'mean_auprc_on_held_out_folds', 'mcc_on_test', 'auprc_on_test'])
     best_classifiers_df.to_csv(os.path.join(CLASSIFIERS_OUTPUT_DIR, 'best_classifiers.csv'))
 
 
