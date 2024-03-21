@@ -14,6 +14,8 @@ from consts import (OUTPUTS_DIR, FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN
                     FIXED_NEGATIVE_TEST_FILE, FIXED_POSITIVE_XANTOMONAS_FILE, FIXED_NEGATIVE_XANTOMONAS_FILE)
 from utils import CustomCallback
 
+RUN_NAME = "with-train-metrics"
+
 RANDOM_STATE = 42
 WANDB_KEY = "64c3807b305e96e26550193f5860452b88d85999"
 WANDB_PROJECT = "type3_secretion_signal"
@@ -84,11 +86,13 @@ def train_model(train_dataset, validation_dataset, test_dataset, tokenizer):
     # Load model
     model = AutoModelForSequenceClassification.from_pretrained(model_checkpoint, num_labels=2)
 
+    run_name = f"{model_checkpoint.split('/')[-1]}-{RUN_NAME}"
     batch_size = 8
     training_args = TrainingArguments(
-        os.path.join(OUTPUTS_DIR, f"{model_checkpoint.split('/')[-1]}-finetune-effectors-medium_model"),
+        os.path.join(OUTPUTS_DIR, run_name),
         evaluation_strategy="epoch",
         save_strategy="epoch",
+        logging_strategy="epoch",
         learning_rate=2e-5,
         per_device_train_batch_size=batch_size,
         per_device_eval_batch_size=batch_size,
@@ -98,7 +102,7 @@ def train_model(train_dataset, validation_dataset, test_dataset, tokenizer):
         metric_for_best_model="matthews_correlation",
         # use_cpu=True,
         report_to="wandb",  # enable logging to W&B
-        run_name="esm-finetune-effectors-medium_model",  # name of the W&B run
+        run_name=run_name,  # name of the W&B run
     )
 
     trainer = Trainer(
