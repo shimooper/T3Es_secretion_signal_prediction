@@ -198,6 +198,7 @@ def main():
             param_grid=param_grid,
             scoring={'mcc': make_scorer(matthews_corrcoef), 'auprc': 'average_precision'},
             refit='mcc',
+            return_train_score=True,
             verbose=1,
             n_jobs=20
         )
