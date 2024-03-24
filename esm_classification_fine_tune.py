@@ -14,15 +14,15 @@ from consts import (OUTPUTS_DIR, FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN
                     FIXED_NEGATIVE_TEST_FILE, FIXED_POSITIVE_XANTOMONAS_FILE, FIXED_NEGATIVE_XANTOMONAS_FILE)
 from utils import CustomCallback
 
-RUN_NAME = "with-train-metrics"
-
+RUN_NAME = "large-model-with-train-metrics"
+NUMBER_OF_EPOCHS = 10
 RANDOM_STATE = 42
 WANDB_KEY = "64c3807b305e96e26550193f5860452b88d85999"
 WANDB_PROJECT = "type3_secretion_signal"
 
 # choose model checkpoint (one fo the ESM-2 models)
-# model_checkpoint = "facebook/esm2_t33_650M_UR50D"
-model_checkpoint = "facebook/esm2_t12_35M_UR50D"
+model_checkpoint = "facebook/esm2_t33_650M_UR50D"
+# model_checkpoint = "facebook/esm2_t6_8M_UR50D"
 mcc_metric = load("matthews_correlation")
 
 
@@ -89,19 +89,20 @@ def train_model(train_dataset, validation_dataset, test_dataset, tokenizer):
     run_name = f"{model_checkpoint.split('/')[-1]}-{RUN_NAME}"
     batch_size = 8
     training_args = TrainingArguments(
-        os.path.join(OUTPUTS_DIR, run_name),
+        os.path.join(OUTPUTS_DIR, 'runs', run_name),
         evaluation_strategy="epoch",
         save_strategy="epoch",
         logging_strategy="epoch",
         learning_rate=2e-5,
         per_device_train_batch_size=batch_size,
         per_device_eval_batch_size=batch_size,
-        num_train_epochs=10,
+        num_train_epochs=NUMBER_OF_EPOCHS,
         weight_decay=0.01,
         load_best_model_at_end=True,
         metric_for_best_model="matthews_correlation",
         # use_cpu=True,
-        report_to="wandb",  # enable logging to W&B
+        report_to=["wandb", "tensorboard"],  # reports to TensorBoardCallback + WandbCallback
+        logging_dir=os.path.join(OUTPUTS_DIR, 'logs', run_name),  # TensorBoard log directory
         run_name=run_name,  # name of the W&B run
     )
 

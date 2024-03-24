@@ -6,7 +6,7 @@ def get_class_name(obj):
     return obj.__class__.__name__
 
 
-# Used to log metric on train set during training (by default there are only logs in evaluation/validation set).
+# Used to log metrics on train set during training (by default metrics are calculated only on evaluation/validation set)
 # Solution taken from - https://stackoverflow.com/questions/67457480/how-to-get-the-accuracy-per-epoch-or-step-for-the-huggingface-transformers-train
 class CustomCallback(TrainerCallback):
     def __init__(self, trainer) -> None:
