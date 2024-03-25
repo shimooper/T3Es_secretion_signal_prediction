@@ -209,7 +209,9 @@ def main():
         logging.info(f"Best estimator: {grid.best_estimator_}, Best params: {grid.best_params_}, "
                      f"Best index: {grid.best_index_}, Best score: {grid.best_score_}, Classes: {grid.classes_}")
 
-        logging.info(f"Best estimator - Mean MCC on held-out folds: {grid_results['mean_test_mcc'][grid.best_index_]}, "
+        logging.info(f"Best estimator - Mean MCC on train folds: {grid_results['mean_train_mcc'][grid.best_index_]}, "
+                     f"Mean AUPRC on train folds: {grid_results['mean_train_auprc'][grid.best_index_]}, "
+                     f"Mean MCC on held-out folds: {grid_results['mean_test_mcc'][grid.best_index_]}, "
                      f"Mean AUPRC on held-out folds: {grid_results['mean_test_auprc'][grid.best_index_]}")
 
         mcc_on_test = grid.score(Xs_test, Ys_test)
@@ -219,10 +221,19 @@ def main():
         logging.info(f"Best estimator - MCC on test: {mcc_on_test}, MCC on xantomonas: {mcc_on_xantomonas}, "
                      f"AUPRC on test: {auprc_on_test}, AUPRC on xantomonas: {auprc_on_xantomonas}")
 
-        best_classifiers[class_name] = (grid.best_index_, grid.best_score_, grid_results['mean_test_auprc'][grid.best_index_], mcc_on_test, auprc_on_test)
+        best_classifiers[class_name] = (grid.best_index_,
+                                        grid_results['mean_train_mcc'][grid.best_index_], grid_results['mean_train_auprc'][grid.best_index_],
+                                        grid.best_score_, grid_results['mean_test_auprc'][grid.best_index_],
+                                        mcc_on_test, auprc_on_test,
+                                        mcc_on_xantomonas, auprc_on_xantomonas)
 
     logging.info(f"Best classifiers scores (on held-out validation folds): {best_classifiers}")
-    best_classifiers_df = pd.DataFrame.from_dict(best_classifiers, orient='index', columns=['best_index', 'mean_mcc_on_held_out_folds', 'mean_auprc_on_held_out_folds', 'mcc_on_test', 'auprc_on_test'])
+    best_classifiers_df = pd.DataFrame.from_dict(best_classifiers, orient='index',
+                                                 columns=['best_index', 'mean_mcc_on_train_folds', 'mean_auprc_on_train_folds',
+                                                          'mean_mcc_on_held_out_folds', 'mean_auprc_on_held_out_folds',
+                                                          'mcc_on_test', 'auprc_on_test',
+                                                          'mcc_on_xantomonas', 'auprc_on_xantomonas'])
+
     best_classifiers_df.to_csv(os.path.join(CLASSIFIERS_OUTPUT_DIR, 'best_classifiers.csv'))
 
 

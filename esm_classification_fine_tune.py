@@ -14,15 +14,16 @@ from consts import (OUTPUTS_DIR, FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN
                     FIXED_NEGATIVE_TEST_FILE, FIXED_POSITIVE_XANTOMONAS_FILE, FIXED_NEGATIVE_XANTOMONAS_FILE)
 from utils import CustomCallback
 
-RUN_NAME = "large-model-with-train-metrics"
+# RUN_NAME = "large-model-with-train-metrics"
+RUN_NAME = "small-model-test"
 NUMBER_OF_EPOCHS = 10
 RANDOM_STATE = 42
 WANDB_KEY = "64c3807b305e96e26550193f5860452b88d85999"
 WANDB_PROJECT = "type3_secretion_signal"
 
 # choose model checkpoint (one fo the ESM-2 models)
-model_checkpoint = "facebook/esm2_t33_650M_UR50D"
-# model_checkpoint = "facebook/esm2_t6_8M_UR50D"
+# model_checkpoint = "facebook/esm2_t33_650M_UR50D"
+model_checkpoint = "facebook/esm2_t6_8M_UR50D"
 mcc_metric = load("matthews_correlation")
 
 
