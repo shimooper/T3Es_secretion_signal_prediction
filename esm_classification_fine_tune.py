@@ -14,7 +14,7 @@ from consts import (OUTPUTS_DIR, FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN
                     FIXED_NEGATIVE_TEST_FILE, FIXED_POSITIVE_XANTOMONAS_FILE, FIXED_NEGATIVE_XANTOMONAS_FILE)
 from utils import CustomCallback
 
-RUN_NAME = "large-model"
+RUN_NAME = "large-model-cpu-20-epochs"
 # RUN_NAME = "small-model-test-3"
 NUMBER_OF_EPOCHS = 20
 RANDOM_STATE = 42

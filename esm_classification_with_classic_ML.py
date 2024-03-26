@@ -41,7 +41,9 @@ EMB_LAYER = 33
 
 classifiers = [KNeighborsClassifier(), SVC(), LogisticRegression(),
                MLPClassifier(),
-               RandomForestClassifier(), GradientBoostingClassifier(), XGBClassifier(), LGBMClassifier()]
+               RandomForestClassifier(), GradientBoostingClassifier(),
+               # XGBClassifier(),
+               LGBMClassifier()]
 
 knn_grid = {
         'n_neighbors': [5, 10],
@@ -131,7 +133,9 @@ lgbm_grid = {
 
 param_grid_list = [knn_grid, svm_grid, logistic_regression_grid,
                    mlp_grid,
-                   rfc_grid, gbc_grid, xgboost_grid, lgbm_grid]
+                   rfc_grid, gbc_grid,
+                   # xgboost_grid,
+                   lgbm_grid]
 
 
 def read_embeddings_from_dir(dir_path):
