@@ -14,16 +14,16 @@ from consts import (OUTPUTS_DIR, FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN
                     FIXED_NEGATIVE_TEST_FILE, FIXED_POSITIVE_XANTOMONAS_FILE, FIXED_NEGATIVE_XANTOMONAS_FILE)
 from utils import CustomCallback
 
-# RUN_NAME = "large-model-with-train-metrics"
-RUN_NAME = "small-model-test"
-NUMBER_OF_EPOCHS = 10
+RUN_NAME = "large-model"
+# RUN_NAME = "small-model-test-3"
+NUMBER_OF_EPOCHS = 20
 RANDOM_STATE = 42
 WANDB_KEY = "64c3807b305e96e26550193f5860452b88d85999"
 WANDB_PROJECT = "type3_secretion_signal"
 
 # choose model checkpoint (one fo the ESM-2 models)
-# model_checkpoint = "facebook/esm2_t33_650M_UR50D"
-model_checkpoint = "facebook/esm2_t6_8M_UR50D"
+model_checkpoint = "facebook/esm2_t33_650M_UR50D"
+# model_checkpoint = "facebook/esm2_t6_8M_UR50D"
 mcc_metric = load("matthews_correlation")
 
 
@@ -119,12 +119,20 @@ def train_model(train_dataset, validation_dataset, test_dataset, tokenizer):
 
     train_results = trainer.train()
 
-    trainer.log_metrics("train", train_results.metrics)
+    trainer.log_metrics("train", train_results.metrics)  # The train_loss metric is the average loss across all steps during training.
     trainer.save_metrics("train", train_results.metrics)
+
+    train_dataset_results = trainer.predict(train_dataset, metric_key_prefix="train_set")
+    trainer.log_metrics("train_set", train_dataset_results.metrics)
+    trainer.save_metrics("train_set", train_dataset_results.metrics)
 
     validation_results = trainer.evaluate()
     trainer.log_metrics("eval", validation_results)
     trainer.save_metrics("eval", validation_results)
+
+    validation_dataset_results = trainer.predict(validation_dataset, metric_key_prefix="validation_set")
+    trainer.log_metrics("validation_set", validation_dataset_results.metrics)
+    trainer.save_metrics("validation_set", validation_dataset_results.metrics)
 
     test_results = trainer.predict(test_dataset)
     trainer.log_metrics("test", test_results.metrics)
