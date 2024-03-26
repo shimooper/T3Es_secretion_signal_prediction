@@ -239,6 +239,7 @@ def main():
                                                           'mcc_on_xantomonas', 'auprc_on_xantomonas'])
 
     best_classifiers_df.to_csv(os.path.join(CLASSIFIERS_OUTPUT_DIR, 'best_classifiers.csv'))
+    logging.info(f"Best classifier (according to mean_mcc_on_held_out_folds): {best_classifiers_df['mean_mcc_on_held_out_folds'].idxmax()}")
 
 
 if __name__ == "__main__":
