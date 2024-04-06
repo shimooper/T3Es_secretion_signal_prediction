@@ -82,7 +82,7 @@ def train_model(train_dataset, validation_dataset, test_dataset, tokenizer):
     # Set up Weights & Biases
     wandb.login(key=WANDB_KEY)
     os.environ["WANDB_PROJECT"] = WANDB_PROJECT
-    os.environ["WANDB_LOG_MODEL"] = "end"
+    os.environ["WANDB_LOG_MODEL"] = "end"  # Upload the final model to W&B at the end of training (after loading the best model)
 
     # Load model
     model = AutoModelForSequenceClassification.from_pretrained(model_checkpoint, num_labels=2)

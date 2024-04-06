@@ -30,7 +30,7 @@ from utils import get_class_name
 
 RANDOM_STATE = 500
 
-CLASSIFIERS_OUTPUT_DIR = os.path.join(OUTPUTS_DIR, 'classifiers_outputs')
+CLASSIFIERS_OUTPUT_DIR = os.path.join(OUTPUTS_DIR, 'classifiers_outputs_2')
 os.makedirs(CLASSIFIERS_OUTPUT_DIR, exist_ok=True)
 
 logging.basicConfig(level=logging.INFO,
@@ -42,7 +42,7 @@ EMB_LAYER = 33
 classifiers = [KNeighborsClassifier(), SVC(), LogisticRegression(),
                MLPClassifier(),
                RandomForestClassifier(), GradientBoostingClassifier(),
-               # XGBClassifier(),
+               XGBClassifier(),
                LGBMClassifier()]
 
 knn_grid = {
@@ -104,37 +104,37 @@ gbc_grid = {
 
 xgboost_grid = {
     'learning_rate': [0.005, 0.05, 0.1],
-    'n_estimators': [10, 50, 100, 200, 1000],
-    'max_leaves': [10, 30, 50, 100, 200],
-    'max_depth': [0, 6, 10, 50, 100],
+    'n_estimators': [10, 50, 200],
+    'max_leaves': [10, 50, 100],
+    'max_depth': [0, 6, 10, 100],
     'boosting_type': ['gbtree', 'dart'],
     'n_jobs': [1],
     'random_state': [RANDOM_STATE],
     'subsample': [0.6, 0.8, 1],
-    'reg_alpha': [0, 0.5, 1, 3, 10, 100],
-    'reg_lambda': [0, 0.5, 1.5, 3, 100, 500, 1000, 1200],
+    'reg_alpha': [0, 0.5, 1, 10],
+    'reg_lambda': [0, 0.5, 3, 100, 1000],
 }
 
 lgbm_grid = {
     'learning_rate': [0.005, 0.05, 0.1],
-    'n_estimators': [10, 50, 100, 200, 1000],
-    'num_leaves': [10, 30, 50, 100, 200],  # large num_leaves helps improve accuracy but might lead to over-fitting
-    'max_depth': [-1, 10, 100, 1000],
-    'boosting_type': ['gbdt', 'dart', 'rf'],  # for better accuracy -> try dart
+    'n_estimators': [10, 50, 200],
+    'num_leaves': [10, 50, 100],  # large num_leaves helps improve accuracy but might lead to over-fitting
+    'max_depth': [-1, 10, 100],
+    'boosting_type': ['gbdt', 'dart'],  # for better accuracy -> try dart
     'objective': ['binary'],
     'max_bin': [255, 510],  # large max_bin helps improve accuracy but might slow down training progress
     'random_state': [RANDOM_STATE],
     'n_jobs': [1],
     'subsample': [0.6, 0.8, 1],
-    'reg_alpha': [0, 0.5, 1, 3, 10, 100],
-    'reg_lambda': [0, 0.5, 1.5, 3, 100, 500, 1000, 1200],
+    'reg_alpha': [0, 0.5, 1, 10],
+    'reg_lambda': [0, 0.5, 3, 100, 1000],
     'is_unbalance': [True, False],
 }
 
 param_grid_list = [knn_grid, svm_grid, logistic_regression_grid,
                    mlp_grid,
                    rfc_grid, gbc_grid,
-                   # xgboost_grid,
+                   xgboost_grid,
                    lgbm_grid]
 
 
@@ -204,7 +204,7 @@ def main():
             refit='mcc',
             return_train_score=True,
             verbose=1,
-            n_jobs=20
+            n_jobs=60
         )
         grid.fit(Xs_train, Ys_train)
         grid_results = pd.DataFrame.from_dict(grid.cv_results_)
