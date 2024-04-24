@@ -1,5 +1,6 @@
 import random
 from collections import Counter
+import argparse
 
 import torch
 import matplotlib.pyplot as plt
@@ -28,6 +29,12 @@ from consts import (OUTPUTS_DIR, EMBEDDINGS_POSITIVE_TRAIN_DIR, EMBEDDINGS_NEGAT
                     EMBEDDINGS_POSITIVE_XANTOMONAS_DIR, EMBEDDINGS_NEGATIVE_XANTOMONAS_DIR)
 from utils import get_class_name
 
+def get_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--model_name', help='The pretrained model name', type=str, required=True)
+
+
+
 RANDOM_STATE = 500
 
 CLASSIFIERS_OUTPUT_DIR = os.path.join(OUTPUTS_DIR, 'classifiers_outputs_2')
@@ -38,12 +45,6 @@ logging.basicConfig(level=logging.INFO,
                     handlers=[logging.FileHandler(os.path.join(CLASSIFIERS_OUTPUT_DIR, 'esm_classification_with_classic_ML.log'), mode='w')])
 
 EMB_LAYER = 33
-
-classifiers = [KNeighborsClassifier(), SVC(), LogisticRegression(),
-               MLPClassifier(),
-               RandomForestClassifier(), GradientBoostingClassifier(),
-               XGBClassifier(),
-               LGBMClassifier()]
 
 knn_grid = {
         'n_neighbors': [5, 10],
@@ -103,16 +104,15 @@ gbc_grid = {
 }
 
 xgboost_grid = {
-    'learning_rate': [0.005, 0.05, 0.1],
+    'learning_rate': [0.05, 0.1],
     'n_estimators': [10, 50, 200],
-    'max_leaves': [10, 50, 100],
-    'max_depth': [0, 6, 10, 100],
+    'max_depth': [3, 5, 10],
     'boosting_type': ['gbtree', 'dart'],
     'n_jobs': [1],
     'random_state': [RANDOM_STATE],
     'subsample': [0.6, 0.8, 1],
     'reg_alpha': [0, 0.5, 1, 10],
-    'reg_lambda': [0, 0.5, 3, 100, 1000],
+    'reg_lambda': [0, 0.5, 3, 100],
 }
 
 lgbm_grid = {
@@ -131,11 +131,25 @@ lgbm_grid = {
     'is_unbalance': [True, False],
 }
 
-param_grid_list = [knn_grid, svm_grid, logistic_regression_grid,
+classifiers = [KNeighborsClassifier(),
+               SVC(),
+               LogisticRegression(),
+               MLPClassifier(),
+               RandomForestClassifier(),
+               GradientBoostingClassifier(),
+               XGBClassifier(),
+               # LGBMClassifier()
+               ]
+
+param_grid_list = [knn_grid,
+                   svm_grid,
+                   logistic_regression_grid,
                    mlp_grid,
-                   rfc_grid, gbc_grid,
+                   rfc_grid,
+                   gbc_grid,
                    xgboost_grid,
-                   lgbm_grid]
+                   # lgbm_grid
+                   ]
 
 
 def read_embeddings_from_dir(dir_path):
