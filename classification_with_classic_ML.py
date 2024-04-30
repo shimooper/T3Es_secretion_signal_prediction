@@ -16,7 +16,7 @@ from consts import OUTPUTS_DIR, MODEL_ID_TO_MODEL_NAME
 from utils import get_class_name
 from classifiers_params_grids import classifiers, update_grid_params
 
-ESM_EMBEDDINGS_BASE_DIR = os.path.join(OUTPUTS_DIR, 'embeddings')
+EMBEDDINGS_BASE_DIR = os.path.join(OUTPUTS_DIR, 'embeddings')
 CLASSIFIERS_OUTPUT_BASE_DIR = os.path.join(OUTPUTS_DIR, 'embeddings_classifiers')
 
 
@@ -141,7 +141,7 @@ def main(model_id, output_dir, esm_embeddings_calculation_mode):
     if output_dir is None:
         output_dir = model_id
 
-    embeddings_dir = os.path.join(ESM_EMBEDDINGS_BASE_DIR, output_dir)
+    embeddings_dir = os.path.join(EMBEDDINGS_BASE_DIR, output_dir)
     classifiers_output_dir = os.path.join(CLASSIFIERS_OUTPUT_BASE_DIR, output_dir)
     os.makedirs(embeddings_dir, exist_ok=True)
     os.makedirs(classifiers_output_dir, exist_ok=True)
