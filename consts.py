@@ -3,6 +3,15 @@ import os
 LOCAL_RUN = True if os.name == 'nt' else False
 PROJECT_BASE_DIR = r"/groups/pupko/yairshimony/secretion_signal_prediction" if not LOCAL_RUN else r"C:\repos\T3Es_secretion_signal_prediction"
 
+ESM_MODEL_NUMBER_OF_LAYERS_TO_MODEL_NAME = {
+    '6': 'facebook/esm2_t6_8M_UR50D',
+    '12': 'facebook/esm2_t12_35M_UR50D',
+    '30': 'facebook/esm2_t30_150M_UR50D',
+    '33': 'facebook/esm2_t33_650M_UR50D',
+    '36': 'facebook/esm2_t36_3B_UR50D',
+    '48': 'facebook/esm2_t48_15B_UR50D'
+}
+
 DATASETS_ORIGINAL_DIR = os.path.join(PROJECT_BASE_DIR, 'datasets_original')
 DATASETS_FIXED_DIR = os.path.join(PROJECT_BASE_DIR, 'datasets_fixed')
 OUTPUTS_DIR = os.path.join(PROJECT_BASE_DIR, 'outputs')
@@ -24,12 +33,3 @@ FIXED_NEGATIVE_TEST_FILE = os.path.join(DATASETS_FIXED_DIR, "negative_test_data.
 
 FIXED_POSITIVE_XANTOMONAS_FILE = os.path.join(DATASETS_FIXED_DIR, "positive_Xantomonas_data.fasta")
 FIXED_NEGATIVE_XANTOMONAS_FILE = os.path.join(DATASETS_FIXED_DIR, "negative_Xanthomonas_data.fasta")
-
-EMBEDDINGS_POSITIVE_TRAIN_DIR = os.path.join(OUTPUTS_DIR, "train_positive")
-EMBEDDINGS_NEGATIVE_TRAIN_DIR = os.path.join(OUTPUTS_DIR, "train_negative")
-
-EMBEDDINGS_POSITIVE_TEST_DIR = os.path.join(OUTPUTS_DIR, "test_positive")
-EMBEDDINGS_NEGATIVE_TEST_DIR = os.path.join(OUTPUTS_DIR, "test_negative")
-
-EMBEDDINGS_POSITIVE_XANTOMONAS_DIR = os.path.join(OUTPUTS_DIR, "xantomonas_positive")
-EMBEDDINGS_NEGATIVE_XANTOMONAS_DIR = os.path.join(OUTPUTS_DIR, "xantomonas_negative")
