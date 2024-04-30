@@ -44,10 +44,9 @@ class CalcMetricsOnTrainSetCallback(TrainerCallback):
             return control_copy
 
 
-
 def get_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_num_of_layers', help='The pretrained model number of layers', type=str, required=True)
+    parser.add_argument('--model_id', help='The pretrained model id (number of layers)', type=str, required=True)
     return parser.parse_args()
 
 
@@ -170,10 +169,10 @@ def test_on_test_data(trainer: Trainer, tokenizer, split):
     return test_results, elapsed_time
 
 
-def main(model_num_of_layers):
+def main(model_id):
     train_sequences, validation_sequences, train_labels, validation_labels = read_train_data()
 
-    model_checkpoint = MODEL_ID_TO_MODEL_NAME[model_num_of_layers]
+    model_checkpoint = MODEL_ID_TO_MODEL_NAME[model_id]
     run_name = f"{model_checkpoint.split('/')[-1]}-{NUMBER_OF_EPOCHS}-epochs"
     output_dir = os.path.join(OUTPUTS_DIR, 'esm_finetune_runs', run_name)
 
@@ -209,4 +208,4 @@ def main(model_num_of_layers):
 
 if __name__ == "__main__":
     args = get_arguments()
-    main(args.model_num_of_layers)
+    main(args.model_id)
