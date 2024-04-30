@@ -13,6 +13,8 @@ MODEL_ID_TO_MODEL_NAME = {
     'protein_bert': 'protein_bert'
 }
 
+BATCH_SIZE = 8
+
 DATASETS_ORIGINAL_DIR = os.path.join(PROJECT_BASE_DIR, 'datasets_original')
 DATASETS_FIXED_DIR = os.path.join(PROJECT_BASE_DIR, 'datasets_fixed')
 OUTPUTS_DIR = os.path.join(PROJECT_BASE_DIR, 'outputs')

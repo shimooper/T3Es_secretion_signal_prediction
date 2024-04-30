@@ -1,7 +1,7 @@
 #!/bin/bash
-#PBS -l select=1:ncpus=1:ngpus=1
+#PBS -l select=1:ncpus=1
 ##choose any gpu queue: gpu/gpu2
-#PBS -q gpu2
+#PBS -q power-pupko
 #PBS -o /groups/pupko/yairshimony/secretion_signal_prediction/outputs
 #PBS -e /groups/pupko/yairshimony/secretion_signal_prediction/outputs
 #PBS -N esm

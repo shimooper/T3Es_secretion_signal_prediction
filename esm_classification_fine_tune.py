@@ -16,7 +16,8 @@ from evaluate import load
 from consts import (OUTPUTS_DIR, MODEL_ID_TO_MODEL_NAME,
                     FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN_FILE,
                     FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE,
-                    FIXED_POSITIVE_XANTOMONAS_FILE, FIXED_NEGATIVE_XANTOMONAS_FILE)
+                    FIXED_POSITIVE_XANTOMONAS_FILE, FIXED_NEGATIVE_XANTOMONAS_FILE,
+                    BATCH_SIZE)
 from utils import read_fasta_file
 
 NUMBER_OF_EPOCHS = 3
@@ -108,7 +109,6 @@ def train_model(model_checkpoint, tokenizer, train_dataset, validation_dataset, 
     # Load model
     model = AutoModelForSequenceClassification.from_pretrained(model_checkpoint, num_labels=2)
 
-    batch_size = 8
     training_args = TrainingArguments(
         output_dir,
         evaluation_strategy="epoch",
@@ -117,8 +117,8 @@ def train_model(model_checkpoint, tokenizer, train_dataset, validation_dataset, 
         save_total_limit=1,  # Only the best model is saved. Since load_best_model_at_end=True, it is possible that
                              # two checkpoints are saved: the last one and the best one (if they are different)
         learning_rate=2e-5,
-        per_device_train_batch_size=batch_size,
-        per_device_eval_batch_size=batch_size,
+        per_device_train_batch_size=BATCH_SIZE,
+        per_device_eval_batch_size=BATCH_SIZE,
         num_train_epochs=NUMBER_OF_EPOCHS,
         weight_decay=0.01,
         load_best_model_at_end=True,
