@@ -1,6 +1,7 @@
 import subprocess
 import os
 
+import numpy as np
 import torch
 from transformers import AutoTokenizer, AutoModel
 
@@ -39,9 +40,9 @@ def calc_embeddings_of_fasta_file_with_huggingface_model(model, tokenizer, fasta
                 embeddings.append(sequence_representation)
 
         Xs = torch.stack(embeddings, dim=0).numpy()
-        torch.save(Xs, embeddings_output_file_path)
+        np.save(embeddings_output_file_path, Xs)
 
-    Xs = torch.load(embeddings_output_file_path)
+    Xs = np.load(embeddings_output_file_path)
     return Xs
 
 
@@ -64,7 +65,7 @@ def calc_embeddings(model_name, output_dir, split, calc_embeddings_with_script, 
     else:
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         model = AutoModel.from_pretrained(model_name)
-        positive_embeddings = calc_embeddings_of_fasta_file_with_huggingface_model(model, tokenizer, positive_fasta_file, os.path.join(output_dir, f'{split}_positive_embeddings.pt'), always_calc_embeddings)
-        negative_embeddings = calc_embeddings_of_fasta_file_with_huggingface_model(model, tokenizer, negative_fasta_file, os.path.join(output_dir, f'{split}_negative_embeddings.pt'), always_calc_embeddings)
+        positive_embeddings = calc_embeddings_of_fasta_file_with_huggingface_model(model, tokenizer, positive_fasta_file, os.path.join(output_dir, f'{split}_positive_embeddings.npy'), always_calc_embeddings)
+        negative_embeddings = calc_embeddings_of_fasta_file_with_huggingface_model(model, tokenizer, negative_fasta_file, os.path.join(output_dir, f'{split}_negative_embeddings.npy'), always_calc_embeddings)
 
     return positive_embeddings, negative_embeddings

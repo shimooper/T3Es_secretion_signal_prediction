@@ -12,24 +12,28 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.decomposition import PCA
 from sklearn.metrics import make_scorer, matthews_corrcoef, average_precision_score
 
-from consts import OUTPUTS_DIR, ESM_MODEL_NUMBER_OF_LAYERS_TO_MODEL_NAME
+from consts import OUTPUTS_DIR, MODEL_ID_TO_MODEL_NAME
 from utils import get_class_name
-from calc_esm_embeddings import calc_embeddings
 from classifiers_params_grids import classifiers, update_grid_params
 
-ESM_EMBEDDINGS_BASE_DIR = os.path.join(OUTPUTS_DIR, 'esm_embeddings')
-CLASSIFIERS_OUTPUT_BASE_DIR = os.path.join(OUTPUTS_DIR, 'esm_embeddings_classifiers')
+ESM_EMBEDDINGS_BASE_DIR = os.path.join(OUTPUTS_DIR, 'embeddings')
+CLASSIFIERS_OUTPUT_BASE_DIR = os.path.join(OUTPUTS_DIR, 'embeddings_classifiers')
 
 
 def get_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_num_of_layers', help='The pretrained model number of layers', type=str, required=True)
-    parser.add_argument('--calc_embeddings_with_script', help='Whether to calc the embeddings with the esm script or with hugging face', action='store_true')
+    parser.add_argument('--model_id', help='The pretrained model id', type=str, required=True)
+    parser.add_argument('--calc_esm_embeddings_with_script', help='Whether to calc the esm embeddings with the esm script or with hugging face', action='store_true')
     return parser.parse_args()
 
 
-def prepare_Xs_and_Ys(model_name, esm_embeddings_dir, split, calc_embeddings_with_script, always_calc_embeddings):
-    Xs_positive, Xs_negative = calc_embeddings(model_name, esm_embeddings_dir, split, calc_embeddings_with_script, always_calc_embeddings)
+def prepare_Xs_and_Ys(model_name, embeddings_dir, split, calc_esm_embeddings_with_script, always_calc_embeddings):
+    if model_name == 'protein_bert':
+        from calc_proteinbert_embeddings import calc_embeddings
+        Xs_positive, Xs_negative = calc_embeddings(embeddings_dir, split, always_calc_embeddings)
+    else:
+        from calc_esm_embeddings import calc_embeddings
+        Xs_positive, Xs_negative = calc_embeddings(model_name, embeddings_dir, split, calc_esm_embeddings_with_script, always_calc_embeddings)
 
     Xs = np.concatenate([Xs_positive, Xs_negative])
     Ys = [1] * Xs_positive.shape[0] + [0] * Xs_negative.shape[0]
@@ -98,60 +102,61 @@ def fit_on_train_data(Xs_train, Ys_train, output_dir):
     best_classifiers_df = pd.DataFrame.from_dict(best_classifiers, orient='index',
                                                  columns=['best_index', 'mean_mcc_on_train_folds', 'mean_auprc_on_train_folds',
                                                           'mean_mcc_on_held_out_folds', 'mean_auprc_on_held_out_folds'])
+    best_classifiers_df.index.name = 'classifier_class'
     best_classifiers_df.to_csv(os.path.join(output_dir, 'best_classifier_from_each_class.csv'))
 
     best_classifier_class = best_classifiers_df['mean_mcc_on_held_out_folds'].idxmax()
     logging.info(f"Best classifier (according to mean_mcc_on_held_out_folds): {best_classifier_class}")
-    best_classifiers_df.loc[[best_classifier_class]].to_csv(os.path.join(output_dir, 'best_classifier_overall.csv'))
 
-    return grids[best_classifier_class]
+    best_grid = grids[best_classifier_class]
+    best_classifier_metrics = best_classifiers_df.loc[[best_classifier_class]].reset_index()
+    return best_classifier_class, best_grid, best_classifier_metrics
 
 
-def test_on_test_data(model_name, esm_embeddings_dir, best_grid, split, calc_embeddings_with_script):
+def test_on_test_data(model_name, embeddings_dir, best_grid, split, calc_esm_embeddings_with_script):
     start_test_time = timer()
 
-    Xs_test, Ys_test = prepare_Xs_and_Ys(model_name, esm_embeddings_dir, split, calc_embeddings_with_script, always_calc_embeddings=True)
+    Xs_test, Ys_test = prepare_Xs_and_Ys(model_name, embeddings_dir, split, calc_esm_embeddings_with_script, always_calc_embeddings=True)
     mcc_on_test = best_grid.score(Xs_test, Ys_test)
     auprc_on_test = average_precision_score(Ys_test, best_grid.predict_proba(Xs_test)[:, 1])
 
     end_test_time = timer()
     elapsed_time = end_test_time - start_test_time
 
-    estimator_class = get_class_name(best_grid.best_estimator_)
-    logging.info(f"Best estimator ({estimator_class}) - MCC on {split}: {mcc_on_test}, AUPRC on {split}: {auprc_on_test}, "
+    logging.info(f"Best estimator - MCC on {split}: {mcc_on_test}, AUPRC on {split}: {auprc_on_test}, "
                  f"time took for embedding and scoring: {elapsed_time} seconds.")
 
-    test_results = pd.DataFrame({f'{split}_estimator_class': [estimator_class], f'{split}_mcc': [mcc_on_test], f'{split}_auprc': [auprc_on_test],
+    test_results = pd.DataFrame({f'{split}_mcc': [mcc_on_test], f'{split}_auprc': [auprc_on_test],
                                  f'{split}_elapsed_time': [elapsed_time]})
     return test_results
 
 
-def main(model_num_of_layers, calc_embeddings_with_script):
-    esm_embeddings_dir = os.path.join(ESM_EMBEDDINGS_BASE_DIR, f'{model_num_of_layers}_layers')
-    classifiers_output_dir = os.path.join(CLASSIFIERS_OUTPUT_BASE_DIR, f'{model_num_of_layers}_layers')
-    os.makedirs(esm_embeddings_dir, exist_ok=True)
+def main(model_id, calc_esm_embeddings_with_script):
+    embeddings_dir = os.path.join(ESM_EMBEDDINGS_BASE_DIR, model_id)
+    classifiers_output_dir = os.path.join(CLASSIFIERS_OUTPUT_BASE_DIR, model_id)
+    os.makedirs(embeddings_dir, exist_ok=True)
     os.makedirs(classifiers_output_dir, exist_ok=True)
 
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         handlers=[logging.FileHandler(
-                            os.path.join(classifiers_output_dir, 'esm_classification_with_classic_ML.log'), mode='w')])
+                            os.path.join(classifiers_output_dir, 'classification_with_classic_ML.log'), mode='w')])
 
-    model_name = ESM_MODEL_NUMBER_OF_LAYERS_TO_MODEL_NAME[model_num_of_layers]
+    model_name = MODEL_ID_TO_MODEL_NAME[model_id]
 
-    Xs_train, Ys_train = prepare_Xs_and_Ys(model_name, esm_embeddings_dir, 'train', calc_embeddings_with_script, always_calc_embeddings=False)
+    Xs_train, Ys_train = prepare_Xs_and_Ys(model_name, embeddings_dir, 'train', calc_esm_embeddings_with_script, always_calc_embeddings=False)
     update_grid_params(Ys_train)
 
-    pca(Xs_train, Ys_train, esm_embeddings_dir)
+    pca(Xs_train, Ys_train, embeddings_dir)
 
-    best_grid = fit_on_train_data(Xs_train, Ys_train, classifiers_output_dir)
+    best_classifier_class, best_grid, best_classifier_metrics = fit_on_train_data(Xs_train, Ys_train, classifiers_output_dir)
 
-    test_results = test_on_test_data(model_name, esm_embeddings_dir, best_grid, 'test', calc_embeddings_with_script)
-    xantomonas_results = test_on_test_data(model_name, esm_embeddings_dir, best_grid, 'xantomonas', calc_embeddings_with_script)
-    pd.concat([test_results, xantomonas_results], axis=1, ignore_index=True).to_csv(
-        os.path.join(classifiers_output_dir, 'test_results.csv'), index=False)
+    test_results = test_on_test_data(model_name, embeddings_dir, best_grid, 'test', calc_esm_embeddings_with_script)
+    xantomonas_results = test_on_test_data(model_name, embeddings_dir, best_grid, 'xantomonas', calc_esm_embeddings_with_script)
+    pd.concat([best_classifier_metrics, test_results, xantomonas_results], axis=1).to_csv(
+        os.path.join(classifiers_output_dir, 'best_classifier_results.csv'), index=False)
 
 
 if __name__ == "__main__":
     args = get_arguments()
-    main(args.model_num_of_layers, args.calc_embeddings_with_script)
+    main(args.model_id, args.calc_esm_embeddings_with_script)

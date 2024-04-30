@@ -19,8 +19,9 @@ def fix_all_fasta_files():
 def fix_fasta_file(file_path):
     with open(file_path, "r") as f:
         records = list(SeqIO.parse(f, "fasta"))
-    fixed_records = [SeqRecord(seq=record.seq, id=record.id.replace("/", " ").replace("|", "_"), description="") for record in records]
-    fixed_records = [record for record in fixed_records if not "*" in record.seq]
+
+    fixed_records = [SeqRecord(seq=record.seq[:100], id=record.id.replace("/", " ").replace("|", "_"), description="")
+                     for record in records if "*" not in record.seq]
 
     fixed_file_path = os.path.join(DATASETS_FIXED_DIR, Path(file_path).name)
     SeqIO.write(fixed_records, fixed_file_path, "fasta")

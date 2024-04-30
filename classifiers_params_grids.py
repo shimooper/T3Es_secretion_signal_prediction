@@ -99,11 +99,11 @@ lgbm_grid = {
 }
 
 classifiers = [
-    (KNeighborsClassifier(), knn_grid),
+    # (KNeighborsClassifier(), knn_grid),
     (SVC(), svm_grid),
     (LogisticRegression(), logistic_regression_grid),
     # (MLPClassifier(), mlp_grid),
-    (RandomForestClassifier(), rfc_grid),
+    # (RandomForestClassifier(), rfc_grid),
     # (GradientBoostingClassifier(), gbc_grid),
     # (XGBClassifier(), xgboost_grid),
     # (LGBMClassifier(), lgbm_grid)
