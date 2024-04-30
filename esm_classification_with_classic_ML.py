@@ -23,17 +23,19 @@ CLASSIFIERS_OUTPUT_BASE_DIR = os.path.join(OUTPUTS_DIR, 'embeddings_classifiers'
 def get_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_id', help='The pretrained model id', type=str, required=True)
-    parser.add_argument('--calc_esm_embeddings_with_script', help='Whether to calc the esm embeddings with the esm script or with hugging face', action='store_true')
+    parser.add_argument('--output_dir', help='The output dir. By default it is just model_id', type=str)
+    parser.add_argument('--esm_embeddings_calculation_mode', help='the esm embeddings calculation mode', type=str,
+                        choices=['native_script', 'huggingface_model', 'trainer_api'], required=True)
     return parser.parse_args()
 
 
-def prepare_Xs_and_Ys(model_name, embeddings_dir, split, calc_esm_embeddings_with_script, always_calc_embeddings):
+def prepare_Xs_and_Ys(model_name, embeddings_dir, split, esm_embeddings_calculation_mode, always_calc_embeddings):
     if model_name == 'protein_bert':
         from calc_proteinbert_embeddings import calc_embeddings
         Xs_positive, Xs_negative = calc_embeddings(embeddings_dir, split, always_calc_embeddings)
     else:
         from calc_esm_embeddings import calc_embeddings
-        Xs_positive, Xs_negative = calc_embeddings(model_name, embeddings_dir, split, calc_esm_embeddings_with_script, always_calc_embeddings)
+        Xs_positive, Xs_negative = calc_embeddings(model_name, embeddings_dir, split, esm_embeddings_calculation_mode, always_calc_embeddings)
 
     Xs = np.concatenate([Xs_positive, Xs_negative])
     Ys = [1] * Xs_positive.shape[0] + [0] * Xs_negative.shape[0]
@@ -113,27 +115,34 @@ def fit_on_train_data(Xs_train, Ys_train, output_dir):
     return best_classifier_class, best_grid, best_classifier_metrics
 
 
-def test_on_test_data(model_name, embeddings_dir, best_grid, split, calc_esm_embeddings_with_script):
+def test_on_test_data(model_name, embeddings_dir, best_grid, split, esm_embeddings_calculation_mode):
+    # First, estimate time of embedding and prediction
     start_test_time = timer()
 
-    Xs_test, Ys_test = prepare_Xs_and_Ys(model_name, embeddings_dir, split, calc_esm_embeddings_with_script, always_calc_embeddings=True)
-    mcc_on_test = best_grid.score(Xs_test, Ys_test)
-    auprc_on_test = average_precision_score(Ys_test, best_grid.predict_proba(Xs_test)[:, 1])
+    Xs_test, Ys_test = prepare_Xs_and_Ys(model_name, embeddings_dir, split, esm_embeddings_calculation_mode, always_calc_embeddings=True)
+    Xs_test_predictions = best_grid.predict_proba(Xs_test)[:, 1]
 
     end_test_time = timer()
     elapsed_time = end_test_time - start_test_time
 
+    # Now, calculate the metrics
+    mcc_on_test = best_grid.score(Xs_test, Ys_test)
+    auprc_on_test = average_precision_score(Ys_test, Xs_test_predictions)
+
     logging.info(f"Best estimator - MCC on {split}: {mcc_on_test}, AUPRC on {split}: {auprc_on_test}, "
-                 f"time took for embedding and scoring: {elapsed_time} seconds.")
+                 f"time took for embedding and prediction: {elapsed_time} seconds.")
 
     test_results = pd.DataFrame({f'{split}_mcc': [mcc_on_test], f'{split}_auprc': [auprc_on_test],
                                  f'{split}_elapsed_time': [elapsed_time]})
     return test_results
 
 
-def main(model_id, calc_esm_embeddings_with_script):
-    embeddings_dir = os.path.join(ESM_EMBEDDINGS_BASE_DIR, model_id)
-    classifiers_output_dir = os.path.join(CLASSIFIERS_OUTPUT_BASE_DIR, model_id)
+def main(model_id, output_dir, esm_embeddings_calculation_mode):
+    if output_dir is None:
+        output_dir = model_id
+
+    embeddings_dir = os.path.join(ESM_EMBEDDINGS_BASE_DIR, output_dir)
+    classifiers_output_dir = os.path.join(CLASSIFIERS_OUTPUT_BASE_DIR, output_dir)
     os.makedirs(embeddings_dir, exist_ok=True)
     os.makedirs(classifiers_output_dir, exist_ok=True)
 
@@ -144,19 +153,19 @@ def main(model_id, calc_esm_embeddings_with_script):
 
     model_name = MODEL_ID_TO_MODEL_NAME[model_id]
 
-    Xs_train, Ys_train = prepare_Xs_and_Ys(model_name, embeddings_dir, 'train', calc_esm_embeddings_with_script, always_calc_embeddings=False)
+    Xs_train, Ys_train = prepare_Xs_and_Ys(model_name, embeddings_dir, 'train', esm_embeddings_calculation_mode, always_calc_embeddings=False)
     update_grid_params(Ys_train)
 
     pca(Xs_train, Ys_train, embeddings_dir)
 
     best_classifier_class, best_grid, best_classifier_metrics = fit_on_train_data(Xs_train, Ys_train, classifiers_output_dir)
 
-    test_results = test_on_test_data(model_name, embeddings_dir, best_grid, 'test', calc_esm_embeddings_with_script)
-    xantomonas_results = test_on_test_data(model_name, embeddings_dir, best_grid, 'xantomonas', calc_esm_embeddings_with_script)
+    test_results = test_on_test_data(model_name, embeddings_dir, best_grid, 'test', esm_embeddings_calculation_mode)
+    xantomonas_results = test_on_test_data(model_name, embeddings_dir, best_grid, 'xantomonas', esm_embeddings_calculation_mode)
     pd.concat([best_classifier_metrics, test_results, xantomonas_results], axis=1).to_csv(
         os.path.join(classifiers_output_dir, 'best_classifier_results.csv'), index=False)
 
 
 if __name__ == "__main__":
     args = get_arguments()
-    main(args.model_id, args.calc_esm_embeddings_with_script)
+    main(args.model_id, args.output_dir, args.esm_embeddings_calculation_mode)

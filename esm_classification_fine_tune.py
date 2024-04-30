@@ -13,7 +13,7 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trai
 from datasets import Dataset
 from evaluate import load
 
-from consts import (OUTPUTS_DIR, ESM_MODEL_NUMBER_OF_LAYERS_TO_MODEL_NAME,
+from consts import (OUTPUTS_DIR, MODEL_ID_TO_MODEL_NAME,
                     FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN_FILE,
                     FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE,
                     FIXED_POSITIVE_XANTOMONAS_FILE, FIXED_NEGATIVE_XANTOMONAS_FILE)
@@ -79,10 +79,12 @@ def read_test_data(split):
     return test_sequences, test_labels
 
 
-def create_dataset(tokenizer, sequences, labels):
+def create_dataset(tokenizer, sequences, labels=None):
     tokenized = tokenizer(sequences)
     dataset = Dataset.from_dict(tokenized)
-    dataset = dataset.add_column("labels", labels)
+
+    if labels:
+        dataset = dataset.add_column("labels", labels)
 
     return dataset
 
@@ -139,7 +141,7 @@ def train_model(model_checkpoint, tokenizer, train_dataset, validation_dataset, 
 
     train_results = trainer.train()
 
-    # The train_loss metric is the average loss across all steps during training.
+    # The train_loss metric logged here is the average loss across all steps during training.
     # The epoch logged here is the one that resulted in the best model according to metric_for_best_model (mcc) on the evaluation set.
     trainer.log_metrics("train", train_results.metrics)
     trainer.save_metrics("train", train_results.metrics)
@@ -148,18 +150,22 @@ def train_model(model_checkpoint, tokenizer, train_dataset, validation_dataset, 
 
 
 def test_on_test_data(trainer: Trainer, tokenizer, split):
+    # First, estimate time of embedding and prediction
     start_test_time = timer()
 
     test_sequences, test_labels = read_test_data(split=split)
-    test_dataset = create_dataset(tokenizer, test_sequences, test_labels)
+    test_dataset_without_labels = create_dataset(tokenizer, test_sequences)
+    test_predictions = trainer.predict(test_dataset_without_labels, metric_key_prefix=split)
 
+    end_test_time = timer()
+    elapsed_time = end_test_time - start_test_time
+
+    # Now, calculate and log the metrics
+    test_dataset = create_dataset(tokenizer, test_sequences, test_labels)
     test_results = trainer.predict(test_dataset, metric_key_prefix=split)
 
     trainer.log_metrics(split, test_results.metrics)
     trainer.save_metrics(split, test_results.metrics)
-
-    end_test_time = timer()
-    elapsed_time = end_test_time - start_test_time
 
     return test_results, elapsed_time
 
@@ -167,7 +173,7 @@ def test_on_test_data(trainer: Trainer, tokenizer, split):
 def main(model_num_of_layers):
     train_sequences, validation_sequences, train_labels, validation_labels = read_train_data()
 
-    model_checkpoint = ESM_MODEL_NUMBER_OF_LAYERS_TO_MODEL_NAME[model_num_of_layers]
+    model_checkpoint = MODEL_ID_TO_MODEL_NAME[model_num_of_layers]
     run_name = f"{model_checkpoint.split('/')[-1]}-{NUMBER_OF_EPOCHS}-epochs"
     output_dir = os.path.join(OUTPUTS_DIR, 'esm_finetune_runs', run_name)
 
@@ -177,15 +183,23 @@ def main(model_num_of_layers):
 
     trainer = train_model(model_checkpoint, tokenizer, train_dataset, validation_dataset, output_dir, run_name)
 
+    # Evaluate the best model on the train set and on the validation set
+    train_set_results = trainer.predict(train_dataset, metric_key_prefix="train_set_predictions")
+    trainer.log_metrics("train_set_predictions", train_set_results.metrics)
+    trainer.save_metrics("train_set_predictions", train_set_results.metrics)
+
     validation_results = trainer.evaluate()
     trainer.log_metrics("eval", validation_results)
     trainer.save_metrics("eval", validation_results)
 
+    # Evaluate the best model on the test set and on the Xantomonas set
     test_results, test_elapsed_time = test_on_test_data(trainer, tokenizer, 'test')
     xantomonas_results, xantomonas_elapsed_time = test_on_test_data(trainer, tokenizer, 'xantomonas')
 
+    # Save the results
     results_df = pd.DataFrame({
         'best_epoch': [validation_results["epoch"]],
+        'train_mcc': [train_set_results.metrics["train_set_predictions_matthews_correlation"]], 'train_auprc': [train_set_results.metrics["train_set_predictions_auprc"]],
         'validation_mcc': [validation_results["eval_matthews_correlation"]], 'validation_auprc': [validation_results["eval_auprc"]],
         'test_mcc': [test_results.metrics["test_matthews_correlation"]], 'test_auprc': [test_results.metrics["test_auprc"]], 'test_elapsed_time': [test_elapsed_time],
         'xantomonas_mcc': [xantomonas_results.metrics["xantomonas_matthews_correlation"]], 'xantomonas_auprc': [xantomonas_results.metrics["xantomonas_auprc"]], 'xantomonas_elapsed_time': [xantomonas_elapsed_time]
