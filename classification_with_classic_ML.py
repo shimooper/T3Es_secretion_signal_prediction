@@ -25,7 +25,7 @@ def get_arguments():
     parser.add_argument('--model_id', help='The pretrained model id', type=str, required=True)
     parser.add_argument('--output_dir', help='The output dir. By default it is just model_id', type=str)
     parser.add_argument('--esm_embeddings_calculation_mode', help='the esm embeddings calculation mode', type=str,
-                        choices=['native_script', 'huggingface_model', 'trainer_api'], default='trainer_api')
+                        choices=['native_script', 'huggingface_model', 'trainer_api'], default='huggingface_model')
     return parser.parse_args()
 
 

@@ -58,7 +58,7 @@ def read_train_data():
     all_train_sequences = positive_train + negative_train
 
     train_sequences, validation_sequences, train_labels, validation_labels = train_test_split(
-        all_train_sequences, all_train_labels, test_size=0.25, random_state=RANDOM_STATE, shuffle=True)
+        all_train_sequences, all_train_labels, test_size=0.25, random_state=RANDOM_STATE, shuffle=True, stratify=all_train_labels)
 
     return train_sequences, validation_sequences, train_labels, validation_labels
 
@@ -90,12 +90,12 @@ def create_dataset(tokenizer, sequences, labels=None):
 
 
 def compute_metrics(eval_pred):
-    predictions, labels = eval_pred
+    predictions, true_labels = eval_pred
     predictions_labels = np.argmax(predictions, axis=1)
-    predictions_scores = predictions[:, 1]
+    predictions_scores = predictions[:, 1]  # probability estimates of the positive class
 
-    scores = mcc_metric.compute(predictions=predictions_labels, references=labels)
-    scores['auprc'] = average_precision_score(y_true=labels, y_score=predictions_scores)
+    scores = mcc_metric.compute(predictions=predictions_labels, references=true_labels)
+    scores['auprc'] = average_precision_score(y_true=true_labels, y_score=predictions_scores)
     return scores
 
 

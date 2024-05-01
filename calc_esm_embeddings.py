@@ -70,7 +70,7 @@ def calc_embeddings_of_fasta_file_with_huggingface_model(model, tokenizer, fasta
 
             Xs = torch.cat(embeddings, dim=0).numpy()
 
-        # This way to run inference and get sequence embeddings isn't intuitive, but it's fast.
+        # This way to run inference and get sequence embeddings isn't intuitive, but I saw this somewhere as a fast way to get embeddings.
         elif esm_embeddings_calculation_mode == 'trainer_api':
             tokenized_sequences = tokenizer(sequences)
             dataset = Dataset.from_dict(tokenized_sequences)
