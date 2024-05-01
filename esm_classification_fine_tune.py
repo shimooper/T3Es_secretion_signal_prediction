@@ -18,7 +18,7 @@ from consts import (OUTPUTS_DIR, MODEL_ID_TO_MODEL_NAME,
                     FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE,
                     FIXED_POSITIVE_XANTOMONAS_FILE, FIXED_NEGATIVE_XANTOMONAS_FILE,
                     BATCH_SIZE)
-from utils import read_fasta_file
+from utils import read_sequences_from_fasta_file
 
 NUMBER_OF_EPOCHS = 3
 RANDOM_STATE = 42
@@ -51,8 +51,8 @@ def get_arguments():
 
 
 def read_train_data():
-    positive_train = read_fasta_file(FIXED_POSITIVE_TRAIN_FILE)
-    negative_train = read_fasta_file(FIXED_NEGATIVE_TRAIN_FILE)
+    positive_train = read_sequences_from_fasta_file(FIXED_POSITIVE_TRAIN_FILE)
+    negative_train = read_sequences_from_fasta_file(FIXED_NEGATIVE_TRAIN_FILE)
 
     all_train_labels = [1] * len(positive_train) + [0] * len(negative_train)
     all_train_sequences = positive_train + negative_train
@@ -65,11 +65,11 @@ def read_train_data():
 
 def read_test_data(split):
     if split == 'test':
-        positive_test = read_fasta_file(FIXED_POSITIVE_TEST_FILE)
-        negative_test = read_fasta_file(FIXED_NEGATIVE_TEST_FILE)
+        positive_test = read_sequences_from_fasta_file(FIXED_POSITIVE_TEST_FILE)
+        negative_test = read_sequences_from_fasta_file(FIXED_NEGATIVE_TEST_FILE)
     elif split == 'xantomonas':
-        positive_test = read_fasta_file(FIXED_POSITIVE_XANTOMONAS_FILE)
-        negative_test = read_fasta_file(FIXED_NEGATIVE_XANTOMONAS_FILE)
+        positive_test = read_sequences_from_fasta_file(FIXED_POSITIVE_XANTOMONAS_FILE)
+        negative_test = read_sequences_from_fasta_file(FIXED_NEGATIVE_XANTOMONAS_FILE)
     else:
         raise ValueError(f"split must be one of ['test', 'xantomonas'], got {split}")
 

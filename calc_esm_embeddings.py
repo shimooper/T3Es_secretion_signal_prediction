@@ -12,7 +12,7 @@ from consts import (FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN_FILE,
                     FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE,
                     FIXED_POSITIVE_XANTOMONAS_FILE, FIXED_NEGATIVE_XANTOMONAS_FILE,
                     BATCH_SIZE)
-from utils import read_fasta_file
+from utils import read_fasta_file, read_sequences_from_fasta_file
 
 ESM_SCRIPT_PATH = "/groups/pupko/yairshimony/esm/scripts/extract.py"
 
@@ -35,9 +35,13 @@ def calc_embeddings_of_fasta_file_with_script(model_name, fasta_file_path, embed
         cmd = f"python {ESM_SCRIPT_PATH} {model_name.split('/')[1]} {fasta_file_path} {embeddings_dir} --include mean"
         subprocess.run(cmd, shell=True, check=True)
 
+        id_to_sequence = read_fasta_file(fasta_file_path)
         embeddings = []
-        for file in os.listdir(embeddings_dir):
-            embeddings_object = torch.load(os.path.join(embeddings_dir, file))
+        for record_id in id_to_sequence:
+            sequence_embedding_file_path = os.path.join(embeddings_dir, f"{record_id}.pt")
+            if not os.path.exists(sequence_embedding_file_path):
+                raise ValueError(f"Couldn't find the embedding file for the sequence with id {record_id}")
+            embeddings_object = torch.load(sequence_embedding_file_path)
             sequence_representation = next(iter(embeddings_object['mean_representations'].values()))  # take the first and only layer representation which is the last model layer
             embeddings.append(sequence_representation)
         Xs = torch.stack(embeddings, dim=0).numpy()
@@ -50,7 +54,7 @@ def calc_embeddings_of_fasta_file_with_script(model_name, fasta_file_path, embed
 def calc_embeddings_of_fasta_file_with_huggingface_model(model, tokenizer, fasta_file_path, embeddings_dir,
                                                          embeddings_file_path, esm_embeddings_calculation_mode, always_calc_embeddings=False):
     if not os.path.exists(embeddings_file_path) or always_calc_embeddings:
-        sequences = read_fasta_file(fasta_file_path)
+        sequences = read_sequences_from_fasta_file(fasta_file_path)
 
         if esm_embeddings_calculation_mode == 'huggingface_model':
             model.eval()

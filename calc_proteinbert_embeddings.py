@@ -8,7 +8,7 @@ from proteinbert.conv_and_global_attention_model import get_model_with_hidden_la
 from consts import (OUTPUTS_DIR, FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN_FILE,
                     FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE,
                     FIXED_POSITIVE_XANTOMONAS_FILE, FIXED_NEGATIVE_XANTOMONAS_FILE)
-from utils import read_fasta_file
+from utils import read_sequences_from_fasta_file
 
 
 def get_arguments():
@@ -21,7 +21,7 @@ def get_arguments():
 
 def calc_embeddings_of_fasta_file(fasta_file_path, embeddings_output_file_path, always_calc_embeddings=False):
     if not os.path.exists(embeddings_output_file_path) or always_calc_embeddings:
-        sequences = read_fasta_file(fasta_file_path)
+        sequences = read_sequences_from_fasta_file(fasta_file_path)
         sequence_length = len(sequences[0]) + 2
 
         pretrained_model_generator, input_encoder = load_pretrained_model()
