@@ -27,6 +27,9 @@ OUTPUT_SPEC = OutputSpec(OUTPUT_TYPE, UNIQUE_LABELS)
 
 train_set_file_path = os.path.join(BENCHMARKS_DIR, '%s.train.csv' % BENCHMARK_NAME)
 train_set = pd.read_csv(train_set_file_path).dropna().drop_duplicates()
+
+train_set = train_set.head(100)
+
 train_set, valid_set = train_test_split(train_set, stratify=train_set['label'], test_size=0.1, random_state=0)
 
 test_set_file_path = os.path.join(BENCHMARKS_DIR, '%s.test.csv' % BENCHMARK_NAME)
@@ -34,6 +37,7 @@ test_set = pd.read_csv(test_set_file_path).dropna().drop_duplicates()
 
 print(f'{len(train_set)} training set records, {len(valid_set)} validation set records, {len(test_set)} test set records.')
 
+test_set = test_set.head(20)
 
 # Loading the pre-trained model and fine-tuning it on the loaded dataset
 
@@ -50,7 +54,7 @@ training_callbacks = [
 ]
 
 finetune(model_generator, input_encoder, OUTPUT_SPEC, train_set['seq'], train_set['label'], valid_set['seq'], valid_set['label'],
-         seq_len=512, batch_size=32, max_epochs_per_stage=40, lr=1e-04, begin_with_frozen_pretrained_layers=True,
+         seq_len=512, batch_size=32, max_epochs_per_stage=1, lr=1e-04, begin_with_frozen_pretrained_layers=True,
          lr_with_frozen_pretrained_layers=1e-02, n_final_epochs=1, final_seq_len=1024, final_lr=1e-05, callbacks=training_callbacks)
 
 
