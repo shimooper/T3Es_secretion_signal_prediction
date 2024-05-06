@@ -1,4 +1,0 @@
-[submodule "protein_bert"]
-	path = protein_bert
-	url = https://github.com/shimooper/protein_bert.git
-	branch = my_changes

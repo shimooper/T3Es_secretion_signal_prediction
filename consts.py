@@ -14,6 +14,7 @@ MODEL_ID_TO_MODEL_NAME = {
 }
 
 BATCH_SIZE = 8
+RANDOM_STATE = 42
 
 DATASETS_ORIGINAL_DIR = os.path.join(PROJECT_BASE_DIR, 'datasets_original')
 DATASETS_FIXED_DIR = os.path.join(PROJECT_BASE_DIR, 'datasets_fixed')

@@ -4,7 +4,6 @@ from copy import deepcopy
 from timeit import default_timer as timer
 
 import pandas as pd
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import average_precision_score
 import wandb
 import numpy as np
@@ -13,15 +12,10 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trai
 from datasets import Dataset
 from evaluate import load
 
-from consts import (OUTPUTS_DIR, MODEL_ID_TO_MODEL_NAME,
-                    FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN_FILE,
-                    FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE,
-                    FIXED_POSITIVE_XANTOMONAS_FILE, FIXED_NEGATIVE_XANTOMONAS_FILE,
-                    BATCH_SIZE)
-from utils import read_sequences_from_fasta_file
+from consts import (OUTPUTS_DIR, MODEL_ID_TO_MODEL_NAME, BATCH_SIZE)
+from utils import read_train_data, read_test_data
 
 NUMBER_OF_EPOCHS = 3
-RANDOM_STATE = 42
 WANDB_KEY = "64c3807b305e96e26550193f5860452b88d85999"
 WANDB_PROJECT = "type3_secretion_signal"
 
@@ -48,35 +42,6 @@ def get_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_id', help='The pretrained model id (number of layers)', type=str, required=True)
     return parser.parse_args()
-
-
-def read_train_data():
-    positive_train = read_sequences_from_fasta_file(FIXED_POSITIVE_TRAIN_FILE)
-    negative_train = read_sequences_from_fasta_file(FIXED_NEGATIVE_TRAIN_FILE)
-
-    all_train_labels = [1] * len(positive_train) + [0] * len(negative_train)
-    all_train_sequences = positive_train + negative_train
-
-    train_sequences, validation_sequences, train_labels, validation_labels = train_test_split(
-        all_train_sequences, all_train_labels, test_size=0.25, random_state=RANDOM_STATE, shuffle=True, stratify=all_train_labels)
-
-    return train_sequences, validation_sequences, train_labels, validation_labels
-
-
-def read_test_data(split):
-    if split == 'test':
-        positive_test = read_sequences_from_fasta_file(FIXED_POSITIVE_TEST_FILE)
-        negative_test = read_sequences_from_fasta_file(FIXED_NEGATIVE_TEST_FILE)
-    elif split == 'xantomonas':
-        positive_test = read_sequences_from_fasta_file(FIXED_POSITIVE_XANTOMONAS_FILE)
-        negative_test = read_sequences_from_fasta_file(FIXED_NEGATIVE_XANTOMONAS_FILE)
-    else:
-        raise ValueError(f"split must be one of ['test', 'xantomonas'], got {split}")
-
-    test_labels = [1] * len(positive_test) + [0] * len(negative_test)
-    test_sequences = positive_test + negative_test
-
-    return test_sequences, test_labels
 
 
 def create_dataset(tokenizer, sequences, labels=None):
