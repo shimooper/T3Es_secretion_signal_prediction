@@ -11,8 +11,10 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'protein_bert'))
 from proteinbert import OutputType, OutputSpec, FinetuningModelGenerator, load_pretrained_model, finetune, evaluate_by_len
 from proteinbert.conv_and_global_attention_model import get_model_with_hidden_layers_as_outputs
 
-from consts import OUTPUTS_DIR
+from consts import OUTPUTS_DIR, BATCH_SIZE
 from utils import read_train_data, read_test_data
+
+EPOCHS = 1
 
 # A local (non-global) binary output
 OUTPUT_TYPE = OutputType(False, 'binary')
@@ -32,7 +34,8 @@ def test_on_test_data(model_generator, input_encoder, split):
     end_test_time = timer()
     elapsed_time = end_test_time - start_test_time
 
-    mcc = matthews_corrcoef(test_labels, y_pred)
+    y_pred_classes = (y_pred >= 0.5).astype(int)
+    mcc = matthews_corrcoef(test_labels, y_pred_classes)
     auprc = average_precision_score(test_labels, y_pred)
 
     return mcc, auprc, elapsed_time
@@ -59,7 +62,7 @@ def main():
 
     finetune(model_generator, input_encoder, OUTPUT_SPEC, train_sequences, train_labels, validation_sequences,
              validation_labels,
-             seq_len=512, batch_size=32, max_epochs_per_stage=1, lr=1e-04, begin_with_frozen_pretrained_layers=True,
+             seq_len=512, batch_size=BATCH_SIZE, max_epochs_per_stage=EPOCHS, lr=1e-04, begin_with_frozen_pretrained_layers=True,
              lr_with_frozen_pretrained_layers=1e-02, n_final_epochs=1, final_seq_len=1024, final_lr=1e-05,
              callbacks=training_callbacks)
 
@@ -71,4 +74,11 @@ def main():
         'test_mcc': [test_mcc], 'test_auprc': [test_auprc], 'test_elapsed_time': [test_elapsed_time],
         'xantomonas_mcc': [xantomonas_mcc], 'xantomonas_auprc': [xantomonas_auprc], 'xantomonas_elapsed_time': [xantomonas_elapsed_time]
     })
-    results_df.to_csv(os.path.join(OUTPUTS_DIR, 'protein_bert_finetune', 'esm_finetune_results.csv'), index=False)
+
+    output_dir = os.path.join(OUTPUTS_DIR, 'protein_bert_finetune')
+    os.makedirs(output_dir, exist_ok=True)
+    results_df.to_csv(os.path.join(output_dir, 'esm_finetune_results.csv'), index=False)
+
+
+if __name__ == "__main__":
+    main()
