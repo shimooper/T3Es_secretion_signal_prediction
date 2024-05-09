@@ -48,7 +48,7 @@ def main():
     print(f'{len(train_sequences)} training set records, {len(validation_sequences)} validation set records')
 
     # Loading the pre-trained model and fine-tuning it on the loaded dataset
-    pretrained_model_generator, input_encoder = load_pretrained_model()
+    pretrained_model_generator, input_encoder = load_pretrained_model(validate_downloading=False)
 
     # get_model_with_hidden_layers_as_outputs gives the model output access to the hidden layers (on top of the output)
     model_generator = FinetuningModelGenerator(pretrained_model_generator, OUTPUT_SPEC,

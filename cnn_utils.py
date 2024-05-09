@@ -1,6 +1,7 @@
 from collections import Counter
 from torchtext.vocab import build_vocab_from_iterator, vocab
 
+
 class LetterTokenizer:
     def __call__(self, items):
         if isinstance(items, str):

@@ -26,6 +26,7 @@ def get_arguments():
     parser.add_argument('--output_dir', help='The output dir. By default it is just model_id', type=str)
     parser.add_argument('--esm_embeddings_calculation_mode', help='the esm embeddings calculation mode', type=str,
                         choices=['native_script', 'huggingface_model', 'trainer_api'], default='huggingface_model')
+    parser.add_argument('--n_jobs', help='The number of jobs to run in parallel', type=int, default=1)
     return parser.parse_args()
 
 
@@ -64,7 +65,7 @@ def pca(Xs, Ys, output_dir, n_components=2):
     fig.savefig(os.path.join(output_dir, 'train_examples_pca.png'))
 
 
-def fit_on_train_data(Xs_train, Ys_train, output_dir):
+def fit_on_train_data(Xs_train, Ys_train, output_dir, n_jobs):
     grids = {}
     best_classifiers = {}
     for classifier, param_grid in classifiers:
@@ -77,7 +78,7 @@ def fit_on_train_data(Xs_train, Ys_train, output_dir):
             refit='mcc',
             return_train_score=True,
             verbose=1,
-            n_jobs=60
+            n_jobs=n_jobs
         )
 
         try:
@@ -137,7 +138,7 @@ def test_on_test_data(model_name, embeddings_dir, best_grid, split, esm_embeddin
     return test_results
 
 
-def main(model_id, output_dir, esm_embeddings_calculation_mode):
+def main(model_id, output_dir, esm_embeddings_calculation_mode, n_jobs):
     if output_dir is None:
         output_dir = model_id
 
@@ -158,7 +159,7 @@ def main(model_id, output_dir, esm_embeddings_calculation_mode):
 
     pca(Xs_train, Ys_train, embeddings_dir)
 
-    best_classifier_class, best_grid, best_classifier_metrics = fit_on_train_data(Xs_train, Ys_train, classifiers_output_dir)
+    best_classifier_class, best_grid, best_classifier_metrics = fit_on_train_data(Xs_train, Ys_train, classifiers_output_dir, n_jobs)
 
     test_results = test_on_test_data(model_name, embeddings_dir, best_grid, 'test', esm_embeddings_calculation_mode)
     xantomonas_results = test_on_test_data(model_name, embeddings_dir, best_grid, 'xantomonas', esm_embeddings_calculation_mode)
@@ -168,4 +169,4 @@ def main(model_id, output_dir, esm_embeddings_calculation_mode):
 
 if __name__ == "__main__":
     args = get_arguments()
-    main(args.model_id, args.output_dir, args.esm_embeddings_calculation_mode)
+    main(args.model_id, args.output_dir, args.esm_embeddings_calculation_mode, args.n_jobs)

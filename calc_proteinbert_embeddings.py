@@ -1,6 +1,9 @@
 import numpy as np
 import os
 import argparse
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(__file__), 'protein_bert'))
 
 from proteinbert import load_pretrained_model
 from proteinbert.conv_and_global_attention_model import get_model_with_hidden_layers_as_outputs
@@ -24,7 +27,7 @@ def calc_embeddings_of_fasta_file(fasta_file_path, embeddings_output_file_path, 
         sequences = read_sequences_from_fasta_file(fasta_file_path)
         sequence_length = len(sequences[0]) + 2
 
-        pretrained_model_generator, input_encoder = load_pretrained_model()
+        pretrained_model_generator, input_encoder = load_pretrained_model(validate_downloading=False)
         model = get_model_with_hidden_layers_as_outputs(pretrained_model_generator.create_model(sequence_length))
         encoded_x = input_encoder.encode_X(sequences, sequence_length)
         local_representations, global_representations = model.predict(encoded_x, batch_size=8)

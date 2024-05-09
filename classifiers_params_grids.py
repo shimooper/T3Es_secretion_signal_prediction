@@ -74,7 +74,7 @@ xgboost_grid = {
     'learning_rate': [0.05, 0.1],
     'n_estimators': [10, 50, 200],
     'max_depth': [3, 5, 10],
-    'boosting_type': ['gbtree', 'dart'],
+    'booster': ['gbtree', 'dart'],
     'n_jobs': [1],
     'random_state': [RANDOM_STATE],
     'subsample': [0.6, 0.8, 1],
@@ -99,13 +99,13 @@ lgbm_grid = {
 }
 
 classifiers = [
-    # (KNeighborsClassifier(), knn_grid),
+    (KNeighborsClassifier(), knn_grid),
     (SVC(), svm_grid),
     (LogisticRegression(), logistic_regression_grid),
-    # (MLPClassifier(), mlp_grid),
-    # (RandomForestClassifier(), rfc_grid),
-    # (GradientBoostingClassifier(), gbc_grid),
-    # (XGBClassifier(), xgboost_grid),
+    (MLPClassifier(), mlp_grid),
+    (RandomForestClassifier(), rfc_grid),
+    (GradientBoostingClassifier(), gbc_grid),
+    (XGBClassifier(), xgboost_grid),
     # (LGBMClassifier(), lgbm_grid)
 ]
 

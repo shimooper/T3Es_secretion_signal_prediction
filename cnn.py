@@ -83,7 +83,6 @@ class CNN(L.LightningModule):
         return optimizer
 
 
-
 class EffectorsDataModule(L.LightningDataModule):
     def __init__(self, data_dir: str = r"C:\repos\T3Es_secretion_signal_prediction\datasets_fixed"):
         super().__init__()
