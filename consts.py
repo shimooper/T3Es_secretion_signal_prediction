@@ -13,7 +13,7 @@ MODEL_ID_TO_MODEL_NAME = {
     'protein_bert': 'protein_bert'
 }
 
-BATCH_SIZE = 32
+BATCH_SIZE = 8
 RANDOM_STATE = 42
 
 DATASETS_ORIGINAL_DIR = os.path.join(PROJECT_BASE_DIR, 'datasets_original')

@@ -26,8 +26,8 @@ def main():
 
     esm_model_ids = list(MODEL_ID_TO_MODEL_NAME.keys())[:6]
 
-    for model_id in esm_model_ids:
-        run_classification_with_classic_ML(model_id, args.cpus)
+    # for model_id in esm_model_ids:
+    #     run_classification_with_classic_ML(model_id, args.cpus)
 
     with Pool(processes=args.cpus) as pool:
         pool.map(run_esm_classification_fine_tune, esm_model_ids)

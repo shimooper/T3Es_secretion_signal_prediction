@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -q power-pupko
-#PBS -l select=1:ncpus=100
+#PBS -l select=1:ncpus=10
 #PBS -o /groups/pupko/yairshimony/secretion_signal_prediction/outputs
 #PBS -e /groups/pupko/yairshimony/secretion_signal_prediction/outputs
 #PBS -N secretion_signal
@@ -14,4 +14,4 @@ conda activate python38_tensorflow
 export PATH=$CONDA_PREFIX/bin:$PATH
 
 cd ~/secretion_signal_prediction
-python run_all_protein_bert.py --cpus 50
+python run_all_protein_bert.py --cpus 10

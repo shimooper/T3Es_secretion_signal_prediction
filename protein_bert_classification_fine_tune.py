@@ -14,7 +14,7 @@ from proteinbert.conv_and_global_attention_model import get_model_with_hidden_la
 from consts import OUTPUTS_DIR, BATCH_SIZE
 from utils import read_train_data, read_test_data
 
-EPOCHS = 1
+EPOCHS = 10
 
 # A local (non-global) binary output
 OUTPUT_TYPE = OutputType(False, 'binary')
@@ -77,7 +77,7 @@ def main():
 
     output_dir = os.path.join(OUTPUTS_DIR, 'protein_bert_finetune')
     os.makedirs(output_dir, exist_ok=True)
-    results_df.to_csv(os.path.join(output_dir, 'esm_finetune_results.csv'), index=False)
+    results_df.to_csv(os.path.join(output_dir, f'esm_finetune_results_{EPOCHS}_epochs.csv'), index=False)
 
 
 if __name__ == "__main__":

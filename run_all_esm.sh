@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -q power-pupko
-#PBS -l select=1:ncpus=100
+#PBS -l select=1:ncpus=30
 #PBS -o /groups/pupko/yairshimony/secretion_signal_prediction/outputs
 #PBS -e /groups/pupko/yairshimony/secretion_signal_prediction/outputs
 #PBS -N secretion_signal
@@ -14,4 +14,4 @@ conda activate secretion_signal
 export PATH=$CONDA_PREFIX/bin:$PATH
 
 cd ~/secretion_signal_prediction
-python run_all_esm.py --cpus 50
+python run_all_esm.py --cpus 10

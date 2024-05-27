@@ -15,7 +15,7 @@ from evaluate import load
 from consts import (OUTPUTS_DIR, MODEL_ID_TO_MODEL_NAME, BATCH_SIZE)
 from utils import read_train_data, read_test_data
 
-NUMBER_OF_EPOCHS = 3
+NUMBER_OF_EPOCHS = 10
 WANDB_KEY = "64c3807b305e96e26550193f5860452b88d85999"
 WANDB_PROJECT = "type3_secretion_signal"
 
@@ -114,11 +114,14 @@ def train_model(model_checkpoint, tokenizer, train_dataset, validation_dataset, 
 
 
 def test_on_test_data(trainer: Trainer, tokenizer, split):
+    trainer.model.to('cpu')
+
     # First, estimate time of embedding and prediction
     start_test_time = timer()
 
     test_sequences, test_labels = read_test_data(split=split)
     test_dataset_without_labels = create_dataset(tokenizer, test_sequences)
+    test_dataset_without_labels.with_format("torch", device="cpu")
     test_predictions = trainer.predict(test_dataset_without_labels, metric_key_prefix=split)
 
     end_test_time = timer()
@@ -126,6 +129,7 @@ def test_on_test_data(trainer: Trainer, tokenizer, split):
 
     # Now, calculate and log the metrics
     test_dataset = create_dataset(tokenizer, test_sequences, test_labels)
+    test_dataset_without_labels.with_format("torch", device="cpu")
     test_results = trainer.predict(test_dataset, metric_key_prefix=split)
 
     trainer.log_metrics(split, test_results.metrics)

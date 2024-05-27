@@ -24,7 +24,7 @@ def main():
 
     protein_bert_model_id = "protein_bert"
 
-    run_classification_with_classic_ML(protein_bert_model_id, args.cpus)
+    # run_classification_with_classic_ML(protein_bert_model_id, args.cpus)
     run_protein_bert_classification_fine_tune()
 
 
