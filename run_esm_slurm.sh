@@ -26,4 +26,4 @@ export PATH=$CONDA_PREFIX/bin:$PATH
 python ~/python_test/check_cuda_available.py
 
 cd ~/secretion_signal_prediction
-python python esm_classification_fine_tune.py --model_id 36
+python esm_classification_fine_tune.py --model_id 36
