@@ -3,7 +3,7 @@
 #SBATCH --job-name=general_job             # Job name
 #SBATCH --account=gpu-talp-users          # Account name for billing
 #SBATCH --partition=gpu-talp              # Partition name
-#SBATCH --time=10:00:00               # Time allotted for the job (hh:mm:ss)
+#SBATCH --time=01:00:00               # Time allotted for the job (hh:mm:ss)
 #SBATCH --ntasks=1                    # Number of tasks (processes)
 #SBATCH --cpus-per-task=1             # Number of CPU cores per task
 #SBATCH --gres=gpu:1     # number of GPU's to use in the job
@@ -26,4 +26,4 @@ export PATH=$CONDA_PREFIX/bin:$PATH
 python ~/python_test/check_cuda_available.py
 
 cd ~/secretion_signal_prediction
-python python esm_classification_fine_tune.py --model_id 6
+python python esm_classification_fine_tune.py --model_id 36
