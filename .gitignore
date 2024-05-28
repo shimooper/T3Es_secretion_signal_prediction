@@ -4,5 +4,4 @@ __pycache__
 *.ER
 *.OU
 *.log
-outputs/*
 wandb/
