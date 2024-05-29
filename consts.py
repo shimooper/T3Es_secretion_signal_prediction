@@ -10,7 +10,9 @@ MODEL_ID_TO_MODEL_NAME = {
     '33': 'facebook/esm2_t33_650M_UR50D',
     '36': 'facebook/esm2_t36_3B_UR50D',
     '48': 'facebook/esm2_t48_15B_UR50D',
-    'protein_bert': 'protein_bert'
+    'protein_bert': 'protein_bert',
+    'Rostlab/prot_t5_xl_uniref50': 'Rostlab/prot_t5_xl_uniref50',
+    'Rostlab/prot_t5_xl_half_uniref50-enc': 'Rostlab/prot_t5_xl_half_uniref50-enc'
 }
 
 BATCH_SIZE = 8

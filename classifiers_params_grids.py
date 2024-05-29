@@ -78,8 +78,8 @@ xgboost_grid = {
     'n_jobs': [1],
     'random_state': [RANDOM_STATE],
     'subsample': [0.6, 0.8, 1],
-    'reg_alpha': [0, 0.5, 1, 10],
-    'reg_lambda': [0, 0.5, 3, 100],
+    'reg_alpha': [0, 0.5, 1],
+    'reg_lambda': [0, 0.5, 3],
 }
 
 lgbm_grid = {

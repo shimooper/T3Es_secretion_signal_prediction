@@ -34,6 +34,9 @@ def prepare_Xs_and_Ys(model_name, embeddings_dir, split, esm_embeddings_calculat
     if model_name == 'protein_bert':
         from calc_proteinbert_embeddings import calc_embeddings
         Xs_positive, Xs_negative = calc_embeddings(embeddings_dir, split, always_calc_embeddings)
+    elif 'Rostlab' in model_name:
+        from calc_prott5_embeddings import calc_embeddings
+        Xs_positive, Xs_negative = calc_embeddings(model_name, embeddings_dir, split, always_calc_embeddings)
     else:
         from calc_esm_embeddings import calc_embeddings
         Xs_positive, Xs_negative = calc_embeddings(model_name, embeddings_dir, split, esm_embeddings_calculation_mode, always_calc_embeddings)
