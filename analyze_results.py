@@ -10,7 +10,21 @@ MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION = {
     '30': 150,
     '33': 650,
     '36': 3000,
+    'prot_t5': 3000,
+    'prot_t5_half': 3000,
     '48': 15000,
+}
+
+MODEL_ID_TO_MODEL_NAME = {
+    '6': 'esm_8M',
+    'protein_bert': 'protein_bert_16M',
+    '12': 'esm_35M',
+    '30': 'esm_150M',
+    '33': 'esm_650M',
+    '36': 'esm_3B',
+    'prot_t5': 'prot_t5_3B',
+    'prot_t5_half': 'prot_t5_half_3B',
+    '48': 'esm_15B',
 }
 
 CLASSIC_CLASSIFIERS_PATH = r'C:\repos\T3Es_secretion_signal_prediction\outputs\all_classic_classifiers_results.csv'
@@ -35,25 +49,26 @@ def main():
 
     all_results_df['Number of parameters (in million)'] = all_results_df['backbone'].apply(lambda x: MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION[x])
     all_results_df.sort_values('Number of parameters (in million)', inplace=True)
+    all_results_df['Model name'] = all_results_df['backbone'].apply(lambda x: MODEL_ID_TO_MODEL_NAME[x])
     all_results_df.to_csv(Path('outputs') / 'all_results.csv', index=False)
 
-    fig, axs = plt.subplots(4, 3, figsize=(20, 15))
+    fig, axs = plt.subplots(4, 3, figsize=(40, 35))
 
-    sns.stripplot(data=all_results_df, x='Number of parameters (in million)', y='train_mcc', hue='training_mode', ax=axs[0, 0])
-    sns.stripplot(data=all_results_df, x='Number of parameters (in million)', y='train_auprc', hue='training_mode', ax=axs[0, 1])
+    sns.stripplot(data=all_results_df, x='Model name', y='train_mcc', hue='training_mode', ax=axs[0, 0])
+    sns.stripplot(data=all_results_df, x='Model name', y='train_auprc', hue='training_mode', ax=axs[0, 1])
     axs[0, 2].set_visible(False)
-    sns.stripplot(data=all_results_df, x='Number of parameters (in million)', y='validation_mcc', hue='training_mode', ax=axs[1, 0])
-    sns.stripplot(data=all_results_df, x='Number of parameters (in million)', y='validation_auprc', hue='training_mode', ax=axs[1, 1])
+    sns.stripplot(data=all_results_df, x='Model name', y='validation_mcc', hue='training_mode', ax=axs[1, 0])
+    sns.stripplot(data=all_results_df, x='Model name', y='validation_auprc', hue='training_mode', ax=axs[1, 1])
     axs[1, 2].set_visible(False)
 
-    sns.stripplot(data=all_results_df, x='Number of parameters (in million)', y='test_mcc', hue='training_mode', ax=axs[2, 0])
-    sns.stripplot(data=all_results_df, x='Number of parameters (in million)', y='test_auprc', hue='training_mode', ax=axs[2, 1])
-    sns.stripplot(data=all_results_df, x='Number of parameters (in million)', y='test_elapsed_time', hue='training_mode', ax=axs[2, 2])
+    sns.stripplot(data=all_results_df, x='Model name', y='test_mcc', hue='training_mode', ax=axs[2, 0])
+    sns.stripplot(data=all_results_df, x='Model name', y='test_auprc', hue='training_mode', ax=axs[2, 1])
+    sns.stripplot(data=all_results_df, x='Model name', y='test_elapsed_time', hue='training_mode', ax=axs[2, 2])
     axs[2, 2].set_ylabel('Test Elapsed time (in seconds)')
 
-    sns.stripplot(data=all_results_df, x='Number of parameters (in million)', y='xantomonas_mcc', hue='training_mode', ax=axs[3, 0])
-    sns.stripplot(data=all_results_df, x='Number of parameters (in million)', y='xantomonas_auprc', hue='training_mode', ax=axs[3, 1])
-    sns.stripplot(data=all_results_df, x='Number of parameters (in million)', y='xantomonas_elapsed_time', hue='training_mode', ax=axs[3, 2])
+    sns.stripplot(data=all_results_df, x='Model name', y='xantomonas_mcc', hue='training_mode', ax=axs[3, 0])
+    sns.stripplot(data=all_results_df, x='Model name', y='xantomonas_auprc', hue='training_mode', ax=axs[3, 1])
+    sns.stripplot(data=all_results_df, x='Model name', y='xantomonas_elapsed_time', hue='training_mode', ax=axs[3, 2])
     axs[3, 2].set_ylabel('Xantomonas Elapsed time (in seconds)')
 
     fig.text(0.06, 0.80, 'Train', va='center', rotation='vertical', fontsize=14)
