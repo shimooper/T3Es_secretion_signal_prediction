@@ -5,3 +5,4 @@ __pycache__
 *.OU
 *.log
 logs/wandb/
+logs/runs/
