@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 from pathlib import Path
+from consts import PROJECT_BASE_DIR
 
 MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION = {
     '6': 8,
@@ -27,8 +28,8 @@ MODEL_ID_TO_MODEL_NAME = {
     '48': 'esm_15B',
 }
 
-CLASSIC_CLASSIFIERS_PATH = r'C:\repos\T3Es_secretion_signal_prediction\outputs\all_classic_classifiers_results.csv'
-FINETUNED_CLASSIFIERS_PATH = r'C:\repos\T3Es_secretion_signal_prediction\outputs\all_finetuned_classifiers_results.csv'
+CLASSIC_CLASSIFIERS_PATH = r'/outputs/all_classic_classifiers_results.csv'
+FINETUNED_CLASSIFIERS_PATH = r'/outputs/all_finetuned_classifiers_results.csv'
 
 
 def flatten(x):
@@ -50,7 +51,7 @@ def main():
     all_results_df['Number of parameters (in million)'] = all_results_df['backbone'].apply(lambda x: MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION[x])
     all_results_df.sort_values('Number of parameters (in million)', inplace=True)
     all_results_df['Model name'] = all_results_df['backbone'].apply(lambda x: MODEL_ID_TO_MODEL_NAME[x])
-    all_results_df.to_csv(Path('outputs') / 'all_results.csv', index=False)
+    all_results_df.to_csv(Path('../../outputs') / 'all_results.csv', index=False)
 
     fig, axs = plt.subplots(4, 3, figsize=(40, 35))
 
@@ -80,7 +81,7 @@ def main():
     fig.text(0.5, 0.90, 'AUPRC', ha='center', fontsize=14)
     fig.text(0.75, 0.90, 'Elapsed time (in seconds)', ha='center', fontsize=14)
 
-    plt.savefig(Path('outputs') / 'results.png')
+    plt.savefig(Path(PROJECT_BASE_DIR) / 'outputs' / 'results.png')
     plt.clf()
 
 

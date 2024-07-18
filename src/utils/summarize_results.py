@@ -1,8 +1,6 @@
 import os
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-import numpy as np
+
 
 OUTPUTS_PATH = '/groups/pupko/yairshimony/secretion_signal_prediction/outputs'
 
@@ -14,7 +12,7 @@ CLASSIC_CLASSIFIERS_RESULTS = {
     '33': os.path.join(CLASSIC_CLASSIFIERS_PATH, '33', 'best_classifier_results.csv'),
     '36': os.path.join(CLASSIC_CLASSIFIERS_PATH, '36', 'best_classifier_results.csv'),
     '48': os.path.join(CLASSIC_CLASSIFIERS_PATH, '48', 'best_classifier_results.csv'),
-    'protein_bert': os.path.join(CLASSIC_CLASSIFIERS_PATH, 'protein_bert', 'best_classifier_results.csv'),
+    'protein_bert': os.path.join(CLASSIC_CLASSIFIERS_PATH, '../../protein_bert', 'best_classifier_results.csv'),
 }
 
 ESM_FINETUNED_CLASSIFIERS_PATH = os.path.join(OUTPUTS_PATH, 'esm_finetune_runs')

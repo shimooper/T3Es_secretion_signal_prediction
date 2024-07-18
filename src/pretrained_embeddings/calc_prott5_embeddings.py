@@ -1,4 +1,3 @@
-import subprocess
 import os
 import argparse
 from timeit import default_timer as timer
@@ -8,11 +7,11 @@ import numpy as np
 import torch
 from transformers import T5Tokenizer, T5EncoderModel
 
-from consts import (FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN_FILE,
-                    FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE,
-                    FIXED_POSITIVE_XANTOMONAS_FILE, FIXED_NEGATIVE_XANTOMONAS_FILE,
-                    BATCH_SIZE)
-from utils import read_sequences_from_fasta_file
+from src.utils.consts import (FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN_FILE,
+                              FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE,
+                              FIXED_POSITIVE_XANTOMONAS_FILE, FIXED_NEGATIVE_XANTOMONAS_FILE,
+                              BATCH_SIZE)
+from src.utils.utils import read_sequences_from_fasta_file
 
 
 def get_arguments():

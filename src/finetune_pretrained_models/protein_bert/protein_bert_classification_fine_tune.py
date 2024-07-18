@@ -6,13 +6,13 @@ import pandas as pd
 from tensorflow import keras
 from sklearn.metrics import average_precision_score, matthews_corrcoef
 
-sys.path.append(os.path.join(os.path.dirname(__file__), 'protein_bert'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../../protein_bert'))
 
 from proteinbert import OutputType, OutputSpec, FinetuningModelGenerator, load_pretrained_model, finetune, evaluate_by_len
 from proteinbert.conv_and_global_attention_model import get_model_with_hidden_layers_as_outputs
 
-from consts import OUTPUTS_DIR, BATCH_SIZE
-from utils import read_train_data, read_test_data
+from src.utils.consts import OUTPUTS_DIR, BATCH_SIZE
+from src.utils.utils import read_train_data, read_test_data
 
 EPOCHS = 10
 

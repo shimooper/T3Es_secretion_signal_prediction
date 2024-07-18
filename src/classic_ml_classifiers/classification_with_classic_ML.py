@@ -12,8 +12,8 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.decomposition import PCA
 from sklearn.metrics import make_scorer, matthews_corrcoef, average_precision_score
 
-from consts import OUTPUTS_DIR, MODEL_ID_TO_MODEL_NAME
-from utils import get_class_name
+from src.utils.consts import OUTPUTS_DIR, MODEL_ID_TO_MODEL_NAME
+from src.utils.utils import get_class_name
 from classifiers_params_grids import classifiers, update_grid_params
 
 EMBEDDINGS_BASE_DIR = os.path.join(OUTPUTS_DIR, 'embeddings')
@@ -32,13 +32,13 @@ def get_arguments():
 
 def prepare_Xs_and_Ys(model_name, embeddings_dir, split, esm_embeddings_calculation_mode, always_calc_embeddings):
     if model_name == 'protein_bert':
-        from calc_proteinbert_embeddings import calc_embeddings
+        from src.pretrained_embeddings.calc_proteinbert_embeddings import calc_embeddings
         Xs_positive, Xs_negative = calc_embeddings(embeddings_dir, split, always_calc_embeddings)
     elif 'Rostlab' in model_name:
-        from calc_prott5_embeddings import calc_embeddings
+        from src.pretrained_embeddings.calc_prott5_embeddings import calc_embeddings
         Xs_positive, Xs_negative = calc_embeddings(model_name, embeddings_dir, split, always_calc_embeddings)
     else:
-        from calc_esm_embeddings import calc_embeddings
+        from src.pretrained_embeddings.calc_esm_embeddings import calc_embeddings
         Xs_positive, Xs_negative = calc_embeddings(model_name, embeddings_dir, split, esm_embeddings_calculation_mode, always_calc_embeddings)
 
     Xs = np.concatenate([Xs_positive, Xs_negative])

@@ -3,15 +3,15 @@ import os
 import argparse
 import sys
 
-sys.path.append(os.path.join(os.path.dirname(__file__), 'protein_bert'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../protein_bert'))
 
 from proteinbert import load_pretrained_model
 from proteinbert.conv_and_global_attention_model import get_model_with_hidden_layers_as_outputs
 
-from consts import (OUTPUTS_DIR, FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN_FILE,
-                    FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE,
-                    FIXED_POSITIVE_XANTOMONAS_FILE, FIXED_NEGATIVE_XANTOMONAS_FILE)
-from utils import read_sequences_from_fasta_file
+from src.utils.consts import (FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN_FILE,
+                              FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE,
+                              FIXED_POSITIVE_XANTOMONAS_FILE, FIXED_NEGATIVE_XANTOMONAS_FILE)
+from src.utils.utils import read_sequences_from_fasta_file
 
 
 def get_arguments():

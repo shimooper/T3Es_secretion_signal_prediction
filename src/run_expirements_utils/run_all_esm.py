@@ -1,7 +1,7 @@
 import subprocess
 import argparse
 from multiprocessing import Pool
-from consts import MODEL_ID_TO_MODEL_NAME
+from src.utils.consts import MODEL_ID_TO_MODEL_NAME
 
 
 def get_arguments():

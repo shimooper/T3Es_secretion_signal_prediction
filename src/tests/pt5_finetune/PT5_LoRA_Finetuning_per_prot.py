@@ -581,7 +581,7 @@ def train_per_protein(
 
     # Huggingface Trainer arguments
     args = TrainingArguments(
-        "./",
+        "../../../",
         evaluation_strategy = "epoch",
         logging_strategy = "epoch",
         save_strategy = "no",

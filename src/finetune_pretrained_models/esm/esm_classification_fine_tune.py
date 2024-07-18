@@ -12,8 +12,8 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trai
 from datasets import Dataset
 from evaluate import load
 
-from consts import (OUTPUTS_DIR, MODEL_ID_TO_MODEL_NAME, BATCH_SIZE)
-from utils import read_train_data, read_test_data
+from src.utils.consts import (OUTPUTS_DIR, MODEL_ID_TO_MODEL_NAME, BATCH_SIZE)
+from src.utils.utils import read_train_data, read_test_data
 
 NUMBER_OF_EPOCHS = 10
 WANDB_KEY = "64c3807b305e96e26550193f5860452b88d85999"
