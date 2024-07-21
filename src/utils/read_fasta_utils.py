@@ -1,13 +1,9 @@
 from Bio import SeqIO
 from sklearn.model_selection import train_test_split
 
-from consts import (FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN_FILE,
+from .consts import (FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN_FILE,
                     FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE,
                     FIXED_POSITIVE_XANTOMONAS_FILE, FIXED_NEGATIVE_XANTOMONAS_FILE, RANDOM_STATE)
-
-
-def get_class_name(obj):
-    return obj.__class__.__name__
 
 
 def read_fasta_file(file_path):

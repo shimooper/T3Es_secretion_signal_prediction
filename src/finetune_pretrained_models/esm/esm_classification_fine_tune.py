@@ -9,7 +9,7 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trai
 from datasets import Dataset
 
 from src.utils.consts import OUTPUTS_DIR, MODEL_ID_TO_MODEL_NAME, BATCH_SIZE
-from src.utils.utils import read_train_data, read_test_data
+from src.utils.read_fasta_utils import read_train_data, read_test_data
 from src.finetune_pretrained_models.huggingface_utils import CalcMetricsOnTrainSetCallback, compute_metrics
 
 NUMBER_OF_EPOCHS = 10

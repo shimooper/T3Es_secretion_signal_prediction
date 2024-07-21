@@ -18,9 +18,9 @@ MODEL_ID_TO_MODEL_NAME = {
 BATCH_SIZE = 8
 RANDOM_STATE = 42
 
-DATASETS_ORIGINAL_DIR = os.path.join(PROJECT_BASE_DIR, '../../data/datasets_original')
-DATASETS_FIXED_DIR = os.path.join(PROJECT_BASE_DIR, '../../data/datasets_fixed')
-OUTPUTS_DIR = os.path.join(PROJECT_BASE_DIR, '../../outputs')
+DATASETS_ORIGINAL_DIR = os.path.join(PROJECT_BASE_DIR, 'data', 'datasets_original')
+DATASETS_FIXED_DIR = os.path.join(PROJECT_BASE_DIR, 'data', 'datasets_fixed')
+OUTPUTS_DIR = os.path.join(PROJECT_BASE_DIR, 'outputs')
 
 ORIGINAL_POSITIVE_TRAIN_FILE = os.path.join(DATASETS_ORIGINAL_DIR, "positive_train_data.fasta")
 ORIGINAL_NEGATIVE_TRAIN_FILE = os.path.join(DATASETS_ORIGINAL_DIR, "negative_train_data.fasta")

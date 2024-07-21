@@ -14,7 +14,7 @@ from transformers.models.t5.modeling_t5 import T5Config, T5PreTrainedModel, T5St
 from transformers.utils.model_parallel_utils import assert_device_map, get_device_map
 from transformers import T5EncoderModel, T5Tokenizer
 
-from lora import modify_with_lora, LoRAConfig
+from .lora import modify_with_lora, LoRAConfig
 
 
 class ClassConfig:

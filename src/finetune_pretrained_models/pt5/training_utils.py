@@ -1,4 +1,4 @@
-
+import sys
 import os
 import random
 
@@ -6,11 +6,11 @@ import torch
 import numpy as np
 from transformers import TrainingArguments, Trainer, set_seed
 import wandb
-
-from evaluate import load
 from datasets import Dataset
 
-from classifier import PT5_classification_model
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
+
+from .classifier import PT5_classification_model
 from src.utils.consts import OUTPUTS_DIR
 from src.finetune_pretrained_models.huggingface_utils import CalcMetricsOnTrainSetCallback, compute_metrics
 
@@ -104,20 +104,19 @@ def train_per_protein(
         lr=3e-4,  # recommended learning rate
         seed=42,  # random seed
         deepspeed=True,  # if gpu is large enough disable deepspeed for training speedup
-        mixed=False,  # enable mixed precision training
-        gpu=1, # gpu selection (1 for first gpu)
+        half_precision=False,  # enable mixed precision training
 ):
     # Disable deepspeed if we run on windows
     deepspeed = deepspeed and os.name != 'nt'
 
     # Set gpu device
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu - 1)
+    print(f"$CUDA_VISIBLE_DEVICES: {os.environ.get('CUDA_VISIBLE_DEVICES')}")
 
     # Set all random seeds
     set_seeds(seed)
 
     # load model
-    checkpoint, model, tokenizer = PT5_classification_model(num_labels=num_labels, half_precision=torch.cuda.is_available())
+    checkpoint, model, tokenizer = PT5_classification_model(num_labels=num_labels, half_precision=half_precision)
 
     # Set up Weights & Biases
     wandb.login(key=WANDB_KEY)
@@ -155,7 +154,7 @@ def train_per_protein(
         run_name=run_name,
         seed=seed,
         deepspeed=ds_config if deepspeed else None,
-        fp16=mixed,
+        fp16=half_precision,
     )
 
     # Trainer
@@ -194,11 +193,11 @@ def save_model(model, filepath):
     torch.save(non_frozen_params, filepath)
 
 
-def load_model(filepath, num_labels=1, mixed=False):
+def load_model(filepath, num_labels=1, half_precision=False):
     # Creates a new PT5 model and loads the finetuned weights from a file
 
     # load a new model
-    checkpoint, model, tokenizer = PT5_classification_model(num_labels=num_labels, half_precision=mixed)
+    checkpoint, model, tokenizer = PT5_classification_model(num_labels=num_labels, half_precision=half_precision)
 
     # Load the non-frozen parameters from the saved file
     non_frozen_params = torch.load(filepath)

@@ -12,7 +12,7 @@ from proteinbert import OutputType, OutputSpec, FinetuningModelGenerator, load_p
 from proteinbert.conv_and_global_attention_model import get_model_with_hidden_layers_as_outputs
 
 from src.utils.consts import OUTPUTS_DIR, BATCH_SIZE
-from src.utils.utils import read_train_data, read_test_data
+from src.utils.read_fasta_utils import read_train_data, read_test_data
 
 EPOCHS = 10
 

@@ -12,7 +12,7 @@ from src.utils.consts import (FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN_FI
                               FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE,
                               FIXED_POSITIVE_XANTOMONAS_FILE, FIXED_NEGATIVE_XANTOMONAS_FILE,
                               BATCH_SIZE)
-from src.utils.utils import read_fasta_file, read_sequences_from_fasta_file
+from src.utils.read_fasta_utils import read_fasta_file, read_sequences_from_fasta_file
 
 ESM_SCRIPT_PATH = "/groups/pupko/yairshimony/esm/scripts/extract.py"
 

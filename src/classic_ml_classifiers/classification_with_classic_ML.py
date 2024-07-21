@@ -13,7 +13,6 @@ from sklearn.decomposition import PCA
 from sklearn.metrics import make_scorer, matthews_corrcoef, average_precision_score
 
 from src.utils.consts import OUTPUTS_DIR, MODEL_ID_TO_MODEL_NAME
-from src.utils.utils import get_class_name
 from classifiers_params_grids import classifiers, update_grid_params
 
 EMBEDDINGS_BASE_DIR = os.path.join(OUTPUTS_DIR, 'embeddings')
@@ -72,7 +71,7 @@ def fit_on_train_data(Xs_train, Ys_train, output_dir, n_jobs):
     grids = {}
     best_classifiers = {}
     for classifier, param_grid in classifiers:
-        class_name = get_class_name(classifier)
+        class_name = classifier.__class__.__name__
         logging.info(f"Training Classifier {class_name} with hyperparameters tuning using Stratified-KFold CV.")
         grid = GridSearchCV(
             estimator=classifier,
