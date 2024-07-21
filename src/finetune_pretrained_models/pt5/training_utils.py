@@ -5,12 +5,18 @@ import random
 import torch
 import numpy as np
 from transformers import TrainingArguments, Trainer, set_seed
+import wandb
 
 from evaluate import load
 from datasets import Dataset
 
 from classifier import PT5_classification_model
+from src.utils.consts import OUTPUTS_DIR
+from src.finetune_pretrained_models.huggingface_utils import CalcMetricsOnTrainSetCallback, compute_metrics
 
+
+WANDB_KEY = "64c3807b305e96e26550193f5860452b88d85999"
+WANDB_PROJECT = "type3_secretion_signal_pt5"
 
 # Deepspeed config for optimizer CPU offload
 ds_config = {
@@ -82,7 +88,7 @@ def create_dataset(tokenizer, seqs, labels):
     return dataset
 
 
-# Main training fuction
+# Main training function
 def train_per_protein(
         train_df,  # training data
         valid_df,  # validation data
@@ -99,8 +105,8 @@ def train_per_protein(
         seed=42,  # random seed
         deepspeed=True,  # if gpu is large enough disable deepspeed for training speedup
         mixed=False,  # enable mixed precision training
-        gpu=1):  # gpu selection (1 for first gpu)
-
+        gpu=1, # gpu selection (1 for first gpu)
+):
     # Disable deepspeed if we run on windows
     deepspeed = deepspeed and os.name != 'nt'
 
@@ -111,7 +117,13 @@ def train_per_protein(
     set_seeds(seed)
 
     # load model
-    model, tokenizer = PT5_classification_model(num_labels=num_labels, half_precision=torch.cuda.is_available())
+    checkpoint, model, tokenizer = PT5_classification_model(num_labels=num_labels, half_precision=torch.cuda.is_available())
+
+    # Set up Weights & Biases
+    wandb.login(key=WANDB_KEY)
+    os.environ["WANDB_PROJECT"] = WANDB_PROJECT
+    os.environ["WANDB_LOG_MODEL"] = "end"  # Upload the final model to W&B at the end of training (after loading the best model)
+    run_name = f"{checkpoint}-train_batch{batch * accum}-lr{lr}"
 
     # Preprocess inputs
     # Replace uncommon AAs with "X"
@@ -127,31 +139,24 @@ def train_per_protein(
 
     # Huggingface Trainer arguments
     args = TrainingArguments(
-        "./",
+        output_dir=os.path.join(OUTPUTS_DIR, 'pt5_finetune_runs', run_name),
         evaluation_strategy="epoch",
+        save_strategy="epoch",
         logging_strategy="epoch",
-        save_strategy="no",
+        save_total_limit=1,
+        load_best_model_at_end=True,
+        metric_for_best_model="matthews_correlation",
         learning_rate=lr,
         per_device_train_batch_size=batch,
         per_device_eval_batch_size=val_batch,
         gradient_accumulation_steps=accum,
         num_train_epochs=epochs,
+        report_to=["wandb"],
+        run_name=run_name,
         seed=seed,
         deepspeed=ds_config if deepspeed else None,
         fp16=mixed,
     )
-
-    # Metric definition for validation data
-    def compute_metrics(eval_pred):
-        if num_labels > 1:  # for classification
-            metric = load("accuracy")
-            predictions, labels = eval_pred
-            predictions = np.argmax(predictions, axis=1)
-        else:  # for regression
-            metric = load("spearmanr")
-            predictions, labels = eval_pred
-
-        return metric.compute(predictions=predictions, references=labels)
 
     # Trainer
     trainer = Trainer(
@@ -162,11 +167,15 @@ def train_per_protein(
         tokenizer=tokenizer,
         compute_metrics=compute_metrics
     )
+    trainer.add_callback(CalcMetricsOnTrainSetCallback(trainer))
 
     # Train model
     trainer.train()
 
-    return tokenizer, model, trainer.state.log_history
+    # Save model (only the finetuned parameters)
+    save_model(model, os.path.join(OUTPUTS_DIR, 'pt5_finetune_runs', run_name, "PT5_GB1_finetuned.pth"))
+
+    return tokenizer, model
 
 
 def save_model(model, filepath):
@@ -189,7 +198,7 @@ def load_model(filepath, num_labels=1, mixed=False):
     # Creates a new PT5 model and loads the finetuned weights from a file
 
     # load a new model
-    model, tokenizer = PT5_classification_model(num_labels=num_labels, half_precision=mixed)
+    checkpoint, model, tokenizer = PT5_classification_model(num_labels=num_labels, half_precision=mixed)
 
     # Load the non-frozen parameters from the saved file
     non_frozen_params = torch.load(filepath)

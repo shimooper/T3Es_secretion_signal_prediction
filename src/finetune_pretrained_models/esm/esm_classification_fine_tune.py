@@ -1,41 +1,20 @@
 import os
 import argparse
-from copy import deepcopy
 from timeit import default_timer as timer
 
 import pandas as pd
-from sklearn.metrics import average_precision_score
 import wandb
-import numpy as np
 
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer, TrainerCallback
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer
 from datasets import Dataset
-from evaluate import load
 
-from src.utils.consts import (OUTPUTS_DIR, MODEL_ID_TO_MODEL_NAME, BATCH_SIZE)
+from src.utils.consts import OUTPUTS_DIR, MODEL_ID_TO_MODEL_NAME, BATCH_SIZE
 from src.utils.utils import read_train_data, read_test_data
+from src.finetune_pretrained_models.huggingface_utils import CalcMetricsOnTrainSetCallback, compute_metrics
 
 NUMBER_OF_EPOCHS = 10
 WANDB_KEY = "64c3807b305e96e26550193f5860452b88d85999"
 WANDB_PROJECT = "type3_secretion_signal"
-
-mcc_metric = load("matthews_correlation")
-
-
-# Used to log metrics on train set during training at the end of each epoch (by default metrics are calculated only on evaluation/validation set)
-# Solution taken from - https://stackoverflow.com/questions/67457480/how-to-get-the-accuracy-per-epoch-or-step-for-the-huggingface-transformers-train
-# The calculated loss here appears in the logs as "train/train_loss" and is the loss of the train_set at the end of each epoch.
-# This differs from the automatically logged "train/loss" which is the average loss of all steps during the epoch.
-class CalcMetricsOnTrainSetCallback(TrainerCallback):
-    def __init__(self, trainer) -> None:
-        super().__init__()
-        self._trainer = trainer
-
-    def on_epoch_end(self, args, state, control, **kwargs):
-        if control.should_evaluate:
-            control_copy = deepcopy(control)
-            self._trainer.evaluate(eval_dataset=self._trainer.train_dataset, metric_key_prefix="train")
-            return control_copy
 
 
 def get_arguments():
@@ -52,16 +31,6 @@ def create_dataset(tokenizer, sequences, labels=None):
         dataset = dataset.add_column("labels", labels)
 
     return dataset
-
-
-def compute_metrics(eval_pred):
-    predictions, true_labels = eval_pred
-    predictions_labels = np.argmax(predictions, axis=1)
-    predictions_scores = predictions[:, 1]  # probability estimates of the positive class
-
-    scores = mcc_metric.compute(predictions=predictions_labels, references=true_labels)
-    scores['auprc'] = average_precision_score(y_true=true_labels, y_score=predictions_scores)
-    return scores
 
 
 def train_model(model_checkpoint, tokenizer, train_dataset, validation_dataset, output_dir, run_name: str):
@@ -129,7 +98,7 @@ def test_on_test_data(trainer: Trainer, tokenizer, split):
 
     # Now, calculate and log the metrics
     test_dataset = create_dataset(tokenizer, test_sequences, test_labels)
-    test_dataset_without_labels.with_format("torch", device="cpu")
+    test_dataset.with_format("torch", device="cpu")
     test_results = trainer.predict(test_dataset, metric_key_prefix=split)
 
     trainer.log_metrics(split, test_results.metrics)

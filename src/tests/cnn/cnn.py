@@ -89,3 +89,4 @@ class EffectorsDataModule(L.LightningDataModule):
         self.data_dir = data_dir
 
     def prepare_data(self):
+        pass
