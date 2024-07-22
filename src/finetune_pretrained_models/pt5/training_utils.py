@@ -122,6 +122,7 @@ def train_per_protein(
     wandb.login(key=WANDB_KEY)
     os.environ["WANDB_PROJECT"] = WANDB_PROJECT
     os.environ["WANDB_LOG_MODEL"] = "end"  # Upload the final model to W&B at the end of training (after loading the best model)
+    os.environ['WANDB_LOG_DIR'] = os.path.join(OUTPUTS_DIR, 'pt5_finetune')
     run_name = f"{checkpoint}-train_batch{batch * accum}-lr{lr}"
 
     # Preprocess inputs
@@ -138,7 +139,7 @@ def train_per_protein(
 
     # Huggingface Trainer arguments
     args = TrainingArguments(
-        output_dir=os.path.join(OUTPUTS_DIR, 'pt5_finetune_runs', run_name),
+        output_dir=os.path.join(OUTPUTS_DIR, 'pt5_finetune', run_name),
         evaluation_strategy="epoch",
         save_strategy="epoch",
         logging_strategy="epoch",
