@@ -6,11 +6,11 @@ import torch
 import numpy as np
 from transformers import TrainingArguments, Trainer, set_seed
 import wandb
-from datasets import Dataset
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 
 from .classifier import PT5_classification_model
+from .data_utils import prepare_dataset
 from src.utils.consts import OUTPUTS_DIR
 from src.finetune_pretrained_models.huggingface_utils import CalcMetricsOnTrainSetCallback, compute_metrics
 
@@ -79,15 +79,6 @@ def set_seeds(s):
     set_seed(s)
 
 
-# Dataset creation
-def create_dataset(tokenizer, seqs, labels):
-    tokenized = tokenizer(seqs, max_length=1024, padding=False, truncation=True)
-    dataset = Dataset.from_dict(tokenized)
-    dataset = dataset.add_column("labels", labels)
-
-    return dataset
-
-
 # Main training function
 def train_per_protein(
         train_df,  # training data
@@ -123,23 +114,16 @@ def train_per_protein(
     os.environ["WANDB_PROJECT"] = WANDB_PROJECT
     os.environ["WANDB_LOG_MODEL"] = "end"  # Upload the final model to W&B at the end of training (after loading the best model)
     os.environ['WANDB_LOG_DIR'] = os.path.join(OUTPUTS_DIR, 'pt5_finetune')
-    run_name = f"{checkpoint}-train_batch{batch * accum}-lr{lr}"
-
-    # Preprocess inputs
-    # Replace uncommon AAs with "X"
-    train_df["sequence"] = train_df["sequence"].str.replace('|'.join(["O", "B", "U", "Z"]), "X", regex=True)
-    valid_df["sequence"] = valid_df["sequence"].str.replace('|'.join(["O", "B", "U", "Z"]), "X", regex=True)
-    # Add spaces between each amino acid for PT5 to correctly use them
-    train_df['sequence'] = train_df.apply(lambda row: " ".join(row["sequence"]), axis=1)
-    valid_df['sequence'] = valid_df.apply(lambda row: " ".join(row["sequence"]), axis=1)
+    run_name = f"{checkpoint}_train_batch{batch * accum}_lr{lr}"
+    run_output_dir = os.path.join(OUTPUTS_DIR, 'pt5_finetune', run_name)
 
     # Create Datasets
-    train_set = create_dataset(tokenizer, list(train_df['sequence']), list(train_df['label']))
-    valid_set = create_dataset(tokenizer, list(valid_df['sequence']), list(valid_df['label']))
+    train_set = prepare_dataset(train_df, tokenizer)
+    valid_set = prepare_dataset(valid_df, tokenizer)
 
     # Huggingface Trainer arguments
     args = TrainingArguments(
-        output_dir=os.path.join(OUTPUTS_DIR, 'pt5_finetune', run_name),
+        output_dir=run_output_dir,
         evaluation_strategy="epoch",
         save_strategy="epoch",
         logging_strategy="epoch",
@@ -173,7 +157,7 @@ def train_per_protein(
     trainer.train()
 
     # Save model (only the finetuned parameters)
-    save_model(model, os.path.join(OUTPUTS_DIR, 'pt5_finetune_runs', run_name, "PT5_GB1_finetuned.pth"))
+    save_model(model, os.path.join(run_output_dir, "PT5_GB1_finetuned.pth"))
 
     return tokenizer, model
 
@@ -192,20 +176,3 @@ def save_model(model, filepath):
 
     # Save only the finetuned parameters
     torch.save(non_frozen_params, filepath)
-
-
-def load_model(filepath, num_labels=1, half_precision=False):
-    # Creates a new PT5 model and loads the finetuned weights from a file
-
-    # load a new model
-    checkpoint, model, tokenizer = PT5_classification_model(num_labels=num_labels, half_precision=half_precision)
-
-    # Load the non-frozen parameters from the saved file
-    non_frozen_params = torch.load(filepath)
-
-    # Assign the non-frozen parameters to the corresponding parameters of the model
-    for param_name, param in model.named_parameters():
-        if param_name in non_frozen_params:
-            param.data = non_frozen_params[param_name].data
-
-    return tokenizer, model
