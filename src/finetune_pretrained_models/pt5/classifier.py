@@ -18,7 +18,7 @@ from transformers import T5EncoderModel, T5Tokenizer
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 
 from .lora import modify_with_lora, LoRAConfig
-from src.finetune_pretrained_models.huggingface_utils import HF_CACHE_DIR
+from src.finetune_pretrained_models.huggingface_utils import HF_MODELS_CACHE_DIR
 
 
 class ClassConfig:
@@ -173,12 +173,12 @@ def PT5_classification_model(num_labels, half_precision):
     # possible to load the half preciion model (thanks to @pawel-rezo for pointing that out)
     if not half_precision:
         checkpoint = "prot_t5_xl_uniref50"
-        model = T5EncoderModel.from_pretrained(f"Rostlab/{checkpoint}", cache_dir=HF_CACHE_DIR)
-        tokenizer = T5Tokenizer.from_pretrained(f"Rostlab/{checkpoint}", cache_dir=HF_CACHE_DIR)
+        model = T5EncoderModel.from_pretrained(f"Rostlab/{checkpoint}", cache_dir=HF_MODELS_CACHE_DIR)
+        tokenizer = T5Tokenizer.from_pretrained(f"Rostlab/{checkpoint}", cache_dir=HF_MODELS_CACHE_DIR)
     elif half_precision and torch.cuda.is_available():
         checkpoint = "prot_t5_xl_half_uniref50-enc"
-        tokenizer = T5Tokenizer.from_pretrained(f"Rostlab/{checkpoint}", do_lower_case=False, cache_dir=HF_CACHE_DIR)
-        model = T5EncoderModel.from_pretrained(f"Rostlab/{checkpoint}", torch_dtype=torch.float16, cache_dir=HF_CACHE_DIR).to(
+        tokenizer = T5Tokenizer.from_pretrained(f"Rostlab/{checkpoint}", do_lower_case=False, cache_dir=HF_MODELS_CACHE_DIR)
+        model = T5EncoderModel.from_pretrained(f"Rostlab/{checkpoint}", torch_dtype=torch.float16, cache_dir=HF_MODELS_CACHE_DIR).to(
             torch.device('cuda'))
     else:
         raise ValueError('Half precision can be run on GPU only.')

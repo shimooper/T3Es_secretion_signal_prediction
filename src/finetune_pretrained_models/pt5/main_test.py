@@ -5,6 +5,7 @@ import pandas as pd
 from torch.utils.data import DataLoader
 import sys
 import os
+import torch.nn.functional as F
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 
@@ -42,15 +43,16 @@ def evaluate_model_on_dataset(model, tokenizer, sequences, labels, device):
 
     # Make predictions on the test dataset
     model.eval()
-    predictions = []
+    probabilities = []
     with torch.no_grad():
         for batch in tqdm(dataloader):
             input_ids = batch['input_ids'].to(device)
             attention_mask = batch['attention_mask'].to(device)
             # add batch results (logits) to predictions
-            predictions += model(input_ids, attention_mask=attention_mask).logits.tolist()
+            outputs = model(input_ids, attention_mask=attention_mask)
+            probabilities += F.softmax(outputs.logits, dim=-1)
 
-    scores = compute_metrics((predictions, labels))
+    scores = compute_metrics((torch.stack(probabilities), labels))
     return scores
 
 

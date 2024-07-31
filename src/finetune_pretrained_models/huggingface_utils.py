@@ -1,13 +1,15 @@
+import os.path
 from copy import deepcopy
 from transformers import TrainerCallback
 from sklearn.metrics import average_precision_score
 from evaluate import load
 import numpy as np
 
-mcc_metric = load("matthews_correlation")
-
 HF_CACHE_DIR = "/groups/pupko/yairshimony/.cache/huggingface"
+HF_MODELS_CACHE_DIR = os.path.join(HF_CACHE_DIR, "hub")
+HF_EVALUATE_CACHE_DIR = os.path.join(HF_CACHE_DIR, "evaluate")
 
+mcc_metric = load("matthews_correlation", cache_dir=HF_EVALUATE_CACHE_DIR)
 
 # Used to log metrics on train set during training at the end of each epoch (by default metrics are calculated only on evaluation/validation set)
 # Solution taken from - https://stackoverflow.com/questions/67457480/how-to-get-the-accuracy-per-epoch-or-step-for-the-huggingface-transformers-train
