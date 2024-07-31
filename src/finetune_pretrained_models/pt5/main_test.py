@@ -3,10 +3,14 @@ from tqdm import tqdm
 import torch
 import pandas as pd
 from torch.utils.data import DataLoader
+import sys
+import os
 
-from .classifier import PT5_classification_model
-from .data_utils import prepare_dataset
-from ..huggingface_utils import compute_metrics
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
+
+from src.finetune_pretrained_models.pt5.classifier import PT5_classification_model
+from src.finetune_pretrained_models.pt5.data_utils import prepare_dataset
+from src.finetune_pretrained_models.huggingface_utils import compute_metrics
 from src.utils.read_fasta_utils import read_test_data, read_train_data
 from src.utils.consts import OUTPUTS_DIR
 
@@ -18,7 +22,7 @@ def load_model(filepath, num_labels=1, half_precision=False):
     checkpoint, model, tokenizer = PT5_classification_model(num_labels=num_labels, half_precision=half_precision)
 
     # Load the non-frozen parameters from the saved file
-    non_frozen_params = torch.load(filepath)
+    non_frozen_params = torch.load(filepath, map_location=torch.device('cpu'))
 
     # Assign the non-frozen parameters to the corresponding parameters of the model
     for param_name, param in model.named_parameters():
@@ -51,42 +55,48 @@ def evaluate_model_on_dataset(model, tokenizer, sequences, labels, device):
 
 
 def main():
-    tokenizer, model = load_model("./PT5_GB1_finetuned.pth", num_labels=1, half_precision=False)
+    tokenizer, model = load_model("/groups/pupko/yairshimony/secretion_signal_prediction/outputs/pt5_finetune/prot_t5_xl_uniref50_train_batch8_lr0.0003/PT5_GB1_finetuned.pth", num_labels=1, half_precision=False)
 
     # Set the device to use
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     model.to(device)
 
     train_sequences, validation_sequences, train_labels, validation_labels = read_train_data()
+    print("Evaluating model on train data...")
     train_scores = evaluate_model_on_dataset(model, tokenizer, train_sequences, train_labels, device)
+    print("Evaluating model on validation data...")
     validation_scores = evaluate_model_on_dataset(model, tokenizer, validation_sequences, validation_labels, device)
 
     start_test_time = time.time()
     test_sequences, test_labels = read_test_data('test')
+    print("Evaluating model on test data...")
     test_scores = evaluate_model_on_dataset(model, tokenizer, test_sequences, test_labels, device)
     test_elapsed_time = time.time() - start_test_time
 
     start_xantomonas_time = time.time()
     xantomonas_sequences, xantomonas_labels = read_test_data('xantomonas')
+    print("Evaluating model on xantomonas data...")
     xantomonas_scores = evaluate_model_on_dataset(model, tokenizer, xantomonas_sequences, xantomonas_labels, device)
     xantomonas_elapsed_time = time.time() - start_xantomonas_time
 
     all_scores = {
-        'train_mcc': train_scores['matthews_correlation'],
-        'train_auprc': train_scores['auprc'],
-        'validation_mcc': validation_scores['matthews_correlation'],
-        'validation_auprc': validation_scores['auprc'],
-        'test_mcc': test_scores['matthews_correlation'],
-        'test_auprc': test_scores['auprc'],
-        'test_elapsed_time': test_elapsed_time,
-        'xantomonas_mcc': xantomonas_scores['matthews_correlation'],
-        'xantomonas_auprc': xantomonas_scores['auprc'],
-        'xantomonas_elapsed_time': xantomonas_elapsed_time,
-        'backbone': 'PT5',
+        'train_mcc': [train_scores['matthews_correlation']],
+        'train_auprc': [train_scores['auprc']],
+        'validation_mcc': [validation_scores['matthews_correlation']],
+        'validation_auprc': [validation_scores['auprc']],
+        'test_mcc': [test_scores['matthews_correlation']],
+        'test_auprc': [test_scores['auprc']],
+        'test_elapsed_time': [test_elapsed_time],
+        'xantomonas_mcc': [xantomonas_scores['matthews_correlation']],
+        'xantomonas_auprc': [xantomonas_scores['auprc']],
+        'xantomonas_elapsed_time': [xantomonas_elapsed_time],
+        'backbone': ['PT5'],
     }
 
     results_df = pd.DataFrame(all_scores)
-    results_df.to_csv(f"{OUTPUTS_DIR}/pt5_finetune/pt5_results.csv", index=False)
+    output_path = f"{OUTPUTS_DIR}/pt5_finetune/pt5_results.csv"
+    print(f"Writing scores to {output_path}")
+    results_df.to_csv(output_path, index=False)
 
 
 if __name__ == "__main__":

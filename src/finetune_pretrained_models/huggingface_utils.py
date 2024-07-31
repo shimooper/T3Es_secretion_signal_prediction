@@ -6,6 +6,8 @@ import numpy as np
 
 mcc_metric = load("matthews_correlation")
 
+HF_CACHE_DIR = "/groups/pupko/yairshimony/.cache/huggingface"
+
 
 # Used to log metrics on train set during training at the end of each epoch (by default metrics are calculated only on evaluation/validation set)
 # Solution taken from - https://stackoverflow.com/questions/67457480/how-to-get-the-accuracy-per-epoch-or-step-for-the-huggingface-transformers-train
