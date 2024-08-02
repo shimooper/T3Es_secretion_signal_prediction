@@ -2,6 +2,7 @@ import subprocess
 import os
 import argparse
 from timeit import default_timer as timer
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -11,7 +12,7 @@ from datasets import Dataset
 from src.utils.consts import (FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN_FILE,
                               FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE,
                               FIXED_POSITIVE_XANTOMONAS_FILE, FIXED_NEGATIVE_XANTOMONAS_FILE,
-                              BATCH_SIZE)
+                              BATCH_SIZE, OUTPUTS_DIR, MODEL_ID_TO_MODEL_NAME)
 from src.utils.read_fasta_utils import read_fasta_file, read_sequences_from_fasta_file
 
 ESM_SCRIPT_PATH = "/groups/pupko/yairshimony/esm/scripts/extract.py"
@@ -19,11 +20,10 @@ ESM_SCRIPT_PATH = "/groups/pupko/yairshimony/esm/scripts/extract.py"
 
 def get_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_name', help='The model name to use for the embeddings calculation', type=str, required=True)
-    parser.add_argument('--output_dir', help='The output directory to save the embeddings', type=str, required=True)
+    parser.add_argument('--model_id', help='The model id to use for the embeddings calculation', type=str, required=True)
     parser.add_argument('--split', help='The split to calc the embeddings for', type=str, required=True)
     parser.add_argument('--esm_embeddings_calculation_mode', help='The mode to use for the embeddings calculation', type=str,
-                        choices=['native_script', 'huggingface_model', 'trainer_api'], required=True)
+                        choices=['native_script', 'huggingface_model', 'trainer_api'], default='huggingface_model')
     parser.add_argument('--always_calc_embeddings', help='Whether to always calc the embeddings even if they were already calculated', action='store_true')
     parser.add_argument('--measure_time', help='Whether to measure the time it takes to calc the embeddings', action='store_true')
     return parser.parse_args()
@@ -92,7 +92,7 @@ def calc_embeddings_of_fasta_file_with_huggingface_model(model, tokenizer, fasta
     return Xs
 
 
-def calc_embeddings(model_name, output_dir, split, esm_embeddings_calculation_mode, always_calc_embeddings):
+def calc_embeddings(model_id, split, esm_embeddings_calculation_mode, always_calc_embeddings):
     if split == 'train':
         positive_fasta_file = FIXED_POSITIVE_TRAIN_FILE
         negative_fasta_file = FIXED_NEGATIVE_TRAIN_FILE
@@ -105,12 +105,14 @@ def calc_embeddings(model_name, output_dir, split, esm_embeddings_calculation_mo
     else:
         raise ValueError(f"split must be one of ['train', 'test', 'xantomonas'], got {split}")
 
+    output_dir = Path(OUTPUTS_DIR) / "pretrained_embeddings" / model_id
     os.makedirs(output_dir, exist_ok=True)
     positive_embeddings_tmp_dir = os.path.join(output_dir, f'{split}_positive_embeddings')
     negative_embeddings_tmp_dir = os.path.join(output_dir, f'{split}_negative_embeddings')
     positive_embeddings_output_file_path = os.path.join(output_dir, f'{split}_positive_embeddings.npy')
     negative_embeddings_output_file_path = os.path.join(output_dir, f'{split}_negative_embeddings.npy')
 
+    model_name = MODEL_ID_TO_MODEL_NAME[model_id]
     if esm_embeddings_calculation_mode == 'native_script':
         positive_embeddings = calc_embeddings_of_fasta_file_with_script(
             model_name, positive_fasta_file, positive_embeddings_tmp_dir, positive_embeddings_output_file_path,
@@ -137,8 +139,7 @@ if __name__ == "__main__":
     args = get_arguments()
 
     start_test_time = timer()
-    calc_embeddings(args.model_name, args.output_dir, args.split, args.esm_embeddings_calculation_mode,
-                    args.always_calc_embeddings)
+    calc_embeddings(args.model_id, args.split, args.esm_embeddings_calculation_mode, args.always_calc_embeddings)
 
     if args.measure_time:
         end_test_time = timer()
