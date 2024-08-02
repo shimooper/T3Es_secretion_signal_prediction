@@ -42,7 +42,7 @@ logistic_regression_grid = {
 mlp_grid = {
     'hidden_layer_sizes': [(10,3),(30,5),(50,10), (100,)],
     'activation': ['tanh', 'relu'],
-    'solver': ['sgd', 'adam'],
+    'solver': ['adam'],
     'alpha': [0.0001, 0.05],
     'learning_rate': ['constant', 'adaptive'],
     'max_iter': [40],
@@ -104,7 +104,7 @@ classifiers = [
     (LogisticRegression(), logistic_regression_grid),
     (MLPClassifier(), mlp_grid),
     (RandomForestClassifier(), rfc_grid),
-    (GradientBoostingClassifier(), gbc_grid),
+    # (GradientBoostingClassifier(), gbc_grid),
     (XGBClassifier(), xgboost_grid),
     # (LGBMClassifier(), lgbm_grid)
 ]

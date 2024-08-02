@@ -15,21 +15,18 @@ from sklearn.metrics import make_scorer, matthews_corrcoef, average_precision_sc
 from src.utils.consts import OUTPUTS_DIR, MODEL_ID_TO_MODEL_NAME
 from classifiers_params_grids import classifiers, update_grid_params
 
-EMBEDDINGS_BASE_DIR = os.path.join(OUTPUTS_DIR, 'embeddings')
+EMBEDDINGS_BASE_DIR = os.path.join(OUTPUTS_DIR, 'pretrained_embeddings')
 CLASSIFIERS_OUTPUT_BASE_DIR = os.path.join(OUTPUTS_DIR, 'embeddings_classifiers')
 
 
 def get_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_id', help='The pretrained model id', type=str, required=True)
-    parser.add_argument('--output_dir', help='The output dir. By default it is just model_id', type=str)
-    parser.add_argument('--esm_embeddings_calculation_mode', help='the esm embeddings calculation mode', type=str,
-                        choices=['native_script', 'huggingface_model', 'trainer_api'], default='huggingface_model')
     parser.add_argument('--n_jobs', help='The number of jobs to run in parallel', type=int, default=1)
     return parser.parse_args()
 
 
-def prepare_Xs_and_Ys(model_name, embeddings_dir, split, esm_embeddings_calculation_mode, always_calc_embeddings):
+def prepare_Xs_and_Ys(model_name, embeddings_dir, split, always_calc_embeddings):
     if model_name == 'protein_bert':
         from src.pretrained_embeddings.calc_proteinbert_embeddings import calc_embeddings
         Xs_positive, Xs_negative = calc_embeddings(embeddings_dir, split, always_calc_embeddings)
@@ -140,12 +137,9 @@ def test_on_test_data(model_name, embeddings_dir, best_grid, split, esm_embeddin
     return test_results
 
 
-def main(model_id, output_dir, esm_embeddings_calculation_mode, n_jobs):
-    if output_dir is None:
-        output_dir = model_id
-
-    embeddings_dir = os.path.join(EMBEDDINGS_BASE_DIR, output_dir)
-    classifiers_output_dir = os.path.join(CLASSIFIERS_OUTPUT_BASE_DIR, output_dir)
+def main(model_id, n_jobs):
+    embeddings_dir = os.path.join(EMBEDDINGS_BASE_DIR, model_id)
+    classifiers_output_dir = os.path.join(CLASSIFIERS_OUTPUT_BASE_DIR, model_id)
     os.makedirs(embeddings_dir, exist_ok=True)
     os.makedirs(classifiers_output_dir, exist_ok=True)
 
@@ -156,7 +150,7 @@ def main(model_id, output_dir, esm_embeddings_calculation_mode, n_jobs):
 
     model_name = MODEL_ID_TO_MODEL_NAME[model_id]
 
-    Xs_train, Ys_train = prepare_Xs_and_Ys(model_name, embeddings_dir, 'train', esm_embeddings_calculation_mode, always_calc_embeddings=False)
+    Xs_train, Ys_train = prepare_Xs_and_Ys(model_name, embeddings_dir, 'train', always_calc_embeddings=False)
     update_grid_params(Ys_train)
 
     pca(Xs_train, Ys_train, embeddings_dir)
@@ -171,4 +165,4 @@ def main(model_id, output_dir, esm_embeddings_calculation_mode, n_jobs):
 
 if __name__ == "__main__":
     args = get_arguments()
-    main(args.model_id, args.output_dir, args.esm_embeddings_calculation_mode, args.n_jobs)
+    main(args.model_id, args.n_jobs)

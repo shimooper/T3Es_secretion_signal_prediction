@@ -3,16 +3,19 @@ import os
 import argparse
 from timeit import default_timer as timer
 from pathlib import Path
+import sys
 
 import numpy as np
 import torch
 from transformers import AutoTokenizer, AutoModel, TrainingArguments, Trainer
 from datasets import Dataset
 
+sys.path.insert(0, "/groups/pupko/yairshimony/secretion_signal_prediction")
+
 from src.utils.consts import (FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN_FILE,
                               FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE,
                               FIXED_POSITIVE_XANTOMONAS_FILE, FIXED_NEGATIVE_XANTOMONAS_FILE,
-                              BATCH_SIZE, OUTPUTS_DIR, MODEL_ID_TO_MODEL_NAME)
+                              BATCH_SIZE, OUTPUTS_DIR, MODEL_ID_TO_MODEL_NAME, PRETRAINED_MODELS_DIR)
 from src.utils.read_fasta_utils import read_fasta_file, read_sequences_from_fasta_file
 
 ESM_SCRIPT_PATH = "/groups/pupko/yairshimony/esm/scripts/extract.py"
@@ -113,6 +116,7 @@ def calc_embeddings(model_id, split, esm_embeddings_calculation_mode, always_cal
     negative_embeddings_output_file_path = os.path.join(output_dir, f'{split}_negative_embeddings.npy')
 
     model_name = MODEL_ID_TO_MODEL_NAME[model_id]
+    mode_path = Path(PRETRAINED_MODELS_DIR) / model_name
     if esm_embeddings_calculation_mode == 'native_script':
         positive_embeddings = calc_embeddings_of_fasta_file_with_script(
             model_name, positive_fasta_file, positive_embeddings_tmp_dir, positive_embeddings_output_file_path,
@@ -122,8 +126,8 @@ def calc_embeddings(model_id, split, esm_embeddings_calculation_mode, always_cal
             always_calc_embeddings)
 
     else:
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        model = AutoModel.from_pretrained(model_name)
+        tokenizer = AutoTokenizer.from_pretrained(mode_path)
+        model = AutoModel.from_pretrained(mode_path)
 
         positive_embeddings = calc_embeddings_of_fasta_file_with_huggingface_model(
             model, tokenizer, positive_fasta_file, positive_embeddings_tmp_dir, positive_embeddings_output_file_path,

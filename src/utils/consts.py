@@ -18,7 +18,7 @@ RANDOM_STATE = 42
 
 DATASETS_ORIGINAL_DIR = os.path.join(PROJECT_BASE_DIR, 'data', 'datasets_original')
 DATASETS_FIXED_DIR = os.path.join(PROJECT_BASE_DIR, 'data', 'datasets_fixed')
-OUTPUTS_DIR = os.path.join(PROJECT_BASE_DIR, 'outputs')
+OUTPUTS_DIR = os.path.join(PROJECT_BASE_DIR, 'outputs_new')
 PRETRAINED_MODELS_DIR = os.path.join(PROJECT_BASE_DIR, 'models')
 
 ORIGINAL_POSITIVE_TRAIN_FILE = os.path.join(DATASETS_ORIGINAL_DIR, "positive_train_data.fasta")
