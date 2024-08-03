@@ -45,7 +45,8 @@ mlp_grid = {
     'solver': ['adam'],
     'alpha': [0.0001, 0.05],
     'learning_rate': ['constant', 'adaptive'],
-    'max_iter': [40],
+    'max_iter': [400],
+    'early_stopping': [True],
     'random_state': [RANDOM_STATE],
 }
 
@@ -73,13 +74,11 @@ gbc_grid = {
 xgboost_grid = {
     'learning_rate': [0.05, 0.1],
     'n_estimators': [10, 50, 200],
-    'max_depth': [3, 5, 10],
-    'booster': ['gbtree', 'dart'],
+    'max_depth': [3, 10],
+    'booster': ['dart'],
     'n_jobs': [1],
     'random_state': [RANDOM_STATE],
-    'subsample': [0.6, 0.8, 1],
-    'reg_alpha': [0, 0.5, 1],
-    'reg_lambda': [0, 0.5, 3],
+    'subsample': [0.6, 1],
 }
 
 lgbm_grid = {

@@ -54,48 +54,47 @@ def calc_embeddings_of_fasta_file_with_script(model_name, fasta_file_path, embed
     return Xs
 
 
-def calc_embeddings_of_fasta_file_with_huggingface_model(model, tokenizer, fasta_file_path, embeddings_dir,
-                                                         embeddings_file_path, esm_embeddings_calculation_mode, always_calc_embeddings=False):
-    if not os.path.exists(embeddings_file_path) or always_calc_embeddings:
-        sequences = read_sequences_from_fasta_file(fasta_file_path)
+def calc_embeddings_of_fasta_file_with_huggingface_model(mode_path, fasta_file_path, embeddings_dir,
+                                                         embeddings_file_path, esm_embeddings_calculation_mode):
+    tokenizer = AutoTokenizer.from_pretrained(mode_path)
+    model = AutoModel.from_pretrained(mode_path)
+    sequences = read_sequences_from_fasta_file(fasta_file_path)
 
-        if esm_embeddings_calculation_mode == 'huggingface_model':
-            model.eval()
-            tokenized_sequences = tokenizer(sequences, return_tensors="pt")
+    if esm_embeddings_calculation_mode == 'huggingface_model':
+        model.eval()
+        tokenized_sequences = tokenizer(sequences, return_tensors="pt")
 
-            embeddings = []
-            with torch.no_grad():
-                for i in range(0, len(sequences), BATCH_SIZE):
-                    batch_inputs = {key: value[i:i+BATCH_SIZE] for key, value in tokenized_sequences.items()}
-                    outputs = model(**batch_inputs)
-                    sequence_representation = outputs.last_hidden_state[:, 1: -1, :].mean(1)
-                    embeddings.append(sequence_representation)
+        embeddings = []
+        with torch.no_grad():
+            for i in range(0, len(sequences), BATCH_SIZE):
+                batch_inputs = {key: value[i:i+BATCH_SIZE] for key, value in tokenized_sequences.items()}
+                outputs = model(**batch_inputs)
+                sequence_representation = outputs.last_hidden_state[:, 1: -1, :].mean(1)
+                embeddings.append(sequence_representation)
 
-            Xs = torch.cat(embeddings, dim=0).numpy()
+        Xs = torch.cat(embeddings, dim=0).numpy()
 
-        # This way to run inference and get sequence embeddings isn't intuitive, but I saw this somewhere as a fast way to get embeddings.
-        elif esm_embeddings_calculation_mode == 'trainer_api':
-            tokenized_sequences = tokenizer(sequences)
-            dataset = Dataset.from_dict(tokenized_sequences)
-            training_args = TrainingArguments(
-                embeddings_dir,  # In this context this argument doesn't have any meaning, but it's a required argument
-                per_device_eval_batch_size=BATCH_SIZE)
-            trainer = Trainer(model=model, args=training_args)
-            outputs = trainer.predict(dataset)
-            tokens_representations = outputs.predictions[0]
-            Xs = tokens_representations[:, 1: -1, :].mean(1)
+    # This way to run inference and get sequence embeddings isn't intuitive, but I saw this somewhere as a fast way to get embeddings.
+    elif esm_embeddings_calculation_mode == 'trainer_api':
+        tokenized_sequences = tokenizer(sequences)
+        dataset = Dataset.from_dict(tokenized_sequences)
+        training_args = TrainingArguments(
+            embeddings_dir,  # In this context this argument doesn't have any meaning, but it's a required argument
+            per_device_eval_batch_size=BATCH_SIZE)
+        trainer = Trainer(model=model, args=training_args)
+        outputs = trainer.predict(dataset)
+        tokens_representations = outputs.predictions[0]
+        Xs = tokens_representations[:, 1: -1, :].mean(1)
 
-        else:
-            raise ValueError(f"esm_embeddings_calculation_mode must be one of ['huggingface_model', 'trainer_api'], "
-                             f"got {esm_embeddings_calculation_mode}")
+    else:
+        raise ValueError(f"esm_embeddings_calculation_mode must be one of ['huggingface_model', 'trainer_api'], "
+                         f"got {esm_embeddings_calculation_mode}")
 
-        np.save(embeddings_file_path, Xs)
-
-    Xs = np.load(embeddings_file_path)
+    np.save(embeddings_file_path, Xs)
     return Xs
 
 
-def calc_embeddings(model_id, split, esm_embeddings_calculation_mode, always_calc_embeddings):
+def calc_embeddings(model_id, split, esm_embeddings_calculation_mode='huggingface_model', always_calc_embeddings=False):
     if split == 'train':
         positive_fasta_file = FIXED_POSITIVE_TRAIN_FILE
         negative_fasta_file = FIXED_NEGATIVE_TRAIN_FILE
@@ -126,15 +125,23 @@ def calc_embeddings(model_id, split, esm_embeddings_calculation_mode, always_cal
             always_calc_embeddings)
 
     else:
-        tokenizer = AutoTokenizer.from_pretrained(mode_path)
-        model = AutoModel.from_pretrained(mode_path)
+        if not os.path.exists(positive_embeddings_output_file_path) or always_calc_embeddings:
+            print(f"Calculating embeddings of {positive_fasta_file} into {positive_embeddings_output_file_path}")
+            positive_embeddings = calc_embeddings_of_fasta_file_with_huggingface_model(
+                mode_path, positive_fasta_file, positive_embeddings_tmp_dir, positive_embeddings_output_file_path,
+                esm_embeddings_calculation_mode)
+        else:
+            print(f"Found embeddings of {positive_fasta_file} in {positive_embeddings_output_file_path}")
+            positive_embeddings = np.load(positive_embeddings_output_file_path)
 
-        positive_embeddings = calc_embeddings_of_fasta_file_with_huggingface_model(
-            model, tokenizer, positive_fasta_file, positive_embeddings_tmp_dir, positive_embeddings_output_file_path,
-            esm_embeddings_calculation_mode, always_calc_embeddings)
-        negative_embeddings = calc_embeddings_of_fasta_file_with_huggingface_model(
-            model, tokenizer, negative_fasta_file, negative_embeddings_tmp_dir, negative_embeddings_output_file_path,
-            esm_embeddings_calculation_mode,  always_calc_embeddings)
+        if not os.path.exists(negative_embeddings_output_file_path) or always_calc_embeddings:
+            print(f"Calculating embeddings of {negative_fasta_file} into {negative_embeddings_output_file_path}")
+            negative_embeddings = calc_embeddings_of_fasta_file_with_huggingface_model(
+                mode_path, negative_fasta_file, negative_embeddings_tmp_dir, negative_embeddings_output_file_path,
+                esm_embeddings_calculation_mode)
+        else:
+            print(f"Found embeddings of {negative_fasta_file} in {negative_embeddings_output_file_path}")
+            negative_embeddings = np.load(negative_embeddings_output_file_path)
 
     return positive_embeddings, negative_embeddings
 
