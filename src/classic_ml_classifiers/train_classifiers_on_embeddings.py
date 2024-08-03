@@ -114,9 +114,9 @@ def main(model_id, n_jobs):
 
     best_classifier_metrics['model_id'] = [model_id]
     best_classifier_metrics['training_mode'] = ['only_head']
-    best_classifier_metrics['number_of_parameters (millions)']: MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION[model_id]
+    best_classifier_metrics['number_of_parameters (millions)'] = [MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION[model_id]]
 
-    best_classifier_metrics.to_csv(os.path.join(classifiers_output_dir, 'best_classifier_results.csv'), index=False)
+    best_classifier_metrics.to_csv(os.path.join(classifiers_output_dir, 'best_classifier_train_results.csv'), index=False)
 
     logging.info(f"Finished training classifiers on embeddings for model {model_id}")
 

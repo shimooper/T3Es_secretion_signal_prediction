@@ -46,7 +46,7 @@ def calc_embeddings_of_fasta_file_with_huggingface_model(model, tokenizer, devic
             sequences_representation = outputs.last_hidden_state[:, :-1, :].mean(1)
             embeddings.extend(sequences_representation)
 
-    Xs = torch.stack(embeddings).numpy()
+    Xs = torch.stack(embeddings).cpu().numpy()
     np.save(embeddings_file_path, Xs)
     return Xs
 
@@ -81,7 +81,7 @@ def calc_embeddings(model_id, split, always_calc_embeddings=False):
     if not os.path.exists(positive_embeddings_output_file_path) or always_calc_embeddings:
         print(f"Calculating embeddings of {positive_fasta_file} into {positive_embeddings_output_file_path}")
         positive_embeddings = calc_embeddings_of_fasta_file_with_huggingface_model(
-            model, tokenizer, device, positive_fasta_file, positive_embeddings_output_file_path, always_calc_embeddings)
+            model, tokenizer, device, positive_fasta_file, positive_embeddings_output_file_path)
     else:
         print(f"Found embeddings of {positive_fasta_file} in {positive_embeddings_output_file_path}")
         positive_embeddings = np.load(positive_embeddings_output_file_path)
@@ -89,7 +89,7 @@ def calc_embeddings(model_id, split, always_calc_embeddings=False):
     if not os.path.exists(negative_embeddings_output_file_path) or always_calc_embeddings:
         print(f"Calculating embeddings of {negative_fasta_file} into {negative_embeddings_output_file_path}")
         negative_embeddings = calc_embeddings_of_fasta_file_with_huggingface_model(
-            model, tokenizer, device, negative_fasta_file, negative_embeddings_output_file_path, always_calc_embeddings)
+            model, tokenizer, device, negative_fasta_file, negative_embeddings_output_file_path)
     else:
         print(f"Found embeddings of {negative_fasta_file} in {negative_embeddings_output_file_path}")
         negative_embeddings = np.load(negative_embeddings_output_file_path)

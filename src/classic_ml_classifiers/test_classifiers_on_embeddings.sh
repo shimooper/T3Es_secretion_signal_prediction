@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=test_classifiers             # Job name
 #SBATCH --account=gpu-research          # Account name for billing
-#SBATCH --partition=gpu-a100-killable              # Partition name
+#SBATCH --partition=killable              # Partition name
 #SBATCH --time=10:00:00               # Time allotted for the job (hh:mm:ss)
 #SBATCH --ntasks=1                    # Number of tasks (processes)
 #SBATCH --cpus-per-task=1             # Number of CPU cores per task

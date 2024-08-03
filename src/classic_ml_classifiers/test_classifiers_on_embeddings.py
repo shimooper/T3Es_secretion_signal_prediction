@@ -11,7 +11,7 @@ from sklearn.metrics import matthews_corrcoef, average_precision_score
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from src.utils.consts import CLASSIFIERS_OUTPUT_DIR, CLASSIFIERS_TEST_OUTPUT_DIR, MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION
+from src.utils.consts import CLASSIFIERS_OUTPUT_DIR
 from utils import prepare_Xs_and_Ys
 
 
@@ -45,24 +45,21 @@ def test_on_test_data(logger, model_id, model, split):
 
 def main(model_id):
     classifiers_dir = os.path.join(CLASSIFIERS_OUTPUT_DIR, model_id)
-    classifiers_test_dir = os.path.join(CLASSIFIERS_TEST_OUTPUT_DIR, model_id)
 
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         handlers=[logging.FileHandler(
-                            os.path.join(classifiers_test_dir, 'classification_with_classic_ML_test.log'), mode='w')])
+                            os.path.join(classifiers_dir, 'classification_with_classic_ML_test.log'), mode='w')])
     logger = logging.getLogger(__name__)
 
     model = joblib.load(os.path.join(classifiers_dir, f'model.pkl'))
     test_results = test_on_test_data(logger, model_id, model, 'test')
     xantomonas_results = test_on_test_data(logger, model_id, model,  'xantomonas')
 
-    all_test_results = pd.concat([test_results, xantomonas_results], axis=1)
-    all_test_results['model_id'] = [model_id]
-    all_test_results['training_mode'] = ['only_head']
-    all_test_results['number_of_parameters (millions)']: MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION[model_id]
+    train_results = pd.read_csv(os.path.join(classifiers_dir, 'best_classifier_train_results.csv'))
+    all_results = pd.concat([train_results, test_results, xantomonas_results], axis=1)
 
-    all_test_results.to_csv(os.path.join(classifiers_test_dir, 'best_classifier_test_results.csv'), index=False)
+    all_results.to_csv(os.path.join(classifiers_dir, 'best_classifier_all_results.csv'), index=False)
 
 
 if __name__ == "__main__":

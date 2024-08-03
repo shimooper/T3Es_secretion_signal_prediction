@@ -28,4 +28,9 @@ export PATH=$CONDA_PREFIX/bin:$PATH
 python ~/python_test/check_cuda_available.py
 
 cd ~/secretion_signal_prediction/src/finetune_pretrained_models/esm
-python main_train.py --model_id esm_6
+python ~/secretion_signal_prediction/src/finetune_pretrained_models/esm/main_train.py --model_id esm_6
+python ~/secretion_signal_prediction/src/finetune_pretrained_models/esm/main_train.py --model_id esm_12
+python ~/secretion_signal_prediction/src/finetune_pretrained_models/esm/main_train.py --model_id esm_30
+python ~/secretion_signal_prediction/src/finetune_pretrained_models/esm/main_train.py --model_id esm_33
+python ~/secretion_signal_prediction/src/finetune_pretrained_models/esm/main_train.py --model_id esm_36
+python ~/secretion_signal_prediction/src/finetune_pretrained_models/pt5/main_train.py --model_id pt5
