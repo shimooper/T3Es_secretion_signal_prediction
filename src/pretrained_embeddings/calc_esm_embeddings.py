@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 from src.utils.consts import (FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN_FILE,
                               FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE,
                               FIXED_POSITIVE_XANTOMONAS_FILE, FIXED_NEGATIVE_XANTOMONAS_FILE,
-                              BATCH_SIZE, EMBEDDINGS_BASE_DIR, MODEL_ID_TO_MODEL_NAME)
+                              BATCH_SIZE, EMBEDDINGS_DIR, MODEL_ID_TO_MODEL_NAME)
 from src.utils.read_fasta_utils import read_fasta_file, read_sequences_from_fasta_file
 
 ESM_SCRIPT_PATH = "/groups/pupko/yairshimony/esm/scripts/extract.py"
@@ -107,7 +107,7 @@ def calc_embeddings(model_id, split, esm_embeddings_calculation_mode='huggingfac
     else:
         raise ValueError(f"split must be one of ['train', 'test', 'xantomonas'], got {split}")
 
-    output_dir = Path(EMBEDDINGS_BASE_DIR) / model_id
+    output_dir = Path(EMBEDDINGS_DIR) / model_id
     os.makedirs(output_dir, exist_ok=True)
     positive_embeddings_tmp_dir = os.path.join(output_dir, f'{split}_positive_embeddings')
     negative_embeddings_tmp_dir = os.path.join(output_dir, f'{split}_negative_embeddings')

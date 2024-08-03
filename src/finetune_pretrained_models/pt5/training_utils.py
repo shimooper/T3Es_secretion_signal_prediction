@@ -7,16 +7,17 @@ import numpy as np
 from transformers import TrainingArguments, Trainer, set_seed
 import wandb
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 
 from .classifier import PT5_classification_model
 from .data_utils import prepare_dataset
-from src.utils.consts import OUTPUTS_DIR
+from src.utils.consts import RANDOM_STATE, FINETUNED_MODELS_OUTPUT_DIR
 from src.finetune_pretrained_models.huggingface_utils import CalcMetricsOnTrainSetCallback, compute_metrics
 
 
 WANDB_KEY = "64c3807b305e96e26550193f5860452b88d85999"
 WANDB_PROJECT = "type3_secretion_signal_pt5"
+FINETUNED_WEIGHTS_FILE = "PT5_GB1_finetuned.pth"
 
 # Deepspeed config for optimizer CPU offload
 ds_config = {
@@ -81,41 +82,39 @@ def set_seeds(s):
 
 # Main training function
 def train_per_protein(
-        train_df,  # training data
-        valid_df,  # validation data
-        num_labels=1,  # 1 for regression, >1 for classification
+    model_id,
+    train_df,  # training data
+    valid_df,  # validation data
+    num_labels=1,  # 1 for regression, >1 for classification
 
-        # effective training batch size is batch * accum
-        # we recommend an effective batch size of 8
-        batch=4,  # for training
-        accum=2,  # gradient accumulation
+    # effective training batch size is batch * accum
+    # we recommend an effective batch size of 8
+    batch=4,  # for training
+    accum=2,  # gradient accumulation
 
-        val_batch=16,  # batch size for evaluation
-        epochs=10,  # training epochs
-        lr=3e-4,  # recommended learning rate
-        seed=42,  # random seed
-        deepspeed=True,  # if gpu is large enough disable deepspeed for training speedup
-        half_precision=False,  # enable mixed precision training
+    val_batch=16,  # batch size for evaluation
+    epochs=10,  # training epochs
+    lr=3e-4,  # recommended learning rate
+    seed=RANDOM_STATE,  # random seed
+    deepspeed=True,  # if gpu is large enough disable deepspeed for training speedup
+    half_precision=False,  # enable mixed precision training
 ):
     # Disable deepspeed if we run on windows
     deepspeed = deepspeed and os.name != 'nt'
-
-    # Set gpu device
-    print(f"$CUDA_VISIBLE_DEVICES: {os.environ.get('CUDA_VISIBLE_DEVICES')}")
 
     # Set all random seeds
     set_seeds(seed)
 
     # load model
-    checkpoint, model, tokenizer = PT5_classification_model(num_labels=num_labels, half_precision=half_precision)
+    model, tokenizer = PT5_classification_model(model_id, num_labels=num_labels, half_precision=half_precision)
 
     # Set up Weights & Biases
     wandb.login(key=WANDB_KEY)
     os.environ["WANDB_PROJECT"] = WANDB_PROJECT
     os.environ["WANDB_LOG_MODEL"] = "end"  # Upload the final model to W&B at the end of training (after loading the best model)
-    os.environ['WANDB_LOG_DIR'] = os.path.join(OUTPUTS_DIR, 'pt5_finetune')
-    run_name = f"{checkpoint}_train_batch{batch * accum}_lr{lr}"
-    run_output_dir = os.path.join(OUTPUTS_DIR, 'pt5_finetune', run_name)
+    os.environ['WANDB_LOG_DIR'] = os.path.join(FINETUNED_MODELS_OUTPUT_DIR, model_id)
+    run_name = f"{model_id}_train_batch{batch * accum}_lr{lr}"
+    run_output_dir = os.path.join(FINETUNED_MODELS_OUTPUT_DIR, model_id)
 
     # Create Datasets
     train_set = prepare_dataset(train_df, tokenizer)
@@ -156,10 +155,7 @@ def train_per_protein(
     # Train model
     trainer.train()
 
-    # Save model (only the finetuned parameters)
-    save_model(model, os.path.join(run_output_dir, "PT5_GB1_finetuned.pth"))
-
-    return tokenizer, model
+    return model
 
 
 def save_model(model, filepath):

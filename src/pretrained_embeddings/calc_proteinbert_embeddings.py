@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 from src.utils.consts import (FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN_FILE,
                               FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE,
                               FIXED_POSITIVE_XANTOMONAS_FILE, FIXED_NEGATIVE_XANTOMONAS_FILE,
-                              PROJECT_BASE_DIR, EMBEDDINGS_BASE_DIR, BATCH_SIZE, MODEL_ID_TO_MODEL_NAME)
+                              PROJECT_BASE_DIR, EMBEDDINGS_DIR, BATCH_SIZE, MODEL_ID_TO_MODEL_NAME)
 from src.utils.read_fasta_utils import read_sequences_from_fasta_file
 
 sys.path.append(os.path.join(PROJECT_BASE_DIR, 'protein_bert'))
@@ -57,7 +57,7 @@ def calc_embeddings(split, always_calc_embeddings):
     else:
         raise ValueError(f"split must be one of ['train', 'test', 'xantomonas'], got {split}")
 
-    output_dir = Path(EMBEDDINGS_BASE_DIR) / 'protein_bert'
+    output_dir = Path(EMBEDDINGS_DIR) / 'protein_bert'
     os.makedirs(output_dir, exist_ok=True)
     positive_embeddings_output_file_path = os.path.join(output_dir, f'{split}_positive_embeddings.npy')
     negative_embeddings_output_file_path = os.path.join(output_dir, f'{split}_negative_embeddings.npy')

@@ -11,7 +11,7 @@ from sklearn.metrics import matthews_corrcoef, average_precision_score
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from src.utils.consts import CLASSIFIERS_OUTPUT_BASE_DIR, CLASSIFIERS_TEST_OUTPUT_BASE_DIR
+from src.utils.consts import CLASSIFIERS_OUTPUT_DIR, CLASSIFIERS_TEST_OUTPUT_DIR
 from utils import prepare_Xs_and_Ys
 
 
@@ -44,8 +44,8 @@ def test_on_test_data(logger, model_id, model, split):
 
 
 def main(model_id):
-    classifiers_dir = os.path.join(CLASSIFIERS_OUTPUT_BASE_DIR, model_id)
-    classifiers_test_dir = os.path.join(CLASSIFIERS_TEST_OUTPUT_BASE_DIR, model_id)
+    classifiers_dir = os.path.join(CLASSIFIERS_OUTPUT_DIR, model_id)
+    classifiers_test_dir = os.path.join(CLASSIFIERS_TEST_OUTPUT_DIR, model_id)
 
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',

@@ -15,10 +15,10 @@ from transformers.models.t5.modeling_t5 import T5Config, T5PreTrainedModel, T5St
 from transformers.utils.model_parallel_utils import assert_device_map, get_device_map
 from transformers import T5EncoderModel, T5Tokenizer
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 
 from .lora import modify_with_lora, LoRAConfig
-from src.finetune_pretrained_models.huggingface_utils import HF_MODELS_CACHE_DIR
+from src.utils.consts import MODEL_ID_TO_MODEL_NAME
 
 
 class ClassConfig:
@@ -168,17 +168,16 @@ class T5EncoderForSimpleSequenceClassification(T5PreTrainedModel):
         )
 
 
-def PT5_classification_model(num_labels, half_precision):
+def PT5_classification_model(model_id, num_labels, half_precision):
     # Load PT5 and tokenizer
     # possible to load the half preciion model (thanks to @pawel-rezo for pointing that out)
+    model_name = MODEL_ID_TO_MODEL_NAME[model_id]
     if not half_precision:
-        checkpoint = "prot_t5_xl_uniref50"
-        model = T5EncoderModel.from_pretrained(f"Rostlab/{checkpoint}", cache_dir=HF_MODELS_CACHE_DIR)
-        tokenizer = T5Tokenizer.from_pretrained(f"Rostlab/{checkpoint}", cache_dir=HF_MODELS_CACHE_DIR)
+        model = T5EncoderModel.from_pretrained(model_name)
+        tokenizer = T5Tokenizer.from_pretrained(model_name)
     elif half_precision and torch.cuda.is_available():
-        checkpoint = "prot_t5_xl_half_uniref50-enc"
-        tokenizer = T5Tokenizer.from_pretrained(f"Rostlab/{checkpoint}", do_lower_case=False, cache_dir=HF_MODELS_CACHE_DIR)
-        model = T5EncoderModel.from_pretrained(f"Rostlab/{checkpoint}", torch_dtype=torch.float16, cache_dir=HF_MODELS_CACHE_DIR).to(
+        tokenizer = T5Tokenizer.from_pretrained(model_name, do_lower_case=False)
+        model = T5EncoderModel.from_pretrained(model_name, torch_dtype=torch.float16).to(
             torch.device('cuda'))
     else:
         raise ValueError('Half precision can be run on GPU only.')
@@ -221,4 +220,4 @@ def PT5_classification_model(num_labels, half_precision):
     params = sum([np.prod(p.size()) for p in model_parameters])
     print("ProtT5_LoRA_Classfier\nTrainable Parameter: " + str(params) + "\n")
 
-    return checkpoint, model, tokenizer
+    return model, tokenizer

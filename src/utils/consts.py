@@ -8,9 +8,11 @@ DATASETS_FIXED_DIR = os.path.join(PROJECT_BASE_DIR, 'data', 'datasets_fixed')
 PRETRAINED_MODELS_DIR = os.path.join(PROJECT_BASE_DIR, 'models')
 
 OUTPUTS_DIR = os.path.join(PROJECT_BASE_DIR, 'outputs_new')
-EMBEDDINGS_BASE_DIR = os.path.join(OUTPUTS_DIR, 'pretrained_embeddings')
-CLASSIFIERS_OUTPUT_BASE_DIR = os.path.join(OUTPUTS_DIR, 'embeddings_classifiers')
-CLASSIFIERS_TEST_OUTPUT_BASE_DIR = os.path.join(OUTPUTS_DIR, 'embeddings_classifiers_test')
+EMBEDDINGS_DIR = os.path.join(OUTPUTS_DIR, 'pretrained_embeddings')
+CLASSIFIERS_OUTPUT_DIR = os.path.join(OUTPUTS_DIR, 'embeddings_classifiers')
+CLASSIFIERS_TEST_OUTPUT_DIR = os.path.join(OUTPUTS_DIR, 'embeddings_classifiers_test')
+FINETUNED_MODELS_OUTPUT_DIR = os.path.join(OUTPUTS_DIR, 'finetuned_models')
+FINETUNED_MODELS_TEST_OUTPUT_DIR = os.path.join(OUTPUTS_DIR, 'finetuned_models_test')
 USE_LOCAL_MODELS = True
 
 MODEL_ID_TO_MODEL_NAME = {
@@ -20,13 +22,12 @@ MODEL_ID_TO_MODEL_NAME = {
     'esm_33': Path(PRETRAINED_MODELS_DIR) / 'esm2_t33_650M_UR50D_01_08_2024' if USE_LOCAL_MODELS else 'facebook/esm2_t33_650M_UR50D',
     'esm_36': Path(PRETRAINED_MODELS_DIR) / 'esm2_t36_3B_UR50D_01_08_2024' if USE_LOCAL_MODELS else 'facebook/esm2_t36_3B_UR50D',
     'protein_bert': Path(PRETRAINED_MODELS_DIR) / 'protein_bert',
-    'pt5': Path(PRETRAINED_MODELS_DIR) / 'prot_t5_xl_uniref50_01_08_2024' if USE_LOCAL_MODELS else 'facebook/prot_t5_xl_uniref50',
+    'pt5': Path(PRETRAINED_MODELS_DIR) / 'prot_t5_xl_uniref50_01_08_2024' if USE_LOCAL_MODELS else 'Rostlab/prot_t5_xl_uniref50',
+    'pt5_half_precision': Path(PRETRAINED_MODELS_DIR) / 'prot_t5_xl_half_uniref50_01_08_2024' if USE_LOCAL_MODELS else 'Rostlab/prot_t5_xl_half_uniref50-enc',
 }
 
 BATCH_SIZE = 8
 RANDOM_STATE = 42
-
-
 
 ORIGINAL_POSITIVE_TRAIN_FILE = os.path.join(DATASETS_ORIGINAL_DIR, "positive_train_data.fasta")
 ORIGINAL_NEGATIVE_TRAIN_FILE = os.path.join(DATASETS_ORIGINAL_DIR, "negative_train_data.fasta")

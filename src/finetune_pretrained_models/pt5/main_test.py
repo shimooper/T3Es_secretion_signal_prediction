@@ -7,20 +7,21 @@ import sys
 import os
 import torch.nn.functional as F
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 
 from src.finetune_pretrained_models.pt5.classifier import PT5_classification_model
 from src.finetune_pretrained_models.pt5.data_utils import prepare_dataset
 from src.finetune_pretrained_models.huggingface_utils import compute_metrics
+from src.finetune_pretrained_models.pt5.training_utils import FINETUNED_WEIGHTS_FILE
 from src.utils.read_fasta_utils import read_test_data, read_train_data
 from src.utils.consts import OUTPUTS_DIR
 
 
-def load_model(filepath, num_labels=1, half_precision=False):
+def load_model(model_id, filepath, num_labels, half_precision=False):
     # Creates a new PT5 model and loads the finetuned weights from a file
 
     # load a new model
-    checkpoint, model, tokenizer = PT5_classification_model(num_labels=num_labels, half_precision=half_precision)
+    model, tokenizer = PT5_classification_model(model_id, num_labels=num_labels, half_precision=half_precision)
 
     # Load the non-frozen parameters from the saved file
     non_frozen_params = torch.load(filepath, map_location=torch.device('cpu'))

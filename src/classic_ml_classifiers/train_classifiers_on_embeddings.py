@@ -13,7 +13,7 @@ from sklearn.metrics import make_scorer, matthews_corrcoef
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from src.utils.consts import EMBEDDINGS_BASE_DIR, CLASSIFIERS_OUTPUT_BASE_DIR
+from src.utils.consts import EMBEDDINGS_DIR, CLASSIFIERS_OUTPUT_DIR
 from classifiers_params_grids import classifiers, update_grid_params
 from utils import prepare_Xs_and_Ys
 
@@ -94,8 +94,8 @@ def fit_on_train_data(Xs_train, Ys_train, output_dir, n_jobs):
 
 
 def main(model_id, n_jobs):
-    embeddings_dir = os.path.join(EMBEDDINGS_BASE_DIR, model_id)
-    classifiers_output_dir = os.path.join(CLASSIFIERS_OUTPUT_BASE_DIR, model_id)
+    embeddings_dir = os.path.join(EMBEDDINGS_DIR, model_id)
+    classifiers_output_dir = os.path.join(CLASSIFIERS_OUTPUT_DIR, model_id)
     os.makedirs(embeddings_dir, exist_ok=True)
     os.makedirs(classifiers_output_dir, exist_ok=True)
 
