@@ -11,7 +11,7 @@ from sklearn.metrics import matthews_corrcoef, average_precision_score
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from src.utils.consts import CLASSIFIERS_OUTPUT_DIR, CLASSIFIERS_TEST_OUTPUT_DIR
+from src.utils.consts import CLASSIFIERS_OUTPUT_DIR, CLASSIFIERS_TEST_OUTPUT_DIR, MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION
 from utils import prepare_Xs_and_Ys
 
 
@@ -56,8 +56,13 @@ def main(model_id):
     model = joblib.load(os.path.join(classifiers_dir, f'model.pkl'))
     test_results = test_on_test_data(logger, model_id, model, 'test')
     xantomonas_results = test_on_test_data(logger, model_id, model,  'xantomonas')
-    pd.concat([test_results, xantomonas_results], axis=1).to_csv(
-        os.path.join(classifiers_test_dir, 'best_classifier_test_results.csv'), index=False)
+
+    all_test_results = pd.concat([test_results, xantomonas_results], axis=1)
+    all_test_results['model_id'] = [model_id]
+    all_test_results['training_mode'] = ['only_head']
+    all_test_results['number_of_parameters (millions)']: MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION[model_id]
+
+    all_test_results.to_csv(os.path.join(classifiers_test_dir, 'best_classifier_test_results.csv'), index=False)
 
 
 if __name__ == "__main__":

@@ -27,6 +27,6 @@ def compute_metrics(eval_pred):
     predictions_labels = np.argmax(predictions, axis=1)
     predictions_scores = predictions[:, 1]  # probability estimates of the positive class
 
-    scores = mcc_metric.compute(predictions=predictions_labels, references=true_labels)
+    scores = mcc_metric.compute(references=true_labels, predictions=predictions_labels)
     scores['auprc'] = average_precision_score(y_true=true_labels, y_score=predictions_scores)
     return scores

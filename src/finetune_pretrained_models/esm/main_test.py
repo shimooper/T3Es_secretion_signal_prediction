@@ -1,55 +1,54 @@
-import time
-from tqdm import tqdm
-import torch
-import pandas as pd
-from torch.utils.data import DataLoader
-import sys
 import os
-import torch.nn.functional as F
+import argparse
+import time
+
+import pandas as pd
 from pathlib import Path
+import torch
+from torch.utils.data import DataLoader
+from tqdm import tqdm
+import torch.nn.functional as F
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from datasets import Dataset
 
-from src.finetune_pretrained_models.pt5.classifier import PT5_classification_model
-from src.finetune_pretrained_models.pt5.data_utils import prepare_dataset
+from src.utils.consts import MODEL_ID_TO_MODEL_NAME, BATCH_SIZE, FINETUNED_MODELS_OUTPUT_DIR, \
+    FINETUNED_MODELS_TEST_OUTPUT_DIR, MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION
+from src.utils.read_fasta_utils import read_train_data, read_test_data
 from src.finetune_pretrained_models.huggingface_utils import compute_metrics
-from src.finetune_pretrained_models.pt5.training_utils import FINETUNED_WEIGHTS_FILE
-from src.utils.read_fasta_utils import read_test_data, read_train_data
-from src.utils.consts import FINETUNED_MODELS_TEST_OUTPUT_DIR, FINETUNED_MODELS_OUTPUT_DIR, MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION
 
 
-def load_model(model_id, filepath, half_precision=False):
-    # Creates a new PT5 model and loads the finetuned weights from a file
+def get_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--model_id', help='The pretrained model id (number of layers)', type=str, required=True)
+    return parser.parse_args()
 
-    # load a new model
-    model, tokenizer = PT5_classification_model(model_id, num_labels=2, half_precision=half_precision)
 
-    # Load the non-frozen parameters from the saved file
-    non_frozen_params = torch.load(filepath, map_location=torch.device('cpu'))
+def create_dataset(tokenizer, sequences, labels=None):
+    tokenized = tokenizer(sequences)
+    dataset = Dataset.from_dict(tokenized)
 
-    # Assign the non-frozen parameters to the corresponding parameters of the model
-    for param_name, param in model.named_parameters():
-        if param_name in non_frozen_params:
-            param.data = non_frozen_params[param_name].data
+    if labels:
+        dataset = dataset.add_column("labels", labels)
 
-    return tokenizer, model
+    return dataset
 
 
 def evaluate_model_on_dataset(model, tokenizer, sequences, labels, device):
-    dataset = prepare_dataset(pd.DataFrame({'sequence': sequences, 'label': labels}), tokenizer)
+    dataset = create_dataset(tokenizer, sequences, labels)
     # make compatible with torch DataLoader
     dataset = dataset.with_format("torch", device=device)
 
     # Create a dataloader for the test dataset
-    dataloader = DataLoader(dataset, batch_size=16, shuffle=False)
+    dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=False)
 
     # Make predictions on the test dataset
     model.eval()
     probabilities = []
     with torch.no_grad():
         for batch in tqdm(dataloader):
-            input_ids = batch['input_ids'].to(device)
-            attention_mask = batch['attention_mask'].to(device)
+            input_ids = batch['input_ids']
+            attention_mask = batch['attention_mask']
             # add batch results (logits) to predictions
             outputs = model(input_ids, attention_mask=attention_mask)
             probabilities += F.softmax(outputs.logits, dim=-1)
@@ -58,9 +57,10 @@ def evaluate_model_on_dataset(model, tokenizer, sequences, labels, device):
     return scores
 
 
-def main():
-    model_id = 'pt5'
-    tokenizer, model = load_model(model_id, os.path.join(FINETUNED_MODELS_OUTPUT_DIR, model_id, FINETUNED_WEIGHTS_FILE), half_precision=False)
+def main(model_id):
+    model_name = MODEL_ID_TO_MODEL_NAME[model_id]
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForSequenceClassification.from_pretrained(Path(FINETUNED_MODELS_OUTPUT_DIR) / model_id / "best_model", num_labels=2)
 
     # Set the device to use
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -84,6 +84,7 @@ def main():
     xantomonas_scores = evaluate_model_on_dataset(model, tokenizer, xantomonas_sequences, xantomonas_labels, device)
     xantomonas_elapsed_time = time.time() - start_xantomonas_time
 
+    # Save the results
     all_scores = {
         'train_mcc': [train_scores['matthews_correlation']],
         'train_auprc': [train_scores['auprc']],
@@ -101,10 +102,11 @@ def main():
     }
 
     results_df = pd.DataFrame(all_scores)
-    output_path = Path(FINETUNED_MODELS_TEST_OUTPUT_DIR) / model_id / 'pt5_test_results.csv'
+    output_path = Path(FINETUNED_MODELS_TEST_OUTPUT_DIR) / model_id / 'esm_test_results.csv'
     print(f"Writing scores to {output_path}")
     results_df.to_csv(output_path, index=False)
 
 
 if __name__ == "__main__":
-    main()
+    args = get_arguments()
+    main(args.model_id)

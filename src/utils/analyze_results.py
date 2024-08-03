@@ -4,17 +4,7 @@ import seaborn as sns
 from pathlib import Path
 from consts import OUTPUTS_DIR
 
-MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION = {
-    '6': 8,
-    'protein_bert': 16,
-    '12': 35,
-    '30': 150,
-    '33': 650,
-    '36': 3000,
-    'prot_t5': 3000,
-    'prot_t5_half': 3000,
-    '48': 15000,
-}
+
 
 MODEL_ID_TO_MODEL_NAME = {
     '6': 'esm_8M',

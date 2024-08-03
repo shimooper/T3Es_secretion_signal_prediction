@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=train_classifiers             # Job name
-#SBATCH --account=power=general-users          # Account name for billing
-#SBATCH --partition=power-general              # Partition name
+#SBATCH --account=gpu-research          # Account name for billing
+#SBATCH --partition=gpu-a100-killable              # Partition name
 #SBATCH --time=10:00:00               # Time allotted for the job (hh:mm:ss)
 #SBATCH --ntasks=1                    # Number of tasks (processes)
 #SBATCH --cpus-per-task=60             # Number of CPU cores per task
@@ -18,7 +18,7 @@ echo "Running on nodes: $SLURM_JOB_NODELIST"
 echo "Allocated CPUs: $SLURM_JOB_CPUS_PER_NODE"
 echo "Cuda visible devices: $CUDA_VISIBLE_DEVICES"
 
-source ~/miniconda3/etc/profile.d/conda.sh
+source ~/miniconda/etc/profile.d/conda.sh
 conda activate secretion_signal
 export PATH=$CONDA_PREFIX/bin:$PATH
 

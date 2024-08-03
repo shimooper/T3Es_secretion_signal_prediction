@@ -26,8 +26,20 @@ MODEL_ID_TO_MODEL_NAME = {
     'pt5_half_precision': Path(PRETRAINED_MODELS_DIR) / 'prot_t5_xl_half_uniref50_01_08_2024' if USE_LOCAL_MODELS else 'Rostlab/prot_t5_xl_half_uniref50-enc',
 }
 
+MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION = {
+    'esm_6': 8,
+    'esm_12': 35,
+    'esm_30': 150,
+    'esm_33': 650,
+    'esm_36': 3000,
+    'protein_bert': 16,
+    'pt5': 3000,
+    'pt5_half_precision': 3000,
+}
+
 BATCH_SIZE = 8
 RANDOM_STATE = 42
+FINETUNE_NUMBER_OF_EPOCHS = 10
 
 ORIGINAL_POSITIVE_TRAIN_FILE = os.path.join(DATASETS_ORIGINAL_DIR, "positive_train_data.fasta")
 ORIGINAL_NEGATIVE_TRAIN_FILE = os.path.join(DATASETS_ORIGINAL_DIR, "negative_train_data.fasta")

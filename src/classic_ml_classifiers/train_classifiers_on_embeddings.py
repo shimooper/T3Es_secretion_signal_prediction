@@ -13,7 +13,7 @@ from sklearn.metrics import make_scorer, matthews_corrcoef
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from src.utils.consts import EMBEDDINGS_DIR, CLASSIFIERS_OUTPUT_DIR
+from src.utils.consts import EMBEDDINGS_DIR, CLASSIFIERS_OUTPUT_DIR, MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION
 from classifiers_params_grids import classifiers, update_grid_params
 from utils import prepare_Xs_and_Ys
 
@@ -87,10 +87,10 @@ def fit_on_train_data(Xs_train, Ys_train, output_dir, n_jobs):
 
     # Save the best classifier to disk
     joblib.dump(best_classifiers[best_classifier_class], os.path.join(output_dir, "model.pkl"))
-
-    # Save the best classifier metrics to disk
     best_classifier_metrics = best_classifiers_df.loc[[best_classifier_class]].reset_index()
-    best_classifier_metrics.to_csv(os.path.join(output_dir, 'best_classifier_results.csv'), index=False)
+
+    return best_classifier_metrics
+
 
 
 def main(model_id, n_jobs):
@@ -110,7 +110,13 @@ def main(model_id, n_jobs):
 
     pca(Xs_train, Ys_train, embeddings_dir)
 
-    fit_on_train_data(Xs_train, Ys_train, classifiers_output_dir, n_jobs)
+    best_classifier_metrics = fit_on_train_data(Xs_train, Ys_train, classifiers_output_dir, n_jobs)
+
+    best_classifier_metrics['model_id'] = [model_id]
+    best_classifier_metrics['training_mode'] = ['only_head']
+    best_classifier_metrics['number_of_parameters (millions)']: MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION[model_id]
+
+    best_classifier_metrics.to_csv(os.path.join(classifiers_output_dir, 'best_classifier_results.csv'), index=False)
 
     logging.info(f"Finished training classifiers on embeddings for model {model_id}")
 
