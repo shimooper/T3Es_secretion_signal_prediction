@@ -105,7 +105,7 @@ def main(model_id, n_jobs):
                             os.path.join(classifiers_output_dir, 'classification_with_classic_ML.log'), mode='w')])
     logger = logging.getLogger(__name__)
 
-    Xs_train, Ys_train = prepare_Xs_and_Ys(logger, model_id, embeddings_dir, 'train', always_calc_embeddings=False)
+    Xs_train, Ys_train = prepare_Xs_and_Ys(logger, model_id, 'train', always_calc_embeddings=False)
     update_grid_params(Ys_train)
 
     pca(Xs_train, Ys_train, embeddings_dir)

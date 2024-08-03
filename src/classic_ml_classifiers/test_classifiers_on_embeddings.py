@@ -11,8 +11,7 @@ from sklearn.metrics import matthews_corrcoef, average_precision_score
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from src.utils.consts import EMBEDDINGS_BASE_DIR, CLASSIFIERS_OUTPUT_BASE_DIR, CLASSIFIERS_TEST_OUTPUT_BASE_DIR
-from classifiers_params_grids import classifiers, update_grid_params
+from src.utils.consts import CLASSIFIERS_OUTPUT_BASE_DIR, CLASSIFIERS_TEST_OUTPUT_BASE_DIR
 from utils import prepare_Xs_and_Ys
 
 
@@ -22,12 +21,11 @@ def get_arguments():
     return parser.parse_args()
 
 
-def test_on_test_data(logger, model_id, embeddings_dir, classifiers_dir, split):
+def test_on_test_data(logger, model_id, model, split):
     # First, estimate time of embedding and prediction
     start_test_time = timer()
 
-    Xs_test, Ys_test = prepare_Xs_and_Ys(logger, model_id, embeddings_dir, split, always_calc_embeddings=True)
-    model = joblib.load(os.path.join(classifiers_dir, f'model.pkl'))
+    Xs_test, Ys_test = prepare_Xs_and_Ys(logger, model_id, split, always_calc_embeddings=True)
     Ys_test_predictions = model.predict_proba(Xs_test)
 
     end_test_time = timer()
@@ -46,7 +44,6 @@ def test_on_test_data(logger, model_id, embeddings_dir, classifiers_dir, split):
 
 
 def main(model_id):
-    embeddings_dir = os.path.join(EMBEDDINGS_BASE_DIR, model_id)
     classifiers_dir = os.path.join(CLASSIFIERS_OUTPUT_BASE_DIR, model_id)
     classifiers_test_dir = os.path.join(CLASSIFIERS_TEST_OUTPUT_BASE_DIR, model_id)
 
@@ -56,8 +53,9 @@ def main(model_id):
                             os.path.join(classifiers_test_dir, 'classification_with_classic_ML_test.log'), mode='w')])
     logger = logging.getLogger(__name__)
 
-    test_results = test_on_test_data(logger, model_id, embeddings_dir, classifiers_dir, 'test')
-    xantomonas_results = test_on_test_data(logger, model_id, embeddings_dir, classifiers_dir,  'xantomonas')
+    model = joblib.load(os.path.join(classifiers_dir, f'model.pkl'))
+    test_results = test_on_test_data(logger, model_id, model, 'test')
+    xantomonas_results = test_on_test_data(logger, model_id, model,  'xantomonas')
     pd.concat([test_results, xantomonas_results], axis=1).to_csv(
         os.path.join(classifiers_test_dir, 'best_classifier_test_results.csv'), index=False)
 

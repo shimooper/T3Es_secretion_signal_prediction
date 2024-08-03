@@ -2,10 +2,10 @@ import numpy as np
 import random
 
 
-def prepare_Xs_and_Ys(logger, model_id, embeddings_dir, split, always_calc_embeddings):
+def prepare_Xs_and_Ys(logger, model_id, split, always_calc_embeddings):
     if model_id == 'protein_bert':
         from src.pretrained_embeddings.calc_proteinbert_embeddings import calc_embeddings
-        Xs_positive, Xs_negative = calc_embeddings(embeddings_dir, split, always_calc_embeddings=always_calc_embeddings)
+        Xs_positive, Xs_negative = calc_embeddings(split, always_calc_embeddings=always_calc_embeddings)
     elif model_id == 'pt5':
         from src.pretrained_embeddings.calc_pt5_embeddings import calc_embeddings
         Xs_positive, Xs_negative = calc_embeddings(model_id, split, always_calc_embeddings=always_calc_embeddings)

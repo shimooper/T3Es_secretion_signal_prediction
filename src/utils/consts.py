@@ -19,7 +19,7 @@ MODEL_ID_TO_MODEL_NAME = {
     'esm_30': Path(PRETRAINED_MODELS_DIR) / 'esm2_t30_150M_UR50D_01_08_2024' if USE_LOCAL_MODELS else 'facebook/esm2_t30_150M_UR50D',
     'esm_33': Path(PRETRAINED_MODELS_DIR) / 'esm2_t33_650M_UR50D_01_08_2024' if USE_LOCAL_MODELS else 'facebook/esm2_t33_650M_UR50D',
     'esm_36': Path(PRETRAINED_MODELS_DIR) / 'esm2_t36_3B_UR50D_01_08_2024' if USE_LOCAL_MODELS else 'facebook/esm2_t36_3B_UR50D',
-    'protein_bert': 'protein_bert',
+    'protein_bert': Path(PRETRAINED_MODELS_DIR) / 'protein_bert',
     'pt5': Path(PRETRAINED_MODELS_DIR) / 'prot_t5_xl_uniref50_01_08_2024' if USE_LOCAL_MODELS else 'facebook/prot_t5_xl_uniref50',
 }
 
