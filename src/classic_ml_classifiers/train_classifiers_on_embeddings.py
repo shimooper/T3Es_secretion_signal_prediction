@@ -1,10 +1,7 @@
-import random
 import argparse
 import joblib
-from timeit import default_timer as timer
 
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import os
 import logging
@@ -12,16 +9,13 @@ import sys
 
 from sklearn.model_selection import GridSearchCV
 from sklearn.decomposition import PCA
-from sklearn.metrics import make_scorer, matthews_corrcoef, average_precision_score
+from sklearn.metrics import make_scorer, matthews_corrcoef
 
-sys.path.insert(0, "/groups/pupko/yairshimony/secretion_signal_prediction")
-os.environ['MPLCONFIGDIR'] = '/groups/pupko/yairshimony/.cache/matplotlib'
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from src.utils.consts import OUTPUTS_DIR, MODEL_ID_TO_MODEL_NAME
+from src.utils.consts import EMBEDDINGS_BASE_DIR, CLASSIFIERS_OUTPUT_BASE_DIR
 from classifiers_params_grids import classifiers, update_grid_params
-
-EMBEDDINGS_BASE_DIR = os.path.join(OUTPUTS_DIR, 'pretrained_embeddings')
-CLASSIFIERS_OUTPUT_BASE_DIR = os.path.join(OUTPUTS_DIR, 'embeddings_classifiers')
+from utils import prepare_Xs_and_Ys
 
 
 def get_arguments():
@@ -29,31 +23,6 @@ def get_arguments():
     parser.add_argument('--model_id', help='The pretrained model id', type=str, required=True)
     parser.add_argument('--n_jobs', help='The number of jobs to run in parallel', type=int, default=1)
     return parser.parse_args()
-
-
-def prepare_Xs_and_Ys(model_name, embeddings_dir, split, always_calc_embeddings):
-    if model_name == 'protein_bert':
-        from src.pretrained_embeddings.calc_proteinbert_embeddings import calc_embeddings
-        Xs_positive, Xs_negative = calc_embeddings(embeddings_dir, split, always_calc_embeddings)
-    elif 'Rostlab' in model_name:
-        from src.pretrained_embeddings.calc_prott5_embeddings import calc_embeddings
-        Xs_positive, Xs_negative = calc_embeddings(model_name, embeddings_dir, split, always_calc_embeddings)
-    else:  # esm
-        from src.pretrained_embeddings.calc_esm_embeddings import calc_embeddings
-        Xs_positive, Xs_negative = calc_embeddings(model_name, split)
-
-    Xs = np.concatenate([Xs_positive, Xs_negative])
-    Ys = [1] * Xs_positive.shape[0] + [0] * Xs_negative.shape[0]
-
-    # Shuffle
-    combined = list(zip(Xs, Ys))
-    random.shuffle(combined)
-    shuffled_Xs, shuffled_Ys = zip(*combined)
-    shuffled_Xs = np.array(shuffled_Xs)
-
-    logging.info(f"Loaded {split} data: Xs_{split}.shape = {Xs.shape}, Ys_{split}.shape = {len(Ys)}")
-
-    return shuffled_Xs, shuffled_Ys
 
 
 def pca(Xs, Ys, output_dir, n_components=2):
@@ -134,8 +103,9 @@ def main(model_id, n_jobs):
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         handlers=[logging.FileHandler(
                             os.path.join(classifiers_output_dir, 'classification_with_classic_ML.log'), mode='w')])
+    logger = logging.getLogger(__name__)
 
-    Xs_train, Ys_train = prepare_Xs_and_Ys(model_id, embeddings_dir, 'train', always_calc_embeddings=False)
+    Xs_train, Ys_train = prepare_Xs_and_Ys(logger, model_id, embeddings_dir, 'train', always_calc_embeddings=False)
     update_grid_params(Ys_train)
 
     pca(Xs_train, Ys_train, embeddings_dir)

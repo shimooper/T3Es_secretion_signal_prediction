@@ -10,12 +10,12 @@ import torch
 from transformers import AutoTokenizer, AutoModel, TrainingArguments, Trainer
 from datasets import Dataset
 
-sys.path.insert(0, "/groups/pupko/yairshimony/secretion_signal_prediction")
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from src.utils.consts import (FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN_FILE,
                               FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE,
                               FIXED_POSITIVE_XANTOMONAS_FILE, FIXED_NEGATIVE_XANTOMONAS_FILE,
-                              BATCH_SIZE, OUTPUTS_DIR, MODEL_ID_TO_MODEL_NAME, PRETRAINED_MODELS_DIR)
+                              BATCH_SIZE, EMBEDDINGS_BASE_DIR, MODEL_ID_TO_MODEL_NAME)
 from src.utils.read_fasta_utils import read_fasta_file, read_sequences_from_fasta_file
 
 ESM_SCRIPT_PATH = "/groups/pupko/yairshimony/esm/scripts/extract.py"
@@ -54,10 +54,10 @@ def calc_embeddings_of_fasta_file_with_script(model_name, fasta_file_path, embed
     return Xs
 
 
-def calc_embeddings_of_fasta_file_with_huggingface_model(mode_path, fasta_file_path, embeddings_dir,
+def calc_embeddings_of_fasta_file_with_huggingface_model(model_name, fasta_file_path, embeddings_dir,
                                                          embeddings_file_path, esm_embeddings_calculation_mode):
-    tokenizer = AutoTokenizer.from_pretrained(mode_path)
-    model = AutoModel.from_pretrained(mode_path)
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModel.from_pretrained(model_name)
     sequences = read_sequences_from_fasta_file(fasta_file_path)
 
     if esm_embeddings_calculation_mode == 'huggingface_model':
@@ -107,7 +107,7 @@ def calc_embeddings(model_id, split, esm_embeddings_calculation_mode='huggingfac
     else:
         raise ValueError(f"split must be one of ['train', 'test', 'xantomonas'], got {split}")
 
-    output_dir = Path(OUTPUTS_DIR) / "pretrained_embeddings" / model_id
+    output_dir = Path(EMBEDDINGS_BASE_DIR) / model_id
     os.makedirs(output_dir, exist_ok=True)
     positive_embeddings_tmp_dir = os.path.join(output_dir, f'{split}_positive_embeddings')
     negative_embeddings_tmp_dir = os.path.join(output_dir, f'{split}_negative_embeddings')
@@ -115,7 +115,7 @@ def calc_embeddings(model_id, split, esm_embeddings_calculation_mode='huggingfac
     negative_embeddings_output_file_path = os.path.join(output_dir, f'{split}_negative_embeddings.npy')
 
     model_name = MODEL_ID_TO_MODEL_NAME[model_id]
-    mode_path = Path(PRETRAINED_MODELS_DIR) / model_name
+
     if esm_embeddings_calculation_mode == 'native_script':
         positive_embeddings = calc_embeddings_of_fasta_file_with_script(
             model_name, positive_fasta_file, positive_embeddings_tmp_dir, positive_embeddings_output_file_path,
@@ -128,7 +128,7 @@ def calc_embeddings(model_id, split, esm_embeddings_calculation_mode='huggingfac
         if not os.path.exists(positive_embeddings_output_file_path) or always_calc_embeddings:
             print(f"Calculating embeddings of {positive_fasta_file} into {positive_embeddings_output_file_path}")
             positive_embeddings = calc_embeddings_of_fasta_file_with_huggingface_model(
-                mode_path, positive_fasta_file, positive_embeddings_tmp_dir, positive_embeddings_output_file_path,
+                model_name, positive_fasta_file, positive_embeddings_tmp_dir, positive_embeddings_output_file_path,
                 esm_embeddings_calculation_mode)
         else:
             print(f"Found embeddings of {positive_fasta_file} in {positive_embeddings_output_file_path}")
@@ -137,7 +137,7 @@ def calc_embeddings(model_id, split, esm_embeddings_calculation_mode='huggingfac
         if not os.path.exists(negative_embeddings_output_file_path) or always_calc_embeddings:
             print(f"Calculating embeddings of {negative_fasta_file} into {negative_embeddings_output_file_path}")
             negative_embeddings = calc_embeddings_of_fasta_file_with_huggingface_model(
-                mode_path, negative_fasta_file, negative_embeddings_tmp_dir, negative_embeddings_output_file_path,
+                model_name, negative_fasta_file, negative_embeddings_tmp_dir, negative_embeddings_output_file_path,
                 esm_embeddings_calculation_mode)
         else:
             print(f"Found embeddings of {negative_fasta_file} in {negative_embeddings_output_file_path}")

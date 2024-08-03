@@ -1,25 +1,32 @@
 import os
+from pathlib import Path
 
-LOCAL_RUN = True if os.name == 'nt' else False
-PROJECT_BASE_DIR = r"/groups/pupko/yairshimony/secretion_signal_prediction" if not LOCAL_RUN else r"C:\repos\T3Es_secretion_signal_prediction"
+PROJECT_BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+DATASETS_ORIGINAL_DIR = os.path.join(PROJECT_BASE_DIR, 'data', 'datasets_original')
+DATASETS_FIXED_DIR = os.path.join(PROJECT_BASE_DIR, 'data', 'datasets_fixed')
+PRETRAINED_MODELS_DIR = os.path.join(PROJECT_BASE_DIR, 'models')
+
+OUTPUTS_DIR = os.path.join(PROJECT_BASE_DIR, 'outputs_new')
+EMBEDDINGS_BASE_DIR = os.path.join(OUTPUTS_DIR, 'pretrained_embeddings')
+CLASSIFIERS_OUTPUT_BASE_DIR = os.path.join(OUTPUTS_DIR, 'embeddings_classifiers')
+CLASSIFIERS_TEST_OUTPUT_BASE_DIR = os.path.join(OUTPUTS_DIR, 'embeddings_classifiers_test')
+USE_LOCAL_MODELS = True
 
 MODEL_ID_TO_MODEL_NAME = {
-    'esm_6': 'esm2_t6_8M_UR50D_01_08_2024',
-    'esm_12': 'esm2_t12_35M_UR50D_01_08_2024',
-    'esm_30': 'esm2_t30_150M_UR50D_01_08_2024',
-    'esm_33': 'esm2_t33_650M_UR50D_01_08_2024',
-    'esm_36': 'esm2_t36_3B_UR50D_01_08_2024',
+    'esm_6': Path(PRETRAINED_MODELS_DIR) / 'esm2_t6_8M_UR50D_01_08_2024' if USE_LOCAL_MODELS else 'facebook/esm2_t6_8M_UR50D',
+    'esm_12': Path(PRETRAINED_MODELS_DIR) / 'esm2_t12_35M_UR50D_01_08_2024' if USE_LOCAL_MODELS else 'facebook/esm2_t12_35M_UR50D',
+    'esm_30': Path(PRETRAINED_MODELS_DIR) / 'esm2_t30_150M_UR50D_01_08_2024' if USE_LOCAL_MODELS else 'facebook/esm2_t30_150M_UR50D',
+    'esm_33': Path(PRETRAINED_MODELS_DIR) / 'esm2_t33_650M_UR50D_01_08_2024' if USE_LOCAL_MODELS else 'facebook/esm2_t33_650M_UR50D',
+    'esm_36': Path(PRETRAINED_MODELS_DIR) / 'esm2_t36_3B_UR50D_01_08_2024' if USE_LOCAL_MODELS else 'facebook/esm2_t36_3B_UR50D',
     'protein_bert': 'protein_bert',
-    'pt5': 'prot_t5_xl_uniref50_01_08_2024',
+    'pt5': Path(PRETRAINED_MODELS_DIR) / 'prot_t5_xl_uniref50_01_08_2024' if USE_LOCAL_MODELS else 'facebook/prot_t5_xl_uniref50',
 }
 
 BATCH_SIZE = 8
 RANDOM_STATE = 42
 
-DATASETS_ORIGINAL_DIR = os.path.join(PROJECT_BASE_DIR, 'data', 'datasets_original')
-DATASETS_FIXED_DIR = os.path.join(PROJECT_BASE_DIR, 'data', 'datasets_fixed')
-OUTPUTS_DIR = os.path.join(PROJECT_BASE_DIR, 'outputs_new')
-PRETRAINED_MODELS_DIR = os.path.join(PROJECT_BASE_DIR, 'models')
+
 
 ORIGINAL_POSITIVE_TRAIN_FILE = os.path.join(DATASETS_ORIGINAL_DIR, "positive_train_data.fasta")
 ORIGINAL_NEGATIVE_TRAIN_FILE = os.path.join(DATASETS_ORIGINAL_DIR, "negative_train_data.fasta")
