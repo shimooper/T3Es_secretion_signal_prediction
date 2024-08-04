@@ -31,5 +31,5 @@ python ~/python_test/test_gpu/check_cuda_available.py
 #python ~/secretion_signal_prediction/src/finetune_pretrained_models/esm/main_test.py --model_id esm_12
 #python ~/secretion_signal_prediction/src/finetune_pretrained_models/esm/main_test.py --model_id esm_30
 #python ~/secretion_signal_prediction/src/finetune_pretrained_models/esm/main_test.py --model_id esm_33
-python ~/secretion_signal_prediction/src/finetune_pretrained_models/esm/main_test.py --model_id esm_36
+#python ~/secretion_signal_prediction/src/finetune_pretrained_models/esm/main_test.py --model_id esm_36
 python ~/secretion_signal_prediction/src/finetune_pretrained_models/pt5/main_test.py
