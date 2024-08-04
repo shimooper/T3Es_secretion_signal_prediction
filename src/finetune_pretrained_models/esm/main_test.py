@@ -1,3 +1,4 @@
+import torch  # Important to import torch first - without this I get weird error when trying to import torch later
 import os
 import argparse
 import time
@@ -5,7 +6,6 @@ import sys
 
 import pandas as pd
 from pathlib import Path
-import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 import torch.nn.functional as F

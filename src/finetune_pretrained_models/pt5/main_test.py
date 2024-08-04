@@ -1,6 +1,6 @@
+import torch  # Important to import torch first - without this I get weird error when trying to import torch later
 import time
 from tqdm import tqdm
-import torch
 import pandas as pd
 from torch.utils.data import DataLoader
 import sys
