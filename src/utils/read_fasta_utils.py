@@ -18,12 +18,18 @@ def read_sequences_from_fasta_file(file_path):
     return list(id_to_sequence.values())
 
 
-def read_train_data():
+def read_train_without_split():
     positive_train = read_sequences_from_fasta_file(FIXED_POSITIVE_TRAIN_FILE)
     negative_train = read_sequences_from_fasta_file(FIXED_NEGATIVE_TRAIN_FILE)
 
     all_train_labels = [1] * len(positive_train) + [0] * len(negative_train)
     all_train_sequences = positive_train + negative_train
+
+    return all_train_sequences, all_train_labels
+
+
+def read_train_data():
+    all_train_sequences, all_train_labels = read_train_without_split()
 
     train_sequences, validation_sequences, train_labels, validation_labels = train_test_split(
         all_train_sequences, all_train_labels, test_size=0.25, random_state=RANDOM_STATE, shuffle=True, stratify=all_train_labels)
