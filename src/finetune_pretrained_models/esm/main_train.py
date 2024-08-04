@@ -2,12 +2,15 @@ import os
 import argparse
 import wandb
 from pathlib import Path
+import sys
 
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer
 from datasets import Dataset
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+
 from src.utils.consts import MODEL_ID_TO_MODEL_NAME, BATCH_SIZE, FINETUNED_MODELS_OUTPUT_DIR, FINETUNE_NUMBER_OF_EPOCHS, RANDOM_STATE
-from src.utils.read_fasta_utils import read_train_data, read_test_data
+from src.utils.read_fasta_utils import read_train_data
 from src.finetune_pretrained_models.huggingface_utils import CalcMetricsOnTrainSetCallback, compute_metrics
 
 WANDB_KEY = "64c3807b305e96e26550193f5860452b88d85999"
@@ -33,9 +36,10 @@ def create_dataset(tokenizer, sequences, labels=None):
 
 def train_model(model_name, tokenizer, train_dataset, validation_dataset, output_dir, run_name: str):
     # Set up Weights & Biases
-    wandb.login(key=WANDB_KEY)
     os.environ["WANDB_PROJECT"] = WANDB_PROJECT
+    os.environ["WANDB_DIR"] = FINETUNED_MODELS_OUTPUT_DIR
     os.environ["WANDB_LOG_MODEL"] = "end"  # Upload the final model to W&B at the end of training (after loading the best model)
+    wandb.login(key=WANDB_KEY)
 
     # Load model
     model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2)
@@ -81,6 +85,7 @@ def main(model_id):
     model_name = MODEL_ID_TO_MODEL_NAME[model_id]
     run_name = f"{model_id}_train_batch{BATCH_SIZE}_lr{LEARNING_RATE}"
     output_dir = os.path.join(FINETUNED_MODELS_OUTPUT_DIR, model_id)
+    os.makedirs(output_dir, exist_ok=True)
 
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     train_dataset = create_dataset(tokenizer, train_sequences, train_labels)

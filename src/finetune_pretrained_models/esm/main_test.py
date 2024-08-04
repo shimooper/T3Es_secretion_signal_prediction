@@ -1,6 +1,7 @@
 import os
 import argparse
 import time
+import sys
 
 import pandas as pd
 from pathlib import Path
@@ -12,8 +13,9 @@ import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from datasets import Dataset
 
-from src.utils.consts import MODEL_ID_TO_MODEL_NAME, BATCH_SIZE, FINETUNED_MODELS_OUTPUT_DIR, \
-    FINETUNED_MODELS_TEST_OUTPUT_DIR, MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+
+from src.utils.consts import MODEL_ID_TO_MODEL_NAME, BATCH_SIZE, FINETUNED_MODELS_OUTPUT_DIR, MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION
 from src.utils.read_fasta_utils import read_train_data, read_test_data
 from src.finetune_pretrained_models.huggingface_utils import compute_metrics
 
@@ -102,7 +104,7 @@ def main(model_id):
     }
 
     results_df = pd.DataFrame(all_scores)
-    output_path = Path(FINETUNED_MODELS_TEST_OUTPUT_DIR) / model_id / 'esm_test_results.csv'
+    output_path = Path(FINETUNED_MODELS_OUTPUT_DIR) / model_id / 'best_model_results.csv'
     print(f"Writing scores to {output_path}")
     results_df.to_csv(output_path, index=False)
 

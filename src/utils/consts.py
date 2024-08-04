@@ -11,7 +11,6 @@ OUTPUTS_DIR = os.path.join(PROJECT_BASE_DIR, 'outputs_new')
 EMBEDDINGS_DIR = os.path.join(OUTPUTS_DIR, 'pretrained_embeddings')
 CLASSIFIERS_OUTPUT_DIR = os.path.join(OUTPUTS_DIR, 'embeddings_classifiers')
 FINETUNED_MODELS_OUTPUT_DIR = os.path.join(OUTPUTS_DIR, 'finetuned_models')
-FINETUNED_MODELS_TEST_OUTPUT_DIR = os.path.join(OUTPUTS_DIR, 'finetuned_models_test')
 USE_LOCAL_MODELS = True
 
 MODEL_ID_TO_MODEL_NAME = {

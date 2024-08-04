@@ -112,7 +112,7 @@ def train_per_protein(
     wandb.login(key=WANDB_KEY)
     os.environ["WANDB_PROJECT"] = WANDB_PROJECT
     os.environ["WANDB_LOG_MODEL"] = "end"  # Upload the final model to W&B at the end of training (after loading the best model)
-    os.environ['WANDB_LOG_DIR'] = os.path.join(FINETUNED_MODELS_OUTPUT_DIR, model_id)
+    os.environ["WANDB_DIR"] = FINETUNED_MODELS_OUTPUT_DIR
     run_name = f"{model_id}_train_batch{batch * accum}_lr{lr}"
     run_output_dir = os.path.join(FINETUNED_MODELS_OUTPUT_DIR, model_id)
 

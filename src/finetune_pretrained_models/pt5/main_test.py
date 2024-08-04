@@ -15,7 +15,7 @@ from src.finetune_pretrained_models.pt5.data_utils import prepare_dataset
 from src.finetune_pretrained_models.huggingface_utils import compute_metrics
 from src.finetune_pretrained_models.pt5.training_utils import FINETUNED_WEIGHTS_FILE
 from src.utils.read_fasta_utils import read_test_data, read_train_data
-from src.utils.consts import FINETUNED_MODELS_TEST_OUTPUT_DIR, FINETUNED_MODELS_OUTPUT_DIR, MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION
+from src.utils.consts import FINETUNED_MODELS_OUTPUT_DIR, MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION
 
 
 def load_model(model_id, filepath, half_precision=False):
@@ -101,7 +101,7 @@ def main():
     }
 
     results_df = pd.DataFrame(all_scores)
-    output_path = Path(FINETUNED_MODELS_TEST_OUTPUT_DIR) / model_id / 'pt5_test_results.csv'
+    output_path = Path(FINETUNED_MODELS_OUTPUT_DIR) / model_id / 'best_model_results.csv'
     print(f"Writing scores to {output_path}")
     results_df.to_csv(output_path, index=False)
 
