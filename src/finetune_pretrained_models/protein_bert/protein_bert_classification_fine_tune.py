@@ -6,15 +6,17 @@ import pandas as pd
 from tensorflow import keras
 from sklearn.metrics import average_precision_score, matthews_corrcoef
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../../protein_bert'))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+
+from src.utils.consts import FINETUNED_MODELS_OUTPUT_DIR, BATCH_SIZE, PROJECT_BASE_DIR, FINETUNE_NUMBER_OF_EPOCHS, \
+    MODEL_ID_TO_MODEL_NAME, USE_LOCAL_MODELS, PROTEIN_BERT_MODEL_NAME
+from src.utils.read_fasta_utils import read_train_data, read_test_data
+
+sys.path.append(os.path.join(PROJECT_BASE_DIR, 'protein_bert'))
 
 from proteinbert import OutputType, OutputSpec, FinetuningModelGenerator, load_pretrained_model, finetune, evaluate_by_len
 from proteinbert.conv_and_global_attention_model import get_model_with_hidden_layers_as_outputs
 
-from src.utils.consts import OUTPUTS_DIR, BATCH_SIZE
-from src.utils.read_fasta_utils import read_train_data, read_test_data
-
-EPOCHS = 10
 
 # A local (non-global) binary output
 OUTPUT_TYPE = OutputType(False, 'binary')
@@ -48,7 +50,14 @@ def main():
     print(f'{len(train_sequences)} training set records, {len(validation_sequences)} validation set records')
 
     # Loading the pre-trained model and fine-tuning it on the loaded dataset
-    pretrained_model_generator, input_encoder = load_pretrained_model(validate_downloading=False)
+
+    model_id = 'protein_bert'
+    pretrained_model_dir = MODEL_ID_TO_MODEL_NAME[model_id]
+    if USE_LOCAL_MODELS:
+        pretrained_model_generator, input_encoder = load_pretrained_model(
+            local_model_dump_dir=pretrained_model_dir, local_model_dump_file_name=PROTEIN_BERT_MODEL_NAME)
+    else:
+        pretrained_model_generator, input_encoder = load_pretrained_model(validate_downloading=False)
 
     # get_model_with_hidden_layers_as_outputs gives the model output access to the hidden layers (on top of the output)
     model_generator = FinetuningModelGenerator(pretrained_model_generator, OUTPUT_SPEC,
@@ -62,7 +71,7 @@ def main():
 
     finetune(model_generator, input_encoder, OUTPUT_SPEC, train_sequences, train_labels, validation_sequences,
              validation_labels,
-             seq_len=512, batch_size=BATCH_SIZE, max_epochs_per_stage=EPOCHS, lr=1e-04, begin_with_frozen_pretrained_layers=True,
+             seq_len=512, batch_size=BATCH_SIZE, max_epochs_per_stage=FINETUNE_NUMBER_OF_EPOCHS, lr=1e-04, begin_with_frozen_pretrained_layers=True,
              lr_with_frozen_pretrained_layers=1e-02, n_final_epochs=1, final_seq_len=1024, final_lr=1e-05,
              callbacks=training_callbacks)
 
@@ -75,9 +84,9 @@ def main():
         'xantomonas_mcc': [xantomonas_mcc], 'xantomonas_auprc': [xantomonas_auprc], 'xantomonas_elapsed_time': [xantomonas_elapsed_time]
     })
 
-    output_dir = os.path.join(OUTPUTS_DIR, 'protein_bert_finetune')
+    output_dir = os.path.join(FINETUNED_MODELS_OUTPUT_DIR, model_id)
     os.makedirs(output_dir, exist_ok=True)
-    results_df.to_csv(os.path.join(output_dir, f'esm_finetune_results_{EPOCHS}_epochs.csv'), index=False)
+    results_df.to_csv(os.path.join(output_dir, f'finetune_results.csv'), index=False)
 
 
 if __name__ == "__main__":

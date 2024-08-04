@@ -1,3 +1,4 @@
+import torch  # Important - without this I get weird error when trying to import torch in another module imported here
 import argparse
 from timeit import default_timer as timer
 import joblib

@@ -23,9 +23,9 @@ conda activate secretion_signal
 export PATH=$CONDA_PREFIX/bin:$PATH
 
 cd ~/secretion_signal_prediction/src/classic_ml_classifiers
-#python train_classifiers_on_embeddings.py --model_id esm_6 --n_jobs 60
-python train_classifiers_on_embeddings.py --model_id esm_12 --n_jobs 60
-python train_classifiers_on_embeddings.py --model_id esm_30 --n_jobs 60
-python train_classifiers_on_embeddings.py --model_id esm_33 --n_jobs 60
-python train_classifiers_on_embeddings.py --model_id esm_36 --n_jobs 60
-python train_classifiers_on_embeddings.py --model_id pt5 --n_jobs 60
+python train_classifiers_on_embeddings.py --model_id esm_6 --n_jobs 60
+#python train_classifiers_on_embeddings.py --model_id esm_12 --n_jobs 60
+#python train_classifiers_on_embeddings.py --model_id esm_30 --n_jobs 60
+#python train_classifiers_on_embeddings.py --model_id esm_33 --n_jobs 60
+#python train_classifiers_on_embeddings.py --model_id esm_36 --n_jobs 60
+#python train_classifiers_on_embeddings.py --model_id pt5 --n_jobs 60

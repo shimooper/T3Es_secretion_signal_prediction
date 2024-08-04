@@ -2,10 +2,10 @@
 #SBATCH --job-name=test_classifiers             # Job name
 #SBATCH --account=gpu-research          # Account name for billing
 #SBATCH --partition=killable              # Partition name
-#SBATCH --time=10:00:00               # Time allotted for the job (hh:mm:ss)
+#SBATCH --time=02:40:00               # Time allotted for the job (hh:mm:ss)
 #SBATCH --ntasks=1                    # Number of tasks (processes)
 #SBATCH --cpus-per-task=1             # Number of CPU cores per task
-#SBATCH --mem-per-cpu=10G              # Memory per CPU core
+#SBATCH --mem-per-cpu=4G              # Memory per CPU core
 #SBATCH --output=/home/ai_center/ai_users/yairshimony/secretion_signal_prediction/outputs_new/%j.out        # Standard output and error log (%j expands to jobId)
 #SBATCH --error=/home/ai_center/ai_users/yairshimony/secretion_signal_prediction/outputs_new/%j.err         # Separate file for standard error
 
@@ -21,6 +21,8 @@ echo "Cuda visible devices: $CUDA_VISIBLE_DEVICES"
 source ~/miniconda/etc/profile.d/conda.sh
 conda activate secretion_signal
 export PATH=$CONDA_PREFIX/bin:$PATH
+
+python ~/python_test/test_gpu/check_cuda_available.py
 
 cd ~/secretion_signal_prediction/src/classic_ml_classifiers
 python test_classifiers_on_embeddings.py --model_id esm_6

@@ -10,7 +10,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 from src.utils.consts import (FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN_FILE,
                               FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE,
                               FIXED_POSITIVE_XANTOMONAS_FILE, FIXED_NEGATIVE_XANTOMONAS_FILE,
-                              PROJECT_BASE_DIR, EMBEDDINGS_DIR, BATCH_SIZE, MODEL_ID_TO_MODEL_NAME, USE_LOCAL_MODELS)
+                              PROJECT_BASE_DIR, EMBEDDINGS_DIR, BATCH_SIZE, MODEL_ID_TO_MODEL_NAME, USE_LOCAL_MODELS,
+                              PROTEIN_BERT_MODEL_NAME)
 from src.utils.read_fasta_utils import read_sequences_from_fasta_file
 
 sys.path.append(os.path.join(PROJECT_BASE_DIR, 'protein_bert'))
@@ -18,7 +19,6 @@ sys.path.append(os.path.join(PROJECT_BASE_DIR, 'protein_bert'))
 from proteinbert import load_pretrained_model
 from proteinbert.conv_and_global_attention_model import get_model_with_hidden_layers_as_outputs
 
-PROTEIN_BERT_MODEL_NAME = 'epoch_92400_sample_23500000.pkl'
 
 def get_arguments():
     parser = argparse.ArgumentParser()

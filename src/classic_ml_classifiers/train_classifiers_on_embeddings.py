@@ -6,10 +6,13 @@ import pandas as pd
 import os
 import logging
 import sys
+import json
 
+import numpy as np
 from sklearn.model_selection import GridSearchCV
 from sklearn.decomposition import PCA
 from sklearn.metrics import make_scorer, matthews_corrcoef
+from sklearn import __version__ as sklearn_version
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
@@ -87,6 +90,15 @@ def fit_on_train_data(Xs_train, Ys_train, output_dir, n_jobs):
 
     # Save the best classifier to disk
     joblib.dump(best_classifiers[best_classifier_class], os.path.join(output_dir, "model.pkl"))
+    # Save metadata
+    metadata = {
+        'numpy_version': np.__version__,
+        'joblib_version': joblib.__version__,
+        'sklearn_version': sklearn_version
+    }
+    with open(os.path.join(output_dir, 'model_metadata.json'), 'w') as f:
+        json.dump(metadata, f)
+
     best_classifier_metrics = best_classifiers_df.loc[[best_classifier_class]].reset_index()
 
     return best_classifier_metrics
