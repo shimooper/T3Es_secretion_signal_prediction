@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=finetune_esm             # Job name
+#SBATCH --job-name=finetune             # Job name
 #SBATCH --account=gpu-research          # Account name for billing
 #SBATCH --partition=gpu-a100-killable              # Partition name
 #SBATCH --time=12:00:00               # Time allotted for the job (hh:mm:ss)
