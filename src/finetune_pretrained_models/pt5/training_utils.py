@@ -139,6 +139,7 @@ def train_per_protein(
         seed=seed,
         deepspeed=ds_config if deepspeed else None,
         fp16=half_precision,
+        save_safetensors=False
     )
 
     # Trainer
