@@ -1,4 +1,4 @@
-import torch
+import torch  # Important - without this I get weird error when trying to import torch in another module imported here
 import os.path
 import sys
 import pandas as pd
@@ -16,7 +16,7 @@ def main():
     valid_df = pd.DataFrame({'sequence': validation_sequences, 'label': validation_labels})
 
     model_id = 'pt5'
-    model = train_per_protein(model_id, train_df, valid_df, num_labels=2, batch=1, accum=BATCH_SIZE, epochs=10, seed=42, deepspeed=False)
+    model = train_per_protein(model_id, train_df, valid_df, num_labels=2, batch=1, accum=BATCH_SIZE, deepspeed=False)
 
     # Save model (only the finetuned parameters)
     save_model(model, os.path.join(FINETUNED_MODELS_OUTPUT_DIR, model_id, FINETUNED_WEIGHTS_FILE))

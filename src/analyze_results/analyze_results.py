@@ -2,21 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 from pathlib import Path
-from consts import OUTPUTS_DIR
 
-
-
-MODEL_ID_TO_MODEL_NAME = {
-    '6': 'esm_8M',
-    'protein_bert': 'protein_bert_16M',
-    '12': 'esm_35M',
-    '30': 'esm_150M',
-    '33': 'esm_650M',
-    '36': 'esm_3B',
-    'prot_t5': 'prot_t5_3B',
-    'prot_t5_half': 'prot_t5_half_3B',
-    '48': 'esm_15B',
-}
 
 CLASSIC_CLASSIFIERS_PATH = Path(OUTPUTS_DIR) / 'all_classic_classifiers_results.csv'
 FINETUNED_CLASSIFIERS_PATH = Path(OUTPUTS_DIR) / 'all_finetuned_classifiers_results.csv'

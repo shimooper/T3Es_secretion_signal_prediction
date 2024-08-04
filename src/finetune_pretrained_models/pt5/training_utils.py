@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirna
 
 from .classifier import PT5_classification_model
 from .data_utils import prepare_dataset
-from src.utils.consts import RANDOM_STATE, FINETUNED_MODELS_OUTPUT_DIR
+from src.utils.consts import RANDOM_STATE, FINETUNED_MODELS_OUTPUT_DIR, FINETUNE_NUMBER_OF_EPOCHS
 from src.finetune_pretrained_models.huggingface_utils import CalcMetricsOnTrainSetCallback, compute_metrics
 
 
@@ -85,7 +85,7 @@ def train_per_protein(
     model_id,
     train_df,  # training data
     valid_df,  # validation data
-    num_labels=1,  # 1 for regression, >1 for classification
+    num_labels=2,  # 1 for regression, >1 for classification
 
     # effective training batch size is batch * accum
     # we recommend an effective batch size of 8
@@ -93,10 +93,10 @@ def train_per_protein(
     accum=2,  # gradient accumulation
 
     val_batch=16,  # batch size for evaluation
-    epochs=10,  # training epochs
+    epochs=FINETUNE_NUMBER_OF_EPOCHS,  # training epochs
     lr=3e-4,  # recommended learning rate
     seed=RANDOM_STATE,  # random seed
-    deepspeed=True,  # if gpu is large enough disable deepspeed for training speedup
+    deepspeed=False,  # if gpu is large enough disable deepspeed for training speedup
     half_precision=False,  # enable mixed precision training
 ):
     # Disable deepspeed if we run on windows
