@@ -22,7 +22,7 @@ MODEL_ID_TO_MODEL_NAME = {
     'esm_36': Path(PRETRAINED_MODELS_DIR) / 'esm2_t36_3B_UR50D_01_08_2024' if USE_LOCAL_MODELS else 'facebook/esm2_t36_3B_UR50D',
     'protein_bert': Path(PRETRAINED_MODELS_DIR) / 'protein_bert',
     'pt5': Path(PRETRAINED_MODELS_DIR) / 'prot_t5_xl_uniref50_01_08_2024' if USE_LOCAL_MODELS else 'Rostlab/prot_t5_xl_uniref50',
-    'pt5_half_precision': Path(PRETRAINED_MODELS_DIR) / 'prot_t5_xl_half_uniref50_01_08_2024' if USE_LOCAL_MODELS else 'Rostlab/prot_t5_xl_half_uniref50-enc',
+    # 'pt5_half_precision': Path(PRETRAINED_MODELS_DIR) / 'prot_t5_xl_half_uniref50_01_08_2024' if USE_LOCAL_MODELS else 'Rostlab/prot_t5_xl_half_uniref50-enc',
 }
 
 MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION = {
@@ -33,7 +33,7 @@ MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION = {
     'esm_36': 3000,
     'protein_bert': 16,
     'pt5': 3000,
-    'pt5_half_precision': 3000,
+    # 'pt5_half_precision': 3000,
 }
 
 BATCH_SIZE = 8
