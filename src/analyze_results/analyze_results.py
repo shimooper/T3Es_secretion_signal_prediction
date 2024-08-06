@@ -4,6 +4,7 @@ import seaborn as sns
 from pathlib import Path
 import os
 import sys
+import argparse
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
@@ -13,11 +14,7 @@ CLASSIC_CLASSIFIERS_PATH = Path(FINAL_RESULTS) / 'all_classic_classifiers_result
 FINETUNED_CLASSIFIERS_PATH = Path(FINAL_RESULTS) / 'all_finetuned_classifiers_results.csv'
 
 
-def flatten(x):
-    return [item for sublist in x for item in sublist]
-
-
-def main():
+def main(args):
     classic_classifiers_df = pd.read_csv(CLASSIC_CLASSIFIERS_PATH)
     finetuned_classifiers_df = pd.read_csv(FINETUNED_CLASSIFIERS_PATH)
 
@@ -42,12 +39,24 @@ def main():
     axs[1, 2].set_visible(False)
 
     sns.stripplot(data=all_results_df, x='model_id', y='test_mcc', hue='training_mode', ax=axs[2, 0])
+    if args.add_baselines_to_fig:
+        axs[2, 0].axhline(y=0.81, color='r', linestyle='--', linewidth=1, label='y=0.81')
+        axs[2, 0].axhline(y=0.83, color='r', linestyle='--', linewidth=1, label='y=0.83')
     sns.stripplot(data=all_results_df, x='model_id', y='test_auprc', hue='training_mode', ax=axs[2, 1])
+    if args.add_baselines_to_fig:
+        axs[2, 1].axhline(y=0.88, color='r', linestyle='--', linewidth=1, label='y=0.88')
+        axs[2, 1].axhline(y=0.91, color='r', linestyle='--', linewidth=1, label='y=0.91')
     sns.stripplot(data=all_results_df, x='model_id', y='test_elapsed_time', hue='training_mode', ax=axs[2, 2])
     axs[2, 2].set_ylabel('Test Elapsed time (in seconds)')
 
     sns.stripplot(data=all_results_df, x='model_id', y='xantomonas_mcc', hue='training_mode', ax=axs[3, 0])
+    if args.add_baselines_to_fig:
+        axs[3, 0].axhline(y=0.71, color='r', linestyle='--', linewidth=1, label='y=0.71')
+        axs[3, 0].axhline(y=0.72, color='r', linestyle='--', linewidth=1, label='y=0.72')
     sns.stripplot(data=all_results_df, x='model_id', y='xantomonas_auprc', hue='training_mode', ax=axs[3, 1])
+    if args.add_baselines_to_fig:
+        axs[3, 1].axhline(y=0.77, color='r', linestyle='--', linewidth=1, label='y=0.77')
+        axs[3, 1].axhline(y=0.87, color='r', linestyle='--', linewidth=1, label='y=0.87')
     sns.stripplot(data=all_results_df, x='model_id', y='xantomonas_elapsed_time', hue='training_mode', ax=axs[3, 2])
     axs[3, 2].set_ylabel('Xantomonas Elapsed time (in seconds)')
 
@@ -60,9 +69,13 @@ def main():
     fig.text(0.5, 0.90, 'AUPRC', ha='center', fontsize=14)
     fig.text(0.75, 0.90, 'Elapsed time (in seconds)', ha='center', fontsize=14)
 
-    plt.savefig(Path(FINAL_RESULTS) / 'results.png')
+    plt.savefig(Path(FINAL_RESULTS) / 'results_with_hlines.png')
     plt.clf()
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--add_baselines_to_fig', action='store_true')
+
+    args = parser.parse_args()
+    main(args)
