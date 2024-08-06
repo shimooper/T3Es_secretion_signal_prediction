@@ -9,8 +9,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 
 from src.utils.consts import FINAL_RESULTS
 
-CLASSIC_CLASSIFIERS_PATH = Path(FINAL_RESULTS) / 'all_classic_classifiers_results.csv'
-FINETUNED_CLASSIFIERS_PATH = Path(FINAL_RESULTS) / 'all_finetuned_classifiers_results.csv'
+CLASSIC_CLASSIFIERS_PATH = Path(FINAL_RESULTS) / 'all_classic_classifiers_results_v2.csv'
+FINETUNED_CLASSIFIERS_PATH = Path(FINAL_RESULTS) / 'all_finetuned_classifiers_results_v2.csv'
 
 
 def flatten(x):
