@@ -61,14 +61,15 @@ rfc_grid = {
 }
 
 gbc_grid = {
-    "loss": ["log_loss"],
-    'min_samples_split': [2, 5, 10],
-    'min_samples_leaf': [1, 4],
-    "max_depth": [3, 5, 8],
-    "max_features": ["log2", "sqrt"],
-    "criterion": ["friedman_mse",  "squared_error"],
-    "n_estimators": [100],
+    'learning_rate': [0.05, 0.1],
+    'n_estimators': [10, 50, 200],
+    # 'min_samples_split': [2, 5, 10],
+    # 'min_samples_leaf': [1, 4],
+    'max_depth': [3, 5, 10],
+    # "max_features": ["log2", "sqrt"],
+    # 'criterion': ["friedman_mse",  "squared_error"],
     'random_state': [RANDOM_STATE],
+    'subsample': [0.6, 1],
 }
 
 xgboost_grid = {
@@ -99,12 +100,12 @@ lgbm_grid = {
 
 classifiers = [
     (KNeighborsClassifier(), knn_grid),
-    (SVC(), svm_grid),
+    # (SVC(), svm_grid),
     (LogisticRegression(), logistic_regression_grid),
     (MLPClassifier(), mlp_grid),
     (RandomForestClassifier(), rfc_grid),
-    # (GradientBoostingClassifier(), gbc_grid),
-    (XGBClassifier(), xgboost_grid),
+    (GradientBoostingClassifier(), gbc_grid),
+    # (XGBClassifier(), xgboost_grid),
     # (LGBMClassifier(), lgbm_grid)
 ]
 

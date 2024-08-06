@@ -61,6 +61,7 @@ def fit_on_train_data(Xs_train, Ys_train, output_dir, n_jobs):
             grid_results = pd.DataFrame.from_dict(grid.cv_results_)
             grid_results.to_csv(os.path.join(output_dir, f'{class_name}_grid_results.csv'))
             best_classifiers[class_name] = grid.best_estimator_
+            joblib.dump(grid.best_estimator_, os.path.join(output_dir, f"best_{class_name}.pkl"))
 
             # Note: grid.best_score_ == grid_results['mean_test_mcc'][grid.best_index_] (the mean cross-validated score of the best_estimator)
             logging.info(f"Best params: {grid.best_params_}, Best index: {grid.best_index_}, Best score: {grid.best_score_}")
