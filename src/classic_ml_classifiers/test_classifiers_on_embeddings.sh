@@ -2,7 +2,7 @@
 #SBATCH --job-name=test_classifiers             # Job name
 #SBATCH --account=gpu-research          # Account name for billing
 #SBATCH --partition=killable              # Partition name
-#SBATCH --time=02:40:00               # Time allotted for the job (hh:mm:ss)
+#SBATCH --time=06:40:00               # Time allotted for the job (hh:mm:ss)
 #SBATCH --ntasks=1                    # Number of tasks (processes)
 #SBATCH --cpus-per-task=1             # Number of CPU cores per task
 #SBATCH --mem-per-cpu=4G              # Memory per CPU core
