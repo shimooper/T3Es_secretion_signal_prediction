@@ -14,7 +14,7 @@ import torch.multiprocessing as mp
 
 HOME_DIR = os.path.expanduser("~")
 PRETRAINED_MODEL_DIR = f"{HOME_DIR}/secretion_signal_prediction/models/prot_t5_xl_uniref50_01_08_2024/"
-TRAINED_CLASSIFIER_FILE = f"{HOME_DIR}/secretion_signal_prediction/outputs_classifier/model.pkl"
+TRAINED_CLASSIFIER_FILE = f"{HOME_DIR}/secretion_signal_prediction/outputs_new/final_results/trained_head/model.pkl"
 
 
 def get_embeddings_internal(model, tokenizer, sequences, batch_size):
