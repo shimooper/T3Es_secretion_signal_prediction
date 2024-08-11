@@ -2,7 +2,7 @@
 #SBATCH --job-name=predict             # Job name
 #SBATCH --account=power-general-users          # Account name for billing
 #SBATCH --partition=power-general              # Partition name
-#SBATCH --time=10:40:00               # Time allotted for the job (hh:mm:ss)
+#SBATCH --time=01:00:00               # Time allotted for the job (hh:mm:ss)
 #SBATCH --ntasks=1                    # Number of tasks (processes)
 #SBATCH --cpus-per-task=10             # Number of CPU cores per task
 #SBATCH --mem-per-cpu=4G              # Memory per CPU core
@@ -22,5 +22,5 @@ source ~/miniconda3/etc/profile.d/conda.sh
 conda activate secretion_signal
 export PATH=$CONDA_PREFIX/bin:$PATH
 
-python ~/secretion_signal_prediction/src/inference/predict_secretion_signal.py --input_fasta_file ~/secretion_signal_prediction/src/tests/test_inference/negative_Xanthomonas_data.fasta --output_file ~/secretion_signal_prediction/src/tests/test_inference/predictions_esm33.csv
-python ~/secretion_signal_prediction/src/inference/predict_secretion_signal.py --input_fasta_file ~/secretion_signal_prediction/src/tests/test_inference/negative_Xanthomonas_data.fasta --output_file ~/secretion_signal_prediction/src/tests/test_inference/predictions_pt5.csv --use_large_model
+python ~/secretion_signal_prediction/src/inference/predict_secretion_signal.py --input_fasta_file ~/secretion_signal_prediction/src/tests/test_inference/positive_test_data.fasta --output_file ~/secretion_signal_prediction/src/tests/test_inference/predictions_esm33.csv
+python ~/secretion_signal_prediction/src/inference/predict_secretion_signal.py --input_fasta_file ~/secretion_signal_prediction/src/tests/test_inference/positive_test_data.fasta --use_large_model --output_file ~/secretion_signal_prediction/src/tests/test_inference/predictions_pt5.csv

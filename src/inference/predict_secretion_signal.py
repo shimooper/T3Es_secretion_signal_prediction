@@ -75,7 +75,7 @@ def read_fasta_file(file_path):
     sequences = {}
     for seq_record in SeqIO.parse(file_path, 'fasta'):
         sequences[seq_record.id] = str(seq_record.seq)
-    df = pd.DataFrame(sequences.items(), columns=['id', 'sequence'])
+    df = pd.DataFrame(sequences.items(), columns=['locus', 'sequence'])
     return df
 
 
@@ -112,7 +112,7 @@ def main(args):
     predictions = model.predict_proba(embeddings)
     logger.info(f'Predictions done, time elapsed: {time.time() - start_time:.2f} seconds')
 
-    df['probability'] = predictions[:, 1]
+    df['T3_signal'] = predictions[:, 1]
     df.drop(columns=['sequence'], inplace=True)
 
     df.to_csv(output_file, index=False)
