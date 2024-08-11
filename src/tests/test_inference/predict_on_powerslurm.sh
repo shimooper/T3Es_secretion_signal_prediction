@@ -2,7 +2,7 @@
 #SBATCH --job-name=predict             # Job name
 #SBATCH --account=power-general-users          # Account name for billing
 #SBATCH --partition=power-general              # Partition name
-#SBATCH --time=02:40:00               # Time allotted for the job (hh:mm:ss)
+#SBATCH --time=10:40:00               # Time allotted for the job (hh:mm:ss)
 #SBATCH --ntasks=1                    # Number of tasks (processes)
 #SBATCH --cpus-per-task=1             # Number of CPU cores per task
 #SBATCH --mem-per-cpu=20G              # Memory per CPU core

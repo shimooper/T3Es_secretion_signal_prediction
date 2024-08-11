@@ -8,6 +8,7 @@ from Bio import SeqIO
 import joblib
 import logging
 import time
+from tqdm import tqdm
 from pathlib import Path
 from transformers import T5Tokenizer, T5EncoderModel
 import torch.multiprocessing as mp
@@ -24,7 +25,7 @@ def get_embeddings_internal(model, tokenizer, sequences, batch_size):
 
     embeddings = []
     with torch.no_grad():
-        for i in range(0, len(sequences), batch_size):
+        for i in tqdm(range(0, len(sequences), batch_size)):
             batch_input_ids = input_ids[i:i + batch_size]
             batch_attention_mask = attention_mask[i:i + batch_size]
             outputs = model(input_ids=batch_input_ids, attention_mask=batch_attention_mask)
