@@ -22,8 +22,4 @@ source ~/miniconda/etc/profile.d/conda.sh
 conda activate secretion_signal
 export PATH=$CONDA_PREFIX/bin:$PATH
 
-python ~/secretion_signal_prediction/src/inference/predict_secretion_signal.py --input_fasta_file ~/secretion_signal_prediction/src/tests/test_inference/negative_Xanthomonas_data.fasta --batch_size 4 --output_file ~/secretion_signal_prediction/src/tests/test_inference/predictions_4_batch_size.csv
-python ~/secretion_signal_prediction/src/inference/predict_secretion_signal.py --input_fasta_file ~/secretion_signal_prediction/src/tests/test_inference/negative_Xanthomonas_data.fasta --batch_size 8 --output_file ~/secretion_signal_prediction/src/tests/test_inference/predictions_8_batch_size.csv
-python ~/secretion_signal_prediction/src/inference/predict_secretion_signal.py --input_fasta_file ~/secretion_signal_prediction/src/tests/test_inference/negative_Xanthomonas_data.fasta --batch_size 2 --output_file ~/secretion_signal_prediction/src/tests/test_inference/predictions_2_batch_size.csv
-python ~/secretion_signal_prediction/src/inference/predict_secretion_signal.py --input_fasta_file ~/secretion_signal_prediction/src/tests/test_inference/negative_Xanthomonas_data.fasta --batch_size 1 --output_file ~/secretion_signal_prediction/src/tests/test_inference/predictions_1_batch_size.csv
-python ~/secretion_signal_prediction/src/inference/predict_secretion_signal.py --input_fasta_file ~/secretion_signal_prediction/src/tests/test_inference/negative_Xanthomonas_data.fasta --batch_size 16 --output_file ~/secretion_signal_prediction/src/tests/test_inference/predictions_16_batch_size.csv
+python ~/secretion_signal_prediction/src/inference/predict_secretion_signal.py --input_fasta_file ~/secretion_signal_prediction/src/tests/test_inference/negative_Xanthomonas_data.fasta --output_file ~/secretion_signal_prediction/src/tests/test_inference/predictions_esm33.csv
