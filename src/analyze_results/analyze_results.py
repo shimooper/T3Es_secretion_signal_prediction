@@ -69,7 +69,8 @@ def plot_full(all_results_df):
 
 
 def plot_for_paper(all_results_df):
-    fig, axs = plt.subplots(2, 2, figsize=(20, 15))
+    plt.rcParams.update({'font.size': 18})
+    fig, axs = plt.subplots(2, 2, figsize=(22, 16))
 
     sns.stripplot(data=all_results_df, x='model_id', y='test_mcc', hue='training_mode', ax=axs[0, 0])
     if ADD_BASELINES_TO_FIG:
@@ -91,11 +92,16 @@ def plot_for_paper(all_results_df):
         axs[1, 1].axhline(y=0.77, color='r', linestyle='--', linewidth=1, label='y=0.77')
         axs[1, 1].axhline(y=0.87, color='r', linestyle='--', linewidth=1, label='y=0.87')
 
-    fig.text(0.06, 0.72, 'Test', va='center', rotation='vertical', fontsize=14)
-    fig.text(0.06, 0.3, 'Test Xantomonas', va='center', rotation='vertical', fontsize=14)
+    fig.text(0.06, 0.73, 'Test', va='center', rotation='vertical', fontsize=24)
+    fig.text(0.06, 0.26, 'Test Xantomonas', va='center', rotation='vertical', fontsize=24)
 
-    fig.text(0.3, 0.90, 'MCC', ha='center', fontsize=14)
-    fig.text(0.73, 0.90, 'AUPRC', ha='center', fontsize=14)
+    fig.text(0.3, 0.90, 'MCC', ha='center', fontsize=24)
+    fig.text(0.73, 0.90, 'AUPRC', ha='center', fontsize=24)
+
+    for i, j in [(0, 0), (0, 1), (1, 0), (1, 1)]:
+        axs[i, j].tick_params(axis='x', rotation=45)
+
+    plt.subplots_adjust(hspace=0.6)
 
     if ADD_BASELINES_TO_FIG:
         plt.savefig(Path(FINAL_RESULTS) / 'results_with_hlines_for_paper.png')
