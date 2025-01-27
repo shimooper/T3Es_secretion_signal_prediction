@@ -12,22 +12,28 @@ from pathlib import Path
 from transformers import T5Tokenizer, T5EncoderModel, AutoTokenizer, AutoModel
 
 
-HOME_DIR = os.path.expanduser("~")
+PROJECT_ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-PRETRAINED_MODEL_DIR = {
-    'pt5': f"{HOME_DIR}/secretion_signal_prediction/models/prot_t5_xl_uniref50_01_08_2024/",
-    'esm33': f"{HOME_DIR}/secretion_signal_prediction/models/esm2_t33_650M_UR50D_01_08_2024/"
+PRETRAINED_MODEL_DISK_DIR = {
+    'pt5': f"{PROJECT_ROOT_DIR}/models/prot_t5_xl_uniref50_01_08_2024/",
+    'esm33': f"{PROJECT_ROOT_DIR}/models/esm2_t33_650M_UR50D_01_08_2024/"
+}
+
+PRETRAINED_MODEL_HUGGINGFACE_NAME = {
+    'pt5': 'Rostlab/prot_t5_xl_uniref50',
+    'esm33': 'facebook/esm2_t33_650M_UR50D'
 }
 
 TRAINED_HEAD_DIR = {
-    'pt5': f"{HOME_DIR}/secretion_signal_prediction/outputs_new/final_results/trained_pt5_head/model.pkl",
-    'esm33': f"{HOME_DIR}/secretion_signal_prediction/outputs_new/final_results/trained_esm33_head/model.pkl"
+    'pt5': f"{PROJECT_ROOT_DIR}/outputs_new/final_results/trained_pt5_head/model.pkl",
+    'esm33': f"{PROJECT_ROOT_DIR}/outputs_new/final_results/trained_esm33_head/model.pkl"
 }
 
 
-def get_pt5_embeddings(sequences, batch_size=4):
-    tokenizer = T5Tokenizer.from_pretrained(PRETRAINED_MODEL_DIR['pt5'], do_lower_case=False)
-    model = T5EncoderModel.from_pretrained(PRETRAINED_MODEL_DIR['pt5'])
+def get_pt5_embeddings(sequences, load_llm_from_disk, batch_size=4):
+    pretrained_model_path = PRETRAINED_MODEL_DISK_DIR['pt5'] if load_llm_from_disk else PRETRAINED_MODEL_HUGGINGFACE_NAME['pt5']
+    tokenizer = T5Tokenizer.from_pretrained(pretrained_model_path, do_lower_case=False)
+    model = T5EncoderModel.from_pretrained(pretrained_model_path)
     model.eval()
 
     # replace all rare/ambiguous amino acids by X and introduce white-space between all amino acids
@@ -51,9 +57,10 @@ def get_pt5_embeddings(sequences, batch_size=4):
     return Xs
 
 
-def get_esm33_embeddings(sequences, batch_size=4):
-    tokenizer = AutoTokenizer.from_pretrained(PRETRAINED_MODEL_DIR['esm33'])
-    model = AutoModel.from_pretrained(PRETRAINED_MODEL_DIR['esm33'])
+def get_esm33_embeddings(sequences, load_llm_from_disk, batch_size=4):
+    pretrained_model_path = PRETRAINED_MODEL_DISK_DIR['esm33'] if load_llm_from_disk else PRETRAINED_MODEL_HUGGINGFACE_NAME['esm33']
+    tokenizer = AutoTokenizer.from_pretrained(pretrained_model_path)
+    model = AutoModel.from_pretrained(pretrained_model_path)
     model.eval()
 
     tokenized_sequences = tokenizer(list(sequences), return_tensors="pt")
@@ -90,27 +97,34 @@ def main(args):
     if output_file is None:
         output_file = os.path.join(os.path.dirname(input_fasta_file), f'{input_fasta_file_name}_predictions.csv')
 
+    logger = logging.getLogger('main')
     log_path = os.path.join(os.path.dirname(output_file), f'{input_fasta_file_name}_model_{model_name}_batch_{args.batch_size}_log.txt')
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                        handlers=[logging.FileHandler(log_path)])
-    logger = logging.getLogger(__name__)
+    file_handler = logging.FileHandler(log_path, mode='a')
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+    logger.setLevel(logging.INFO)
 
     logger.info(f'Reading sequences from {input_fasta_file}...')
+    reading_sequences_start_time = time.time()
     df = read_fasta_file(input_fasta_file)
-    logger.info(f'Read {len(df)} sequences, time elapsed: {time.time() - start_time:.2f} seconds')
+    logger.info(f'Read {len(df)} sequences, time elapsed: {time.time() - reading_sequences_start_time:.2f} seconds')
 
-    logger.info(f'Calculating embeddings for {len(df)} sequences using model {model_name} and batch size {args.batch_size}...')
+    logger.info(f'Calculating embeddings for {len(df)} sequences using model {model_name}, '
+                f'batch size {args.batch_size} and load_llm_from_disk={args.load_llm_from_disk}...')
+    calc_embeddings_start_time = time.time()
 
     if model_name == 'pt5':
-        embeddings = get_pt5_embeddings(df['sequence'], args.batch_size)
+        embeddings = get_pt5_embeddings(df['sequence'], args.load_llm_from_disk, args.batch_size)
     else:
-        embeddings = get_esm33_embeddings(df['sequence'], args.batch_size)
-    logger.info(f'Embeddings calculated, time elapsed: {time.time() - start_time:.2f} seconds')
+        embeddings = get_esm33_embeddings(df['sequence'], args.load_llm_from_disk, args.batch_size)
+    logger.info(f'Embeddings calculated, time elapsed: {time.time() - calc_embeddings_start_time:.2f} seconds')
 
     logger.info(f'Predicting probabilities using the trained classifier...')
+    predict_probabilities_start_time = time.time()
     model = joblib.load(TRAINED_HEAD_DIR[model_name])
     predictions = model.predict_proba(embeddings)
-    logger.info(f'Predictions done, time elapsed: {time.time() - start_time:.2f} seconds')
+    logger.info(f'Predictions done, time elapsed: {time.time() - predict_probabilities_start_time:.2f} seconds')
 
     df['T3_signal'] = predictions[:, 1]
     df.drop(columns=['sequence'], inplace=True)
@@ -130,6 +144,10 @@ if __name__ == '__main__':
     parser.add_argument('--use_large_model', help='Whether to use the large model (prot_t5_xl_uniref50_01_08_2024) or '
                                                   'the small model (esm2_t33_650M_UR50D_01_08_2024). By default, use'
                                                   'the small model.', action='store_true')
+    parser.add_argument('--load_llm_from_disk', help='Whether to load the llm from disk, or from hugging face.'
+                                                     'If load_llm_from_disk is True, the models are assumed to be in '
+                                                     'T3Es_secretion_signal_prediction/models/ directory.',
+                        action='store_true')
 
     args = parser.parse_args()
     main(args)

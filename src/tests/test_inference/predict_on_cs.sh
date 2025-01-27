@@ -2,10 +2,10 @@
 #SBATCH --job-name=predict             # Job name
 #SBATCH --account=gpu-research          # Account name for billing
 #SBATCH --partition=cpu-killable              # Partition name
-#SBATCH --time=02:40:00               # Time allotted for the job (hh:mm:ss)
+#SBATCH --time=03:00:00               # Time allotted for the job (hh:mm:ss)
 #SBATCH --ntasks=1                    # Number of tasks (processes)
 #SBATCH --cpus-per-task=1             # Number of CPU cores per task
-#SBATCH --mem-per-cpu=20G              # Memory per CPU core
+#SBATCH --mem=20G              # Memory
 #SBATCH --output=/home/ai_center/ai_users/yairshimony/secretion_signal_prediction/src/tests/test_inference/%j.out        # Standard output and error log (%j expands to jobId)
 #SBATCH --error=/home/ai_center/ai_users/yairshimony/secretion_signal_prediction/src/tests/test_inference/%j.err         # Separate file for standard error
 
@@ -22,4 +22,4 @@ source ~/miniconda/etc/profile.d/conda.sh
 conda activate secretion_signal
 export PATH=$CONDA_PREFIX/bin:$PATH
 
-python ~/secretion_signal_prediction/src/inference/predict_secretion_signal.py --input_fasta_file ~/secretion_signal_prediction/src/tests/test_inference/negative_Xanthomonas_data.fasta --output_file ~/secretion_signal_prediction/src/tests/test_inference/predictions_esm33.csv
+python ~/secretion_signal_prediction/src/inference/predict_secretion_signal.py --input_fasta_file ~/secretion_signal_prediction/src/tests/test_inference/positive_test_data.fasta --use_large_model
