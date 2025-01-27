@@ -1,6 +1,7 @@
 # T3Es_secretion_signal_prediction
 
-This repository contains the code for predicting the T3Es secretion signal in bacterial proteins.
+This repository contains the code for predicting the T3Es secretion signal in bacterial proteins,
+based on trained models, as described in the paper: Effectidor II.
 
 ## Requirements
 
