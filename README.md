@@ -4,7 +4,7 @@ This repository contains the code for predicting the T3Es secretion signal in ba
 
 ## Requirements
 
-Create a conda environment using env.yml, and activate it.
+Clone the repository, create a conda environment using env.yml, and activate it.
 
 ## Usage
 
