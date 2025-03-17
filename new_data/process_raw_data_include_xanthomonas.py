@@ -65,7 +65,7 @@ def cluster_records(logger, input_fasta_path, output_dir, output_fasta_path, min
 def find_homologs(logger, query_fasta_path, target_fasta_path, output_fasta_path, tmp_dir_path, min_e_value,
                   min_coverage, min_identity):
     cmd = f'mmseqs easy-search {query_fasta_path} {target_fasta_path} {output_fasta_path} {tmp_dir_path} ' \
-          f'-e {min_e_value} --min-seq-id {min_identity} -c {min_coverage} --cov-mode 0 --threads 1 ' \
+          f'-e {min_e_value} --min-seq-id {min_identity} -c {min_coverage} --threads 1 ' \
           f'--format-output {MMSEQS_OUTPUT_FORMAT}'
     run_command(logger, cmd)
 
@@ -107,11 +107,32 @@ def split_fasta(logger, input_fasta, output_train_fasta, output_test_fasta, test
     logger.info(f"Split {len(sequences)} sequences from {input_fasta} into {len(train_seqs)} train and {len(test_seqs)} test sequences.")
 
 
+def unite_fasta_files(logger, fasta1, fasta2, output_fasta):
+    sequences = []
+
+    for fasta in [fasta1, fasta2]:
+        sequences.extend(list(SeqIO.parse(fasta, "fasta")))
+
+    with open(output_fasta, "w") as output:
+        SeqIO.write(sequences, output, "fasta")
+
+
+def verify_train_and_test_non_homologs(logger, positive_train_fasta, positive_test_fasta, negative_train_fasta,
+                                       negative_test_fasta, output_dir, min_e_value, min_coverage, min_identity):
+    all_train_records = output_dir / 'all_train_records.faa'
+    unite_fasta_files(logger, positive_train_fasta, negative_train_fasta, all_train_records)
+    all_test_records = output_dir / 'all_test_records.faa'
+    unite_fasta_files(logger, positive_test_fasta, negative_test_fasta, all_test_records)
+
+    find_homologs(logger, all_train_records, all_test_records, output_dir / 'train_test_homologs.m8',
+                  output_dir / 'tmp', min_e_value, min_coverage, min_identity)
+
+
 def main():
     # Init: Parse arguments, and create outputs directory and logger, and read sequences.
     parser = argparse.ArgumentParser()
     parser.add_argument('--outputs_dir_name', default='outputs', help='Directory name to save outputs')
-    parser.add_argument('--min_e_value', default=1e-3, type=float, help='Minimum e-value for homologs/clustering')
+    parser.add_argument('--min_e_value', default=1e-4, type=float, help='Minimum e-value for homologs/clustering')
     parser.add_argument('--min_coverage', default=0.6, type=float, help='Minimum coverage for homologs/clustering')
     parser.add_argument('--min_identity', default=0.5, type=float, help='Minimum identity for homologs/clustering')
     parser.add_argument('--test_ratio', default=0.2, type=float, help='Ratio of test data')
@@ -161,6 +182,15 @@ def main():
     split_fasta(logger, representatives_dir / 'ecoli_representatives.faa', final_datasets_dir / 'negative_train_data.fasta',
                 final_datasets_dir / 'negative_test_data.fasta', args.test_ratio)
 
+    # Step 5: Verify non-homology between train and test
+    logger.info('Step 5: Verify non-homology between train and test...')
+    verify_non_homologs_dir = outputs_dir / '5__Verify_Train_Test_Non_Homologs'
+    verify_non_homologs_dir.mkdir(exist_ok=True, parents=True)
+    verify_train_and_test_non_homologs(logger, final_datasets_dir / 'positive_train_data.fasta',
+                                       final_datasets_dir / 'positive_test_data.fasta',
+                                       final_datasets_dir / 'negative_train_data.fasta',
+                                       final_datasets_dir / 'negative_test_data.fasta', verify_non_homologs_dir,
+                                       args.min_e_value, args.min_coverage, args.min_identity)
 
 if __name__ == '__main__':
     main()
