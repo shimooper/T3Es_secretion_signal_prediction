@@ -62,10 +62,10 @@ rfc_grid = {
 
 gbc_grid = {
     'learning_rate': [0.05, 0.1],
-    'n_estimators': [10, 50, 200],
+    'n_estimators': [10, 50],
     # 'min_samples_split': [2, 5, 10],
     # 'min_samples_leaf': [1, 4],
-    'max_depth': [3, 5, 10],
+    'max_depth': [3, 10],
     # "max_features": ["log2", "sqrt"],
     # 'criterion': ["friedman_mse",  "squared_error"],
     'random_state': [RANDOM_STATE],

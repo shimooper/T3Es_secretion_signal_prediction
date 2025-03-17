@@ -32,7 +32,7 @@ def calc_embeddings_of_fasta_file_with_huggingface_model(model_name, fasta_file_
     sequences = read_sequences_from_fasta_file(fasta_file_path)
 
     model.eval()
-    tokenized_sequences = tokenizer(sequences, return_tensors="pt")
+    tokenized_sequences = tokenizer(sequences, return_tensors="pt", padding=True)
 
     embeddings = []
     with torch.no_grad():

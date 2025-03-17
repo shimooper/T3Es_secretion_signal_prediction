@@ -3,7 +3,7 @@ from sklearn.model_selection import train_test_split
 
 from .consts import (FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN_FILE,
                     FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE,
-                    FIXED_POSITIVE_XANTOMONAS_FILE, FIXED_NEGATIVE_XANTOMONAS_FILE, RANDOM_STATE)
+                    RANDOM_STATE)
 
 
 def read_fasta_file(file_path):
@@ -41,11 +41,8 @@ def read_test_data(split):
     if split == 'test':
         positive_test = read_sequences_from_fasta_file(FIXED_POSITIVE_TEST_FILE)
         negative_test = read_sequences_from_fasta_file(FIXED_NEGATIVE_TEST_FILE)
-    elif split == 'xantomonas':
-        positive_test = read_sequences_from_fasta_file(FIXED_POSITIVE_XANTOMONAS_FILE)
-        negative_test = read_sequences_from_fasta_file(FIXED_NEGATIVE_XANTOMONAS_FILE)
     else:
-        raise ValueError(f"split must be one of ['test', 'xantomonas'], got {split}")
+        raise ValueError(f"split must be one of ['test'], got {split}")
 
     test_labels = [1] * len(positive_test) + [0] * len(negative_test)
     test_sequences = positive_test + negative_test

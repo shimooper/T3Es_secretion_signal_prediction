@@ -28,4 +28,4 @@ python train_classifiers_on_embeddings.py --model_id esm_12 --n_jobs $SLURM_JOB_
 python train_classifiers_on_embeddings.py --model_id esm_30 --n_jobs $SLURM_JOB_CPUS_PER_NODE
 python train_classifiers_on_embeddings.py --model_id esm_33 --n_jobs $SLURM_JOB_CPUS_PER_NODE
 python train_classifiers_on_embeddings.py --model_id esm_36 --n_jobs $SLURM_JOB_CPUS_PER_NODE
-python train_classifiers_on_embeddings.py --model_id pt5 --n_jobs $SLURM_JOB_CPUS_PER_NODE
+#python train_classifiers_on_embeddings.py --model_id pt5 --n_jobs $SLURM_JOB_CPUS_PER_NODE
