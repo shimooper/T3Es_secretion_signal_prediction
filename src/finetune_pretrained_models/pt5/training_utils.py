@@ -16,7 +16,7 @@ from src.finetune_pretrained_models.huggingface_utils import CalcMetricsOnTrainS
 
 
 WANDB_KEY = "64c3807b305e96e26550193f5860452b88d85999"
-WANDB_PROJECT = "type3_secretion_signal_pt5"
+WANDB_PROJECT = "t3e_secretion_signal_pt5_new_data"
 FINETUNED_WEIGHTS_FILE = "PT5_GB1_finetuned.pth"
 
 # Deepspeed config for optimizer CPU offload

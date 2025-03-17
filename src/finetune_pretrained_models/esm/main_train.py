@@ -14,7 +14,7 @@ from src.utils.read_fasta_utils import read_train_data
 from src.finetune_pretrained_models.huggingface_utils import CalcMetricsOnTrainSetCallback, compute_metrics
 
 WANDB_KEY = "64c3807b305e96e26550193f5860452b88d85999"
-WANDB_PROJECT = "type3_secretion_signal_esm"
+WANDB_PROJECT = "t3e_secretion_signal_esm_new_data"
 LEARNING_RATE = 2e-5
 
 
