@@ -105,7 +105,6 @@ def fit_on_train_data(Xs_train, Ys_train, output_dir, n_jobs):
     return best_classifier_metrics
 
 
-
 def main(model_id, n_jobs):
     embeddings_dir = os.path.join(EMBEDDINGS_DIR, model_id)
     classifiers_output_dir = os.path.join(CLASSIFIERS_OUTPUT_DIR, model_id)

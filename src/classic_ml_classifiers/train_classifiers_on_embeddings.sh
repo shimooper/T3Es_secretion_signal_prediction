@@ -4,10 +4,10 @@
 #SBATCH --partition=killable              # Partition name
 #SBATCH --time=10:00:00               # Time allotted for the job (hh:mm:ss)
 #SBATCH --ntasks=1                    # Number of tasks (processes)
-#SBATCH --cpus-per-task=60             # Number of CPU cores per task
-#SBATCH --mem-per-cpu=2G              # Memory per CPU core
-#SBATCH --output=/home/ai_center/ai_users/yairshimony/secretion_signal_prediction/outputs_new/%j.out        # Standard output and error log (%j expands to jobId)
-#SBATCH --error=/home/ai_center/ai_users/yairshimony/secretion_signal_prediction/outputs_new/%j.err         # Separate file for standard error
+#SBATCH --cpus-per-task=30             # Number of CPU cores per task
+#SBATCH --mem=20G              # Memory per CPU core
+#SBATCH --output=/home/ai_center/ai_users/yairshimony/secretion_signal_prediction/outputs_new_data_after_revision/%j.out        # Standard output and error log (%j expands to jobId)
+#SBATCH --error=/home/ai_center/ai_users/yairshimony/secretion_signal_prediction/outputs_new_data_after_revision/%j.err         # Separate file for standard error
 
 export HOME=/home/ai_center/ai_users/yairshimony
 
@@ -23,9 +23,9 @@ conda activate secretion_signal
 export PATH=$CONDA_PREFIX/bin:$PATH
 
 cd ~/secretion_signal_prediction/src/classic_ml_classifiers
-python train_classifiers_on_embeddings.py --model_id esm_6 --n_jobs 60
-python train_classifiers_on_embeddings.py --model_id esm_12 --n_jobs 60
-python train_classifiers_on_embeddings.py --model_id esm_30 --n_jobs 60
-python train_classifiers_on_embeddings.py --model_id esm_33 --n_jobs 60
-python train_classifiers_on_embeddings.py --model_id esm_36 --n_jobs 60
-python train_classifiers_on_embeddings.py --model_id pt5 --n_jobs 60
+python train_classifiers_on_embeddings.py --model_id esm_6 --n_jobs $SLURM_JOB_CPUS_PER_NODE
+python train_classifiers_on_embeddings.py --model_id esm_12 --n_jobs $SLURM_JOB_CPUS_PER_NODE
+python train_classifiers_on_embeddings.py --model_id esm_30 --n_jobs $SLURM_JOB_CPUS_PER_NODE
+python train_classifiers_on_embeddings.py --model_id esm_33 --n_jobs $SLURM_JOB_CPUS_PER_NODE
+python train_classifiers_on_embeddings.py --model_id esm_36 --n_jobs $SLURM_JOB_CPUS_PER_NODE
+python train_classifiers_on_embeddings.py --model_id pt5 --n_jobs $SLURM_JOB_CPUS_PER_NODE

@@ -58,10 +58,9 @@ def main(model_id):
 
     model = joblib.load(os.path.join(classifiers_dir, f'model.pkl'))
     test_results = test_on_test_data(logger, model_id, model, 'test')
-    xantomonas_results = test_on_test_data(logger, model_id, model,  'xantomonas')
 
     train_results = pd.read_csv(os.path.join(classifiers_dir, 'best_classifier_train_results.csv'))
-    all_results = pd.concat([train_results, test_results, xantomonas_results], axis=1)
+    all_results = pd.concat([train_results, test_results], axis=1)
 
     all_results.to_csv(os.path.join(classifiers_dir, 'best_classifier_all_results.csv'), index=False)
 

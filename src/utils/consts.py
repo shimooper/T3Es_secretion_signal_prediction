@@ -3,11 +3,10 @@ from pathlib import Path
 
 PROJECT_BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-DATASETS_ORIGINAL_DIR = os.path.join(PROJECT_BASE_DIR, 'data', 'datasets_original')
-DATASETS_FIXED_DIR = os.path.join(PROJECT_BASE_DIR, 'data', 'datasets_fixed')
+DATASETS_DIR = os.path.join(PROJECT_BASE_DIR, 'new_data', 'new_data_processed')
 PRETRAINED_MODELS_DIR = os.path.join(PROJECT_BASE_DIR, 'models')
 
-OUTPUTS_DIR = os.path.join(PROJECT_BASE_DIR, 'outputs_new')
+OUTPUTS_DIR = os.path.join(PROJECT_BASE_DIR, 'outputs_new_data_after_revision')
 EMBEDDINGS_DIR = os.path.join(OUTPUTS_DIR, 'pretrained_embeddings')
 CLASSIFIERS_OUTPUT_DIR = os.path.join(OUTPUTS_DIR, 'embeddings_classifiers')
 FINETUNED_MODELS_OUTPUT_DIR = os.path.join(OUTPUTS_DIR, 'finetuned_models')
@@ -41,20 +40,10 @@ RANDOM_STATE = 42
 FINETUNE_NUMBER_OF_EPOCHS = 10
 PROTEIN_BERT_MODEL_NAME = 'epoch_92400_sample_23500000.pkl'
 
-ORIGINAL_POSITIVE_TRAIN_FILE = os.path.join(DATASETS_ORIGINAL_DIR, "positive_train_data.fasta")
-ORIGINAL_NEGATIVE_TRAIN_FILE = os.path.join(DATASETS_ORIGINAL_DIR, "negative_train_data.fasta")
 
-ORIGINAL_POSITIVE_TEST_FILE = os.path.join(DATASETS_ORIGINAL_DIR, "positive_test_data.fasta")
-ORIGINAL_NEGATIVE_TEST_FILE = os.path.join(DATASETS_ORIGINAL_DIR, "negative_test_data.fasta")
+FIXED_POSITIVE_TRAIN_FILE = os.path.join(DATASETS_DIR, "positive_train_data.fasta")
+FIXED_NEGATIVE_TRAIN_FILE = os.path.join(DATASETS_DIR, "negative_train_data.fasta")
 
-ORIGINAL_POSITIVE_XANTOMONAS_FILE = os.path.join(DATASETS_ORIGINAL_DIR, "positive_Xantomonas_data.fasta")
-ORIGINAL_NEGATIVE_XANTOMONAS_FILE = os.path.join(DATASETS_ORIGINAL_DIR, "negative_Xanthomonas_data.fasta")
+FIXED_POSITIVE_TEST_FILE = os.path.join(DATASETS_DIR, "positive_test_data.fasta")
+FIXED_NEGATIVE_TEST_FILE = os.path.join(DATASETS_DIR, "negative_test_data.fasta")
 
-FIXED_POSITIVE_TRAIN_FILE = os.path.join(DATASETS_FIXED_DIR, "positive_train_data.fasta")
-FIXED_NEGATIVE_TRAIN_FILE = os.path.join(DATASETS_FIXED_DIR, "negative_train_data.fasta")
-
-FIXED_POSITIVE_TEST_FILE = os.path.join(DATASETS_FIXED_DIR, "positive_test_data.fasta")
-FIXED_NEGATIVE_TEST_FILE = os.path.join(DATASETS_FIXED_DIR, "negative_test_data.fasta")
-
-FIXED_POSITIVE_XANTOMONAS_FILE = os.path.join(DATASETS_FIXED_DIR, "positive_Xantomonas_data.fasta")
-FIXED_NEGATIVE_XANTOMONAS_FILE = os.path.join(DATASETS_FIXED_DIR, "negative_Xanthomonas_data.fasta")
