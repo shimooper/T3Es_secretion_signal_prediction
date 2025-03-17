@@ -4,8 +4,8 @@
 #SBATCH --partition=killable              # Partition name
 #SBATCH --time=10:00:00               # Time allotted for the job (hh:mm:ss)
 #SBATCH --ntasks=1                    # Number of tasks (processes)
-#SBATCH --cpus-per-task=30             # Number of CPU cores per task
-#SBATCH --mem=20G              # Memory per CPU core
+#SBATCH --cpus-per-task=40             # Number of CPU cores per task
+#SBATCH --mem=64G              # Memory per CPU core
 #SBATCH --output=/home/ai_center/ai_users/yairshimony/secretion_signal_prediction/outputs_new_data_after_revision/%j.out        # Standard output and error log (%j expands to jobId)
 #SBATCH --error=/home/ai_center/ai_users/yairshimony/secretion_signal_prediction/outputs_new_data_after_revision/%j.err         # Separate file for standard error
 

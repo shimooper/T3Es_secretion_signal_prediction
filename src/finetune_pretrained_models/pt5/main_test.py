@@ -78,12 +78,6 @@ def main():
     test_scores = evaluate_model_on_dataset(model, tokenizer, test_sequences, test_labels, device)
     test_elapsed_time = time.time() - start_test_time
 
-    start_xantomonas_time = time.time()
-    xantomonas_sequences, xantomonas_labels = read_test_data('xantomonas')
-    print("Evaluating model on xantomonas data...")
-    xantomonas_scores = evaluate_model_on_dataset(model, tokenizer, xantomonas_sequences, xantomonas_labels, device)
-    xantomonas_elapsed_time = time.time() - start_xantomonas_time
-
     all_scores = {
         'train_mcc': [train_scores['matthews_correlation']],
         'train_auprc': [train_scores['auprc']],
@@ -92,9 +86,6 @@ def main():
         'test_mcc': [test_scores['matthews_correlation']],
         'test_auprc': [test_scores['auprc']],
         'test_elapsed_time': [test_elapsed_time],
-        'xantomonas_mcc': [xantomonas_scores['matthews_correlation']],
-        'xantomonas_auprc': [xantomonas_scores['auprc']],
-        'xantomonas_elapsed_time': [xantomonas_elapsed_time],
         'model_id': [model_id],
         'training_mode': ['finetune'],
         'number_of_parameters (millions)': MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION[model_id]

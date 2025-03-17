@@ -75,17 +75,11 @@ def main():
     test_mcc, test_auprc = evaluate_on_dataset(model_generator, input_encoder, test_sequences, test_labels)
     test_elapsed_time = timer() - start_test_time
 
-    start_xantomonas_time = timer()
-    xantomonas_sequences, xantomonas_labels = read_test_data(split='xantomonas')
-    xantomonas_mcc, xantomonas_auprc = evaluate_on_dataset(model_generator, input_encoder, xantomonas_sequences, xantomonas_labels)
-    xantomonas_elapsed_time = timer() - start_xantomonas_time
-
     # Save the results
     results_df = pd.DataFrame({
         'train_mcc': [train_mcc], 'train_auprc': [train_auprc],
         'validation_mcc': [validation_mcc], 'validation_auprc': [validation_auprc],
         'test_mcc': [test_mcc], 'test_auprc': [test_auprc], 'test_elapsed_time': [test_elapsed_time],
-        'xantomonas_mcc': [xantomonas_mcc], 'xantomonas_auprc': [xantomonas_auprc], 'xantomonas_elapsed_time': [xantomonas_elapsed_time],
         'model_id': [model_id],
         'training_mode': ['finetune'],
         'number_of_parameters (millions)': MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION[model_id]
