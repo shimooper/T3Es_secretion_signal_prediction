@@ -65,7 +65,7 @@ def main(args):
         output_file = os.path.join(os.path.dirname(input_fasta_file), f'{input_fasta_file_name}_predictions.csv')
 
     logger = logging.getLogger('main')
-    log_path = os.path.join(os.path.dirname(output_file), f'{input_fasta_file_name}_batch_{args.batch_size}_log.txt')
+    log_path = os.path.join(os.path.dirname(output_file), f'secretion_signal_{input_fasta_file_name}_batch_{args.batch_size}_log.txt')
     file_handler = logging.FileHandler(log_path, mode='a')
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     file_handler.setFormatter(formatter)
