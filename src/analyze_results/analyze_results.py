@@ -12,12 +12,11 @@ from src.utils.consts import FINAL_RESULTS
 CLASSIC_CLASSIFIERS_PATH = Path(FINAL_RESULTS) / 'all_classic_classifiers_results.csv'
 FINETUNED_CLASSIFIERS_PATH = Path(FINAL_RESULTS) / 'all_finetuned_classifiers_results.csv'
 
-ADD_BASELINES_TO_FIG = True
-PLOT_FULL = False
+ADD_BASELINES_TO_FIG = False
 
 
 def plot_full(all_results_df):
-    fig, axs = plt.subplots(4, 3, figsize=(40, 35))
+    fig, axs = plt.subplots(3, 3, figsize=(35, 35))
 
     sns.stripplot(data=all_results_df, x='model_id', y='train_mcc', hue='training_mode', ax=axs[0, 0])
     sns.stripplot(data=all_results_df, x='model_id', y='train_auprc', hue='training_mode', ax=axs[0, 1])
@@ -40,23 +39,9 @@ def plot_full(all_results_df):
     sns.stripplot(data=all_results_df, x='model_id', y='test_elapsed_time', hue='training_mode', ax=axs[2, 2])
     axs[2, 2].set_ylabel('Test Elapsed time (in seconds)')
 
-    sns.stripplot(data=all_results_df, x='model_id', y='xantomonas_mcc', hue='training_mode', ax=axs[3, 0])
-    if ADD_BASELINES_TO_FIG:
-        axs[3, 0].axhline(y=0.71, color='r', linestyle='--', linewidth=1, label='y=0.71')
-        axs[3, 0].axhline(y=0.72, color='r', linestyle='--', linewidth=1, label='y=0.72')
-
-    sns.stripplot(data=all_results_df, x='model_id', y='xantomonas_auprc', hue='training_mode', ax=axs[3, 1])
-    if ADD_BASELINES_TO_FIG:
-        axs[3, 1].axhline(y=0.77, color='r', linestyle='--', linewidth=1, label='y=0.77')
-        axs[3, 1].axhline(y=0.87, color='r', linestyle='--', linewidth=1, label='y=0.87')
-
-    sns.stripplot(data=all_results_df, x='model_id', y='xantomonas_elapsed_time', hue='training_mode', ax=axs[3, 2])
-    axs[3, 2].set_ylabel('Xantomonas Elapsed time (in seconds)')
-
-    fig.text(0.06, 0.80, 'Train', va='center', rotation='vertical', fontsize=14)
-    fig.text(0.06, 0.60, 'Validation', va='center', rotation='vertical', fontsize=14)
-    fig.text(0.06, 0.40, 'Test', va='center', rotation='vertical', fontsize=14)
-    fig.text(0.06, 0.20, 'Test Xantomonas', va='center', rotation='vertical', fontsize=14)
+    fig.text(0.06, 0.75, 'Train', va='center', rotation='vertical', fontsize=14)
+    fig.text(0.06, 0.50, 'Validation', va='center', rotation='vertical', fontsize=14)
+    fig.text(0.06, 0.25, 'Test', va='center', rotation='vertical', fontsize=14)
 
     fig.text(0.25, 0.90, 'MCC', ha='center', fontsize=14)
     fig.text(0.5, 0.90, 'AUPRC', ha='center', fontsize=14)
@@ -70,36 +55,27 @@ def plot_full(all_results_df):
 
 def plot_for_paper(all_results_df):
     plt.rcParams.update({'font.size': 18})
-    fig, axs = plt.subplots(2, 2, figsize=(22, 16))
+    fig, axs = plt.subplots(1, 3, figsize=(30, 16))
 
-    sns.stripplot(data=all_results_df, x='model_id', y='test_mcc', hue='training_mode', ax=axs[0, 0])
+    sns.stripplot(data=all_results_df, x='model_id', y='test_mcc', hue='training_mode', ax=axs[0])
     if ADD_BASELINES_TO_FIG:
-        axs[0, 0].axhline(y=0.81, color='r', linestyle='--', linewidth=1, label='y=0.81')
-        axs[0, 0].axhline(y=0.83, color='r', linestyle='--', linewidth=1, label='y=0.83')
+        axs[0].axhline(y=0.81, color='r', linestyle='--', linewidth=1, label='y=0.81')
+        axs[0].axhline(y=0.83, color='r', linestyle='--', linewidth=1, label='y=0.83')
 
-    sns.stripplot(data=all_results_df, x='model_id', y='test_auprc', hue='training_mode', ax=axs[0, 1])
+    sns.stripplot(data=all_results_df, x='model_id', y='test_auprc', hue='training_mode', ax=axs[1])
     if ADD_BASELINES_TO_FIG:
-        axs[0, 1].axhline(y=0.88, color='r', linestyle='--', linewidth=1, label='y=0.88')
-        axs[0, 1].axhline(y=0.91, color='r', linestyle='--', linewidth=1, label='y=0.91')
+        axs[1].axhline(y=0.88, color='r', linestyle='--', linewidth=1, label='y=0.88')
+        axs[1].axhline(y=0.91, color='r', linestyle='--', linewidth=1, label='y=0.91')
 
-    sns.stripplot(data=all_results_df, x='model_id', y='xantomonas_mcc', hue='training_mode', ax=axs[1, 0])
-    if ADD_BASELINES_TO_FIG:
-        axs[1, 0].axhline(y=0.71, color='r', linestyle='--', linewidth=1, label='y=0.71')
-        axs[1, 0].axhline(y=0.72, color='r', linestyle='--', linewidth=1, label='y=0.72')
+    sns.stripplot(data=all_results_df, x='model_id', y='test_elapsed_time', hue='training_mode', ax=axs[2])
+    axs[2].set_ylabel('Test Elapsed time (in seconds)')
 
-    sns.stripplot(data=all_results_df, x='model_id', y='xantomonas_auprc', hue='training_mode', ax=axs[1, 1])
-    if ADD_BASELINES_TO_FIG:
-        axs[1, 1].axhline(y=0.77, color='r', linestyle='--', linewidth=1, label='y=0.77')
-        axs[1, 1].axhline(y=0.87, color='r', linestyle='--', linewidth=1, label='y=0.87')
+    fig.text(0.25, 0.90, 'MCC', ha='center', fontsize=24)
+    fig.text(0.5, 0.90, 'AUPRC', ha='center', fontsize=24)
+    fig.text(0.75, 0.90, 'Elapsed time (in seconds)', ha='center', fontsize=24)
 
-    fig.text(0.06, 0.73, 'Test', va='center', rotation='vertical', fontsize=24)
-    fig.text(0.06, 0.26, 'Test Xantomonas', va='center', rotation='vertical', fontsize=24)
-
-    fig.text(0.3, 0.90, 'MCC', ha='center', fontsize=24)
-    fig.text(0.73, 0.90, 'AUPRC', ha='center', fontsize=24)
-
-    for i, j in [(0, 0), (0, 1), (1, 0), (1, 1)]:
-        axs[i, j].tick_params(axis='x', rotation=45)
+    for i in [0, 1, 2]:
+        axs[i].tick_params(axis='x', rotation=45)
 
     plt.subplots_adjust(hspace=0.6)
 
@@ -128,10 +104,8 @@ def main():
     else:
         all_results_df = pd.read_csv(all_results_path)
 
-    if PLOT_FULL:
-        plot_full(all_results_df)
-    else:
-        plot_for_paper(all_results_df)
+    plot_full(all_results_df)
+    plot_for_paper(all_results_df)
 
 
 if __name__ == '__main__':

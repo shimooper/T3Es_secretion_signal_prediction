@@ -16,7 +16,7 @@ def main():
         all_classic_results.append(model_results)
 
     all_classic_results_df = pd.concat(all_classic_results)
-    all_classic_results_df.to_csv(os.path.join(FINAL_RESULTS, 'all_classic_classifiers_results_v2.csv'), index=False)
+    all_classic_results_df.to_csv(os.path.join(FINAL_RESULTS, 'all_classic_classifiers_results.csv'), index=False)
 
     all_finetuned_results = []
     for model_id in MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION:
@@ -24,7 +24,7 @@ def main():
         all_finetuned_results.append(model_results)
 
     all_finetuned_results_df = pd.concat(all_finetuned_results)
-    all_finetuned_results_df.to_csv(os.path.join(FINAL_RESULTS, 'all_finetuned_classifiers_results_v2.csv'), index=False)
+    all_finetuned_results_df.to_csv(os.path.join(FINAL_RESULTS, 'all_finetuned_classifiers_results.csv'), index=False)
 
 
 if __name__ == '__main__':
