@@ -2,7 +2,7 @@ from datasets import Dataset
 
 
 def create_dataset(tokenizer, seqs, labels):
-    tokenized = tokenizer(seqs, max_length=1024, padding=False, truncation=True)
+    tokenized = tokenizer(seqs, max_length=1024, padding=True, truncation=True)
     dataset = Dataset.from_dict(tokenized)
     dataset = dataset.add_column("labels", labels)
 

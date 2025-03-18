@@ -27,7 +27,7 @@ def get_arguments():
 
 
 def create_dataset(tokenizer, sequences, labels=None):
-    tokenized = tokenizer(sequences)
+    tokenized = tokenizer(sequences, padding=True)
     dataset = Dataset.from_dict(tokenized)
 
     if labels:
