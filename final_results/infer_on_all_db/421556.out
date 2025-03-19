@@ -1,0 +1,7 @@
+Starting my SLURM job
+Job ID: 421556
+Running on nodes: rack-bgw-dgx1
+Allocated CPUs: 4
+Cuda visible devices: 
+torch.cuda.is_available(): True, torch.cuda.device_count(): 8, torch.cuda.current_device(): 0
+tensor([1., 2., 3.], device='cuda:0')
