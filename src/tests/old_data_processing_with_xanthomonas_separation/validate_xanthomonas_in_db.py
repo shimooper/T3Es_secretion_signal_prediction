@@ -1,6 +1,6 @@
 import pandas as pd
 
-from .process_raw_data import RAW_DATA_PATH
+from src.tests.old_data_processing_with_xanthomonas_separation.process_raw_data import RAW_DATA_PATH
 
 DB_PATH = RAW_DATA_PATH / 'T3Edb_summary.csv'
 

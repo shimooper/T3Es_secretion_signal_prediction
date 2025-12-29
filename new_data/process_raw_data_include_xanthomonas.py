@@ -10,7 +10,7 @@ import shutil
 SCRIPT_DIR = Path(__file__).resolve().parent
 RAW_DATA_PATH = SCRIPT_DIR / 'raw_data'
 
-T3E_PATH = RAW_DATA_PATH / 'T3Es10_EDITED_NO_PARTIAL_v2.faa'
+T3E_PATH = RAW_DATA_PATH / 'T3Es_16_12_25.faa'
 ECOLI_PATH = RAW_DATA_PATH / 'corrected_e_coli_k12.faa'
 
 LOG_MESSAGE_FORMAT = '%(asctime)s %(levelname)s %(filename)s:%(lineno)d %(message)s'
@@ -131,7 +131,7 @@ def verify_train_and_test_non_homologs(logger, positive_train_fasta, positive_te
 def main():
     # Init: Parse arguments, and create outputs directory and logger, and read sequences.
     parser = argparse.ArgumentParser()
-    parser.add_argument('--outputs_dir_name', default='outputs', help='Directory name to save outputs')
+    parser.add_argument('--outputs_dir_name', default='data_processing_29_12_25', help='Directory name to save outputs')
     parser.add_argument('--min_e_value', default=1e-4, type=float, help='Minimum e-value for homologs/clustering')
     parser.add_argument('--min_coverage', default=0.6, type=float, help='Minimum coverage for homologs/clustering')
     parser.add_argument('--min_identity', default=0.5, type=float, help='Minimum identity for homologs/clustering')
