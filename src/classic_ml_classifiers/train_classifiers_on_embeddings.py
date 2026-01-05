@@ -79,7 +79,7 @@ def fit_on_train_data(Xs_train, Ys_train, output_dir, n_jobs):
         except Exception as e:
             logging.error(f"Failed to train classifier {class_name} with error: {e}")
 
-    logging.info(f"Best classifiers scores (on held-out validation folds): {best_classifiers_metrics}")
+    logging.info(f"Best classifiers scores: {best_classifiers_metrics}")
     best_classifiers_df = pd.DataFrame.from_dict(best_classifiers_metrics, orient='index',
                                                  columns=['best_index', 'mean_mcc_on_train_folds', 'mean_auprc_on_train_folds',
                                                           'mean_mcc_on_held_out_folds', 'mean_auprc_on_held_out_folds'])
