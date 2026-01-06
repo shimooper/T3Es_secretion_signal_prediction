@@ -26,11 +26,17 @@ def get_arguments():
     return parser.parse_args()
 
 
-def calc_embeddings_of_fasta_file_with_huggingface_model(model, tokenizer, device, fasta_file_path, embeddings_file_path):
+def calc_embeddings_of_fasta_file_with_huggingface_model_pt5(model_id, fasta_file_path, embeddings_file_path):
     sequences = read_sequences_from_fasta_file(fasta_file_path)
 
     # replace all rare/ambiguous amino acids by X and introduce white-space between all amino acids
     sequences = [" ".join(list(re.sub(r"[UZOB]", "X", sequence))) for sequence in sequences]
+
+    model_name = MODEL_ID_TO_MODEL_NAME[model_id]
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+
+    tokenizer = T5Tokenizer.from_pretrained(model_name, do_lower_case=False)
+    model = T5EncoderModel.from_pretrained(model_name).to(device)
 
     tokenized_sequences = tokenizer(sequences, add_special_tokens=True, padding="longest")
     input_ids = torch.tensor(tokenized_sequences['input_ids']).to(device)
@@ -50,7 +56,7 @@ def calc_embeddings_of_fasta_file_with_huggingface_model(model, tokenizer, devic
     return Xs
 
 
-def calc_embeddings(model_id, split, always_calc_embeddings=False):
+def calc_pt5_embeddings(model_id, split, always_calc_embeddings=False):
     if split == 'train':
         positive_fasta_file = FIXED_POSITIVE_TRAIN_FILE
         negative_fasta_file = FIXED_NEGATIVE_TRAIN_FILE
@@ -65,27 +71,18 @@ def calc_embeddings(model_id, split, always_calc_embeddings=False):
     positive_embeddings_output_file_path = os.path.join(output_dir, f'{split}_positive_embeddings.npy')
     negative_embeddings_output_file_path = os.path.join(output_dir, f'{split}_negative_embeddings.npy')
 
-    model_name = MODEL_ID_TO_MODEL_NAME[model_id]
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-
-    # Load the tokenizer
-    tokenizer = T5Tokenizer.from_pretrained(model_name, do_lower_case=False)
-
-    # Load the model
-    model = T5EncoderModel.from_pretrained(model_name).to(device)
-
     if not os.path.exists(positive_embeddings_output_file_path) or always_calc_embeddings:
         print(f"Calculating embeddings of {positive_fasta_file} into {positive_embeddings_output_file_path}")
-        positive_embeddings = calc_embeddings_of_fasta_file_with_huggingface_model(
-            model, tokenizer, device, positive_fasta_file, positive_embeddings_output_file_path)
+        positive_embeddings = calc_embeddings_of_fasta_file_with_huggingface_model_pt5(
+            model_id, positive_fasta_file, positive_embeddings_output_file_path)
     else:
         print(f"Found embeddings of {positive_fasta_file} in {positive_embeddings_output_file_path}")
         positive_embeddings = np.load(positive_embeddings_output_file_path)
 
     if not os.path.exists(negative_embeddings_output_file_path) or always_calc_embeddings:
         print(f"Calculating embeddings of {negative_fasta_file} into {negative_embeddings_output_file_path}")
-        negative_embeddings = calc_embeddings_of_fasta_file_with_huggingface_model(
-            model, tokenizer, device, negative_fasta_file, negative_embeddings_output_file_path)
+        negative_embeddings = calc_embeddings_of_fasta_file_with_huggingface_model_pt5(
+            model_id, negative_fasta_file, negative_embeddings_output_file_path)
     else:
         print(f"Found embeddings of {negative_fasta_file} in {negative_embeddings_output_file_path}")
         negative_embeddings = np.load(negative_embeddings_output_file_path)
@@ -97,7 +94,7 @@ if __name__ == "__main__":
     args = get_arguments()
 
     start_test_time = timer()
-    calc_embeddings(args.model_id, args.split, args.always_calc_embeddings)
+    calc_pt5_embeddings(args.model_id, args.split, args.always_calc_embeddings)
 
     if args.measure_time:
         end_test_time = timer()

@@ -7,11 +7,11 @@ def prepare_Xs_and_Ys(logger, model_id, split, always_calc_embeddings):
         from src.pretrained_embeddings.calc_proteinbert_embeddings import calc_embeddings
         Xs_positive, Xs_negative = calc_embeddings(split, always_calc_embeddings=always_calc_embeddings)
     elif model_id == 'pt5':
-        from src.pretrained_embeddings.calc_pt5_embeddings import calc_embeddings
-        Xs_positive, Xs_negative = calc_embeddings(model_id, split, always_calc_embeddings=always_calc_embeddings)
+        from src.pretrained_embeddings.calc_pt5_embeddings import calc_pt5_embeddings
+        Xs_positive, Xs_negative = calc_pt5_embeddings(model_id, split, always_calc_embeddings=always_calc_embeddings)
     else:  # esm
-        from src.pretrained_embeddings.calc_esm_embeddings import calc_embeddings
-        Xs_positive, Xs_negative = calc_embeddings(model_id, split, always_calc_embeddings=always_calc_embeddings)
+        from src.pretrained_embeddings.calc_esm_embeddings import calc_esm_embeddings
+        Xs_positive, Xs_negative = calc_esm_embeddings(model_id, split, always_calc_embeddings=always_calc_embeddings)
 
     Xs = np.concatenate([Xs_positive, Xs_negative])
     Ys = [1] * Xs_positive.shape[0] + [0] * Xs_negative.shape[0]

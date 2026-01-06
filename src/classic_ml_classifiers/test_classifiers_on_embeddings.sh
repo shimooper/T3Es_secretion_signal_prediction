@@ -5,7 +5,7 @@
 #SBATCH --qos=owner
 #SBATCH --time=06:40:00               # Time allotted for the job (hh:mm:ss)
 #SBATCH --ntasks=1                    # Number of tasks (processes)
-#SBATCH --cpus-per-task=1             # Number of CPU cores per task
+#SBATCH --cpus-per-task=10             # Number of CPU cores per task
 #SBATCH --mem=16G              # Memory per CPU core
 #SBATCH --output=/groups/pupko/yairshimony/secretion_signal_prediction/src/classic_ml_classifiers/%j.out        # Standard output and error log (%j expands to jobId)
 #SBATCH --error=/groups/pupko/yairshimony/secretion_signal_prediction/src/classic_ml_classifiers/%j.err         # Separate file for standard error

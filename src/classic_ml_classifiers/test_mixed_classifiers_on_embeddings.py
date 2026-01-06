@@ -7,30 +7,42 @@ from timeit import default_timer as timer
 import joblib
 
 import pandas as pd
+import numpy as np
 import os
 import logging
 import sys
+from pathlib import Path
 
 from sklearn.metrics import matthews_corrcoef, average_precision_score
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from src.utils.consts import CLASSIFIERS_OUTPUT_DIR, MODEL_ID_TO_MODEL_NAME
-from utils import prepare_Xs_and_Ys
+from src.utils.consts import CLASSIFIERS_OUTPUT_DIR, FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE
+from src.pretrained_embeddings.calc_esm_embeddings import calc_embeddings_of_fasta_file_with_huggingface_model_esm
 
 
-def test_on_test_data(logger, split):
-    # First, estimate time of embedding and prediction
+def test_on_test_data(logger, accuracy_threshold, output_dir):
     start_test_time = timer()
 
+    # First, generate embeddings of all test sequences using esm6, estimate runtime, and predict probabilities.
+    esm6_embeddings_output_dir = Path(output_dir) / 'esm_6_embeddings'
+    esm6_embeddings_output_dir.mkdir(parents=True, exist_ok=True)
+
+    positive_embeddings_output_file_path = esm6_embeddings_output_dir / f'positive_embeddings.npy'
+    negative_embeddings_output_file_path = esm6_embeddings_output_dir / f'negative_embeddings.npy'
+    Xs_positive = calc_embeddings_of_fasta_file_with_huggingface_model_esm(
+        'esm_6', FIXED_POSITIVE_TEST_FILE, positive_embeddings_output_file_path)
+    Xs_negative = calc_embeddings_of_fasta_file_with_huggingface_model_esm(
+        'esm_6', FIXED_NEGATIVE_TEST_FILE, negative_embeddings_output_file_path)
+
+    Xs = np.concatenate([Xs_positive, Xs_negative])
+    Ys = [1] * Xs_positive.shape[0] + [0] * Xs_negative.shape[0]
+
     model_esm_6 = joblib.load(os.path.join(CLASSIFIERS_OUTPUT_DIR, 'esm_6', f'model.pkl'))
+    Ys_test_predictions = model_esm_6.predict_proba(Xs)
+
+
     model_pt5 = joblib.load(os.path.join(CLASSIFIERS_OUTPUT_DIR, 'pt5', f'model.pkl'))
-
-    model_esm_6_name = MODEL_ID_TO_MODEL_NAME[model_esm_6]
-
-    Xs_test, Ys_test = prepare_Xs_and_Ys(logger, 'esm_6', split, always_calc_embeddings=True)
-    Ys_test_predictions = model_esm_6.predict_proba(Xs_test)
-
 
 
     end_test_time = timer()
@@ -48,7 +60,7 @@ def test_on_test_data(logger, split):
     return test_results
 
 
-def main():
+def main(accuracy_threshold):
     output_classifiers_dir = os.path.join(CLASSIFIERS_OUTPUT_DIR, 'mixed')
 
     logging.basicConfig(level=logging.INFO,
@@ -57,9 +69,12 @@ def main():
                             os.path.join(output_classifiers_dir, 'classification_with_classic_ML_test.log'), mode='w')])
     logger = logging.getLogger(__name__)
 
-    test_results = test_on_test_data(logger, 'test')
+    test_results = test_on_test_data(logger, accuracy_threshold, output_classifiers_dir)
     test_results.to_csv(os.path.join(output_classifiers_dir, 'mixed_classifier_test_results.csv'), index=False)
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--accuracy_threshold', help='The threshold required to calculate the accurate model', type=float, required=True)
+    args = parser.parse_args()
+    main(args.accuracy_threshold)
