@@ -1,0 +1,6 @@
+query,target,fident,qcov,tcov,bits,evalue
+t3e:DspA-E_Pantoea_agglomerans,t3e:tr|Q9FCY7|Q9FCY7_PANSEWtsE_Pantoea_stewartii_subsp._stewartii,0.574,0.87,0.87,86,8.668999999999999e-23
+ecoli:lcl|NC_000913.3_prot_NP_418007.3_3488,ecoli:lcl|NC_000913.3_prot_NP_416386.4_1869,0.508,0.61,0.61,67,3.463e-16
+t3e:common_AvrptoB__uniprot_Q8RSY1__genbank_AAL71883.1__species_Pseudomonas_syringae_group_3,t3e:sp|Q8RK12|HPAB1_PSESGEffector_Pseudomonas_savastanoi,0.525,0.8,0.71,64,2.314e-15
+ecoli:lcl|NC_000913.3_prot_NP_414682.1_140,ecoli:lcl|NC_000913.3_prot_NP_416613.1_2092,0.514,0.68,0.68,75,6.151e-19
+ecoli:lcl|NC_000913.3_prot_NP_415320.1_773,ecoli:lcl|NC_000913.3_prot_NP_416322.1_1802,0.518,0.81,0.75,76,2.379e-19

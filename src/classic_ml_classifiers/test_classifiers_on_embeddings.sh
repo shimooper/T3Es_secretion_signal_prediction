@@ -26,9 +26,13 @@ export PATH=$CONDA_PREFIX/bin:$PATH
 #python ~/python_test/test_gpu/check_cuda_available.py
 
 cd ~/secretion_signal_prediction/src/classic_ml_classifiers
-python test_classifiers_on_embeddings.py --model_id esm_6
+#python test_classifiers_on_embeddings.py --model_id esm_6
 #python test_classifiers_on_embeddings.py --model_id esm_12
 #python test_classifiers_on_embeddings.py --model_id esm_30
 #python test_classifiers_on_embeddings.py --model_id esm_33
 #python test_classifiers_on_embeddings.py --model_id esm_36
-python test_classifiers_on_embeddings.py --model_id pt5
+#python test_classifiers_on_embeddings.py --model_id pt5
+python test_mixed_classifiers_on_embeddings.py --accuracy_threshold 0.4
+python test_mixed_classifiers_on_embeddings.py --accuracy_threshold 0.3
+python test_mixed_classifiers_on_embeddings.py --accuracy_threshold 0.2
+python test_mixed_classifiers_on_embeddings.py --accuracy_threshold 0.1

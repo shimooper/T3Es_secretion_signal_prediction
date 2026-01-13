@@ -1,0 +1,2 @@
+classifier_class,best_index,mean_mcc_on_train_folds,mean_auprc_on_train_folds,mean_mcc_on_held_out_folds,mean_auprc_on_held_out_folds,model_id,training_mode,number_of_parameters (millions),test_mcc,test_auprc,test_elapsed_time
+MLPClassifier,26,0.9308962491405716,0.9695608874962538,0.8943183957676372,0.9496369439721828,pt5,only_head,3000,0.8801745062170357,0.9579651495591919,995.9489868641831

@@ -1,0 +1,11 @@
+query,target,fident,qcov,tcov,bits,evalue
+ecoli:lcl|NC_000913.3_prot_NP_416410.1_1895,t3e:RipTPS_WP_008577799.1_Xanthomonas,0.544,1.0,0.99,114,3.507e-32
+ecoli:lcl|NC_000913.3_prot_NP_418490.1_3983,t3e:C6V246_Escherichia_coli,0.97,1.0,1.0,198,1.921e-61
+ecoli:lcl|NC_000913.3_prot_YP_009518734.1_56,t3e:E8H1W5_Escherichia_coli_O157:H7_str._G5101,0.89,1.0,1.0,188,5.2020000000000005e-58
+ecoli:lcl|NC_000913.3_prot_YP_009518734.1_56,t3e:E8I893_Escherichia_coli,0.89,1.0,1.0,188,5.2020000000000005e-58
+ecoli:lcl|NC_000913.3_prot_YP_009518734.1_56,t3e:C6UVP4_Escherichia_coli,0.89,1.0,1.0,188,5.2020000000000005e-58
+ecoli:lcl|NC_000913.3_prot_YP_009518734.1_56,t3e:E8J137_Escherichia_coli,0.88,1.0,1.0,186,1.843e-57
+ecoli:lcl|NC_000913.3_prot_NP_418441.1_3933,t3e:E8HNY6_Escherichia_coli,0.98,1.0,1.0,192,3.022e-59
+ecoli:lcl|NC_000913.3_prot_NP_418441.1_3933,t3e:E8J924_Escherichia_coli,0.98,1.0,1.0,192,3.022e-59
+ecoli:lcl|NC_000913.3_prot_NP_418441.1_3933,t3e:C6V1X0_Escherichia_coli,0.97,1.0,1.0,190,1.469e-58
+ecoli:lcl|NC_000913.3_prot_NP_418441.1_3933,t3e:E8H9S8_Escherichia_coli,0.96,1.0,1.0,187,9.79e-58
