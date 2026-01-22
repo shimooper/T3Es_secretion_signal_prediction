@@ -58,7 +58,7 @@ ax1.grid(True, axis="y", alpha=0.3)
 
 # Bottom: elapsed time
 ax2.bar(df["model"], df["test_elapsed_time"])
-ax2.set_ylabel("Elapsed Time (using 10 cpus)")
+ax2.set_ylabel("Elapsed Time (seconds, using 10 cpus)")
 ax2.set_xlabel("Model")
 ax2.grid(True, axis="y", alpha=0.3)
 
