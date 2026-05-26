@@ -29,7 +29,7 @@ def filter_fasta_by_indices(input_fasta, output_fasta, indices_set):
     SeqIO.write(selected, output_fasta, "fasta")
 
 
-def test_on_test_data(logger, accuracy_threshold, output_dir):
+def test_on_test_data(logger, lower_threshold, upper_threshold, output_dir):
     start_test_time = timer()
 
     # First, generate embeddings of all test sequences using esm6 and predict probabilities.
@@ -51,7 +51,7 @@ def test_on_test_data(logger, accuracy_threshold, output_dir):
     probs_esm6 = model_esm_6.predict_proba(Xs)[:, 1]
     logger.info(f"ESM-6 model probabilities predicted.")
 
-    significant_mask = (probs_esm6 < accuracy_threshold) | (probs_esm6 > (1 - accuracy_threshold))
+    significant_mask = (probs_esm6 < lower_threshold) | (probs_esm6 > upper_threshold)
     nonsignificant_mask = ~significant_mask
 
     final_probs = np.empty_like(probs_esm6)
@@ -109,8 +109,8 @@ def test_on_test_data(logger, accuracy_threshold, output_dir):
     return test_results
 
 
-def main(accuracy_threshold):
-    output_classifiers_dir = os.path.join(CLASSIFIERS_OUTPUT_DIR, f'mixed_{accuracy_threshold}')
+def main(lower_threshold, upper_threshold):
+    output_classifiers_dir = os.path.join(CLASSIFIERS_OUTPUT_DIR, f'mixed_{lower_threshold}_{upper_threshold}')
     os.makedirs(output_classifiers_dir, exist_ok=True)
 
     logging.basicConfig(level=logging.INFO,
@@ -119,12 +119,16 @@ def main(accuracy_threshold):
                             os.path.join(output_classifiers_dir, 'classification_with_classic_ML_test.log'), mode='w')])
     logger = logging.getLogger(__name__)
 
-    test_results = test_on_test_data(logger, accuracy_threshold, output_classifiers_dir)
+    test_results = test_on_test_data(logger, lower_threshold, upper_threshold, output_classifiers_dir)
     test_results.to_csv(os.path.join(output_classifiers_dir, 'mixed_classifier_test_results.csv'), index=False)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--accuracy_threshold', help='The threshold required to calculate the accurate model', type=float, default=0.4)
+    parser.add_argument('--lower_threshold', type=float, default=0.4,
+                        help='ESM-6 probabilities below this are classified directly (negative).')
+    parser.add_argument('--upper_threshold', type=float, default=0.6,
+                        help='ESM-6 probabilities above this are classified directly (positive). '
+                             'Sequences with probabilities in [lower_threshold, upper_threshold] are escalated to PT5.')
     args = parser.parse_args()
-    main(args.accuracy_threshold)
+    main(args.lower_threshold, args.upper_threshold)
