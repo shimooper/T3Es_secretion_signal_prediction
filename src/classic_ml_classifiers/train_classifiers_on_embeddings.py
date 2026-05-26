@@ -25,6 +25,7 @@ def get_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_id', help='The pretrained model id', type=str, required=True)
     parser.add_argument('--n_jobs', help='The number of jobs to run in parallel', type=int, default=1)
+    parser.add_argument('--hidden_layer_number', help='Encoder layer index to use for embeddings (1=first block, None=last hidden state)', type=int, default=None)
     return parser.parse_args()
 
 
@@ -105,9 +106,11 @@ def fit_on_train_data(Xs_train, Ys_train, output_dir, n_jobs):
     return best_classifier_metrics
 
 
-def main(model_id, n_jobs):
+def main(model_id, n_jobs, hidden_layer_number=None):
     embeddings_dir = os.path.join(EMBEDDINGS_DIR, model_id)
-    classifiers_output_dir = os.path.join(CLASSIFIERS_OUTPUT_DIR, model_id)
+    layer_subdir = f'layer_{hidden_layer_number}' if hidden_layer_number is not None else ''
+    classifiers_output_dir = (os.path.join(CLASSIFIERS_OUTPUT_DIR, model_id, layer_subdir)
+                              if layer_subdir else os.path.join(CLASSIFIERS_OUTPUT_DIR, model_id))
     os.makedirs(embeddings_dir, exist_ok=True)
     os.makedirs(classifiers_output_dir, exist_ok=True)
 
@@ -117,7 +120,8 @@ def main(model_id, n_jobs):
                             os.path.join(classifiers_output_dir, 'classification_with_classic_ML.log'), mode='w')])
     logger = logging.getLogger(__name__)
 
-    Xs_train, Ys_train = prepare_Xs_and_Ys(logger, model_id, 'train', always_calc_embeddings=False)
+    Xs_train, Ys_train = prepare_Xs_and_Ys(logger, model_id, 'train', always_calc_embeddings=False,
+                                            hidden_layer_number=hidden_layer_number)
     update_grid_params(Ys_train)
 
     pca(Xs_train, Ys_train, embeddings_dir)
@@ -125,6 +129,7 @@ def main(model_id, n_jobs):
     best_classifier_metrics = fit_on_train_data(Xs_train, Ys_train, classifiers_output_dir, n_jobs)
 
     best_classifier_metrics['model_id'] = [model_id]
+    best_classifier_metrics['hidden_layer_number'] = [hidden_layer_number]
     best_classifier_metrics['training_mode'] = ['only_head']
     best_classifier_metrics['number_of_parameters (millions)'] = [MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION[model_id]]
 
@@ -135,4 +140,4 @@ def main(model_id, n_jobs):
 
 if __name__ == "__main__":
     args = get_arguments()
-    main(args.model_id, args.n_jobs)
+    main(args.model_id, args.n_jobs, args.hidden_layer_number)

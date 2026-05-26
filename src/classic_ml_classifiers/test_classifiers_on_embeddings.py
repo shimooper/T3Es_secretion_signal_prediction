@@ -22,14 +22,16 @@ from utils import prepare_Xs_and_Ys
 def get_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_id', help='The pretrained model id', type=str, required=True)
+    parser.add_argument('--hidden_layer_number', help='Encoder layer index used during training (must match)', type=int, default=None)
     return parser.parse_args()
 
 
-def test_on_test_data(logger, model_id, model, split):
+def test_on_test_data(logger, model_id, model, split, hidden_layer_number=None):
     # First, estimate time of embedding and prediction
     start_test_time = timer()
 
-    Xs_test, Ys_test = prepare_Xs_and_Ys(logger, model_id, split, always_calc_embeddings=True)
+    Xs_test, Ys_test = prepare_Xs_and_Ys(logger, model_id, split, always_calc_embeddings=True,
+                                          hidden_layer_number=hidden_layer_number)
     Ys_test_predictions = model.predict_proba(Xs_test)
 
     end_test_time = timer()
@@ -47,8 +49,10 @@ def test_on_test_data(logger, model_id, model, split):
     return test_results
 
 
-def main(model_id):
-    classifiers_dir = os.path.join(CLASSIFIERS_OUTPUT_DIR, model_id)
+def main(model_id, hidden_layer_number=None):
+    layer_subdir = f'layer_{hidden_layer_number}' if hidden_layer_number is not None else ''
+    classifiers_dir = (os.path.join(CLASSIFIERS_OUTPUT_DIR, model_id, layer_subdir)
+                       if layer_subdir else os.path.join(CLASSIFIERS_OUTPUT_DIR, model_id))
 
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -57,7 +61,7 @@ def main(model_id):
     logger = logging.getLogger(__name__)
 
     model = joblib.load(os.path.join(classifiers_dir, f'model.pkl'))
-    test_results = test_on_test_data(logger, model_id, model, 'test')
+    test_results = test_on_test_data(logger, model_id, model, 'test', hidden_layer_number=hidden_layer_number)
 
     train_results = pd.read_csv(os.path.join(classifiers_dir, 'best_classifier_train_results.csv'))
     all_results = pd.concat([train_results, test_results], axis=1)
@@ -67,4 +71,4 @@ def main(model_id):
 
 if __name__ == "__main__":
     args = get_arguments()
-    main(args.model_id)
+    main(args.model_id, args.hidden_layer_number)
