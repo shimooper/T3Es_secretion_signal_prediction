@@ -3,6 +3,7 @@ try:
 except Exception:
     pass
 import argparse
+from pathlib import Path
 from timeit import default_timer as timer
 import joblib
 
@@ -16,7 +17,7 @@ from Bio import SeqIO
 
 from sklearn.metrics import matthews_corrcoef, average_precision_score
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from src.utils.consts import CLASSIFIERS_OUTPUT_DIR, FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE
 from src.pretrained_embeddings.calc_esm_embeddings import calc_embeddings_of_fasta_file_with_huggingface_model_esm

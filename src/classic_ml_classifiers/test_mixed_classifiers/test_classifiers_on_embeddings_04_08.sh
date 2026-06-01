@@ -7,8 +7,8 @@
 #SBATCH --ntasks=1                    # Number of tasks (processes)
 #SBATCH --cpus-per-task=10             # Number of CPU cores per task
 #SBATCH --mem=16G              # Memory per CPU core
-#SBATCH --output=/groups/pupko/yairshimony/secretion_signal_prediction/src/classic_ml_classifiers/text_mixed_classifiers/%j.out        # Standard output and error log (%j expands to jobId)
-#SBATCH --error=/groups/pupko/yairshimony/secretion_signal_prediction/src/classic_ml_classifiers/text_mixed_classifiers/%j.err         # Separate file for standard error
+#SBATCH --output=/groups/pupko/yairshimony/secretion_signal_prediction/src/classic_ml_classifiers/test_mixed_classifiers/%j.out        # Standard output and error log (%j expands to jobId)
+#SBATCH --error=/groups/pupko/yairshimony/secretion_signal_prediction/src/classic_ml_classifiers/test_mixed_classifiers/%j.err         # Separate file for standard error
 
 export HOME=/groups/pupko/yairshimony
 
@@ -25,5 +25,5 @@ export PATH=$CONDA_PREFIX/bin:$PATH
 
 #python ~/python_test/test_gpu/check_cuda_available.py
 
-cd ~/secretion_signal_prediction/src/classic_ml_classifiers/text_mixed_classifiers
+cd ~/secretion_signal_prediction/src/classic_ml_classifiers/test_mixed_classifiers
 python test_mixed_classifiers_on_embeddings.py --lower_threshold 0.4 --upper_threshold 0.8
