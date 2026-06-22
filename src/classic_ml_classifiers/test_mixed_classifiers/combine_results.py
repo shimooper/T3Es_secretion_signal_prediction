@@ -7,7 +7,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from src.utils.consts import CLASSIFIERS_OUTPUT_DIR
 
