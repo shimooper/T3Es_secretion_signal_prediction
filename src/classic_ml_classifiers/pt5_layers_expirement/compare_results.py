@@ -1,11 +1,12 @@
 import os
 import sys
+from pathlib import Path
 
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from src.utils.consts import CLASSIFIERS_OUTPUT_DIR
 
@@ -57,17 +58,22 @@ def main():
     # --- plots ---
     layer_nums = combined['hidden_layer_number'].tolist()
 
-    for metric_col, metric_label, filename in [
-        ('test_mcc',   'MCC (test set)',   'pt5_layers_test_mcc.png'),
-        ('test_auprc', 'AUPRC (test set)', 'pt5_layers_test_auprc.png'),
-        ('mean_mcc_on_held_out_folds',   'MCC (CV held-out folds)',   'pt5_layers_cv_mcc.png'),
-        ('mean_auprc_on_held_out_folds', 'AUPRC (CV held-out folds)', 'pt5_layers_cv_auprc.png'),
-    ]:
+    metrics = [
+        ('test_mcc',   'MCC (test set)'),
+        ('test_auprc', 'AUPRC (test set)'),
+        ('mean_mcc_on_held_out_folds',   'MCC (CV held-out folds)'),
+        ('mean_auprc_on_held_out_folds', 'AUPRC (CV held-out folds)'),
+        ('test_elapsed_time', 'Elapsed time (test set, s)'),
+    ]
+
+    fig, axes = plt.subplots(3, 2, figsize=(16, 15))
+    axes.flat[-1].set_visible(False)
+    for ax, (metric_col, metric_label) in zip(axes.flat, metrics):
         if metric_col not in combined.columns:
             print(f"Column '{metric_col}' not found, skipping plot.")
+            ax.set_visible(False)
             continue
 
-        fig, ax = plt.subplots(figsize=(10, 5))
         ax.plot(layer_nums, combined[metric_col].tolist(), marker='o', label='layer sweep')
 
         if baseline is not None and metric_col in baseline.columns:
@@ -80,10 +86,12 @@ def main():
         ax.xaxis.set_major_locator(ticker.MultipleLocator(2))
         ax.legend()
         ax.grid(True, alpha=0.3)
-        fig.tight_layout()
-        fig.savefig(os.path.join(OUTPUT_DIR, filename), dpi=150)
-        plt.close(fig)
-        print(f"Saved {filename}")
+
+    fig.tight_layout()
+    filename = 'pt5_layers_comparison.png'
+    fig.savefig(os.path.join(OUTPUT_DIR, filename), dpi=150)
+    plt.close(fig)
+    print(f"Saved {filename}")
 
     # Print summary table
     summary_cols = ['hidden_layer_number', 'classifier_class',
