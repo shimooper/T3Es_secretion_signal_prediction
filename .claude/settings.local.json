@@ -3,7 +3,19 @@
     "allow": [
       "Bash(Get-ChildItem -Path \"C:\\\\repos\\\\T3Es_secretion_signal_prediction\" -Recurse -Directory)",
       "Bash(Select-Object -ExpandProperty FullName)",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Bash(grep -E '^\\(new_data/__init__|__init__.py|src/__init__.py\\)$')",
+      "Bash(sed -i 's#secretion_signal_prediction/src/classic_ml_classifiers#secretion_signal_prediction/effectidor2_paper/src/classic_ml_classifiers#g' effectidor2_paper/src/classic_ml_classifiers/train_classifiers_on_embeddings.sh effectidor2_paper/src/classic_ml_classifiers/test_classifiers_on_embeddings.sh effectidor2_paper/src/classic_ml_classifiers/test_classifiers_on_proteinbert_embeddings.sh effectidor2_paper/src/classic_ml_classifiers/train_classifiers_on_proteinbert_embeddings.sh)",
+      "Bash(sed -i 's#secretion_signal_prediction/src/finetune_pretrained_models#secretion_signal_prediction/effectidor2_paper/src/finetune_pretrained_models#g' effectidor2_paper/src/finetune_pretrained_models/finetune.sh effectidor2_paper/src/finetune_pretrained_models/test.sh effectidor2_paper/src/finetune_pretrained_models/protein_bert/finetune.sh)",
+      "Bash(sed -i 's#secretion_signal_prediction/src/train_final_model_on_all_data#secretion_signal_prediction/effectidor2_paper/src/train_final_model_on_all_data#g' effectidor2_paper/src/train_final_model_on_all_data/train_final_classifier.sh)",
+      "Bash(sed -i 's#secretion_signal_prediction/src/classic_ml_classifiers/pt5_layers_expirement#secretion_signal_prediction/runtime_optimization/src/classic_ml_classifiers/pt5_layers_expirement#g; s#secretion_signal_prediction/outputs_optimization#secretion_signal_prediction/runtime_optimization/outputs#g' runtime_optimization/src/classic_ml_classifiers/pt5_layers_expirement/compare_results.sh)",
+      "Bash(sed -i 's#secretion_signal_prediction/src/classic_ml_classifiers#secretion_signal_prediction/effectidor2_paper/src/classic_ml_classifiers#g; s#secretion_signal_prediction/outputs_optimization#secretion_signal_prediction/runtime_optimization/outputs#g' runtime_optimization/src/classic_ml_classifiers/pt5_layers_expirement/run_experiment.sh)",
+      "Bash(sed -i 's#secretion_signal_prediction/src/classic_ml_classifiers/test_mixed_classifiers#secretion_signal_prediction/runtime_optimization/src/classic_ml_classifiers/test_mixed_classifiers#g' runtime_optimization/src/classic_ml_classifiers/test_mixed_classifiers/*.sh)",
+      "Bash(sed -i 's#secretion_signal_prediction/src/inference#secretion_signal_prediction/runtime_optimization/src/inference/effectidor_samples#g' runtime_optimization/src/inference/effectidor_samples/infer_mixed_1.sh runtime_optimization/src/inference/effectidor_samples/infer_mixed_2.sh runtime_optimization/src/inference/effectidor_samples/infer_mixed_3.sh runtime_optimization/src/inference/effectidor_samples/infer_mixed_4.sh)",
+      "Bash(python -c ' *)",
+      "Bash(awk '{print $1}')",
+      "Bash(xargs -0 python -m py_compile)",
+      "Bash(echo \"PYCOMPILE_EXIT:$?\")"
     ]
   }
 }

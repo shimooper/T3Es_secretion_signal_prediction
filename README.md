@@ -12,7 +12,7 @@ Clone the repository, create a conda environment using env.yml, and activate it.
 Create a fasta file that contains the 100 N-terminal amino acids of bacterial protein sequences.
 Then run the following script:
 
-python src/inference/predict_secretion_signal.py --input_fasta_file <path_to_fasta_file>
+python effectidor2_paper/src/inference/predict_secretion_signal.py --input_fasta_file <path_to_fasta_file>
 
 ## Advanced Usage
 
