@@ -17,9 +17,9 @@ from sklearn.metrics import matthews_corrcoef, average_precision_score
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
-from runtime_optimization.src.utils.consts_paths import CLASSIFIERS_OUTPUT_DIR, FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE
-from effectidor2_paper.src.pretrained_embeddings.calc_esm_embeddings import calc_embeddings_of_fasta_file_with_huggingface_model_esm
-from effectidor2_paper.src.pretrained_embeddings.calc_pt5_embeddings import calc_embeddings_of_fasta_file_with_huggingface_model_pt5
+from runtime_optimization.src.utils.consts_paths import CLASSIFIERS_OUTPUT_DIR, POSITIVE_TEST_FILE, NEGATIVE_TEST_FILE
+from common.pretrained_embeddings.calc_esm_embeddings import calc_embeddings_of_fasta_file_with_huggingface_model_esm
+from common.pretrained_embeddings.calc_pt5_embeddings import calc_embeddings_of_fasta_file_with_huggingface_model_pt5
 
 
 def filter_fasta_by_indices(input_fasta, output_fasta, indices_set):

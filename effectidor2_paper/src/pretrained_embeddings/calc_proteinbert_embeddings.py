@@ -10,7 +10,7 @@ from effectidor2_paper.src.utils.consts_paths import (FIXED_POSITIVE_TRAIN_FILE,
                                                        FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE,
                                                        EMBEDDINGS_DIR, PROTEIN_BERT_DIR, PROTEIN_BERT_MODEL_NAME)
 from common.consts import BATCH_SIZE, MODEL_ID_TO_MODEL_NAME, USE_LOCAL_MODELS
-from effectidor2_paper.src.utils.read_fasta_utils import read_sequences_from_fasta_file
+from common.read_fasta_utils import read_sequences_from_fasta_file
 
 sys.path.append(str(PROTEIN_BERT_DIR))
 
@@ -45,17 +45,19 @@ def calc_embeddings_of_fasta_file(fasta_file_path, embeddings_output_file_path):
     return sequences_representation
 
 
-def calc_embeddings(split, always_calc_embeddings):
-    if split == 'train':
-        positive_fasta_file = FIXED_POSITIVE_TRAIN_FILE
-        negative_fasta_file = FIXED_NEGATIVE_TRAIN_FILE
-    elif split == 'test':
-        positive_fasta_file = FIXED_POSITIVE_TEST_FILE
-        negative_fasta_file = FIXED_NEGATIVE_TEST_FILE
-    else:
-        raise ValueError(f"split must be one of ['train', 'test'], got {split}")
+def calc_embeddings(split, always_calc_embeddings, positive_fasta_file=None, negative_fasta_file=None,
+                    embeddings_dir=None):
+    if positive_fasta_file is None or negative_fasta_file is None:
+        if split == 'train':
+            positive_fasta_file = positive_fasta_file or FIXED_POSITIVE_TRAIN_FILE
+            negative_fasta_file = negative_fasta_file or FIXED_NEGATIVE_TRAIN_FILE
+        elif split == 'test':
+            positive_fasta_file = positive_fasta_file or FIXED_POSITIVE_TEST_FILE
+            negative_fasta_file = negative_fasta_file or FIXED_NEGATIVE_TEST_FILE
+        else:
+            raise ValueError(f"split must be one of ['train', 'test'], got {split}")
 
-    output_dir = EMBEDDINGS_DIR / 'protein_bert'
+    output_dir = (embeddings_dir or EMBEDDINGS_DIR) / 'protein_bert'
     output_dir.mkdir(parents=True, exist_ok=True)
     positive_embeddings_output_file_path = output_dir / f'{split}_positive_embeddings.npy'
     negative_embeddings_output_file_path = output_dir / f'{split}_negative_embeddings.npy'

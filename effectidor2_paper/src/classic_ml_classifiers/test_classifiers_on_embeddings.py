@@ -1,22 +1,12 @@
-try:
-    import torch  # Important - without this I get weird error when trying to import torch in another module imported here
-except Exception:
-    pass
 import argparse
-from timeit import default_timer as timer
-import joblib
-
-import pandas as pd
-import logging
 import sys
 from pathlib import Path
 
-from sklearn.metrics import matthews_corrcoef, average_precision_score
-
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from effectidor2_paper.src.utils.consts_paths import CLASSIFIERS_OUTPUT_DIR
-from utils import prepare_Xs_and_Ys
+from common.classic_ml_classifiers.test_classifiers_on_embeddings import main as test_classifiers_on_embeddings
+from effectidor2_paper.src.utils.consts_paths import (EMBEDDINGS_DIR, CLASSIFIERS_OUTPUT_DIR,
+                                                       FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE)
 
 
 def get_arguments():
@@ -26,49 +16,20 @@ def get_arguments():
     return parser.parse_args()
 
 
-def test_on_test_data(logger, model_id, model, split, hidden_layer_number=None):
-    # First, estimate time of embedding and prediction
-    start_test_time = timer()
-
-    Xs_test, Ys_test = prepare_Xs_and_Ys(logger, model_id, split, always_calc_embeddings=True,
-                                          hidden_layer_number=hidden_layer_number)
-    Ys_test_predictions = model.predict_proba(Xs_test)
-
-    end_test_time = timer()
-    elapsed_time = end_test_time - start_test_time
-
-    # Now, calculate the metrics
-    mcc_on_test = matthews_corrcoef(Ys_test, Ys_test_predictions.argmax(axis=1))
-    auprc_on_test = average_precision_score(Ys_test, Ys_test_predictions[:, 1])
-
-    logging.info(f"Best estimator - MCC on {split}: {mcc_on_test}, AUPRC on {split}: {auprc_on_test}, "
-                 f"time took for embedding and prediction: {elapsed_time} seconds.")
-
-    test_results = pd.DataFrame({f'{split}_mcc': [mcc_on_test], f'{split}_auprc': [auprc_on_test],
-                                 f'{split}_elapsed_time': [elapsed_time]})
-    return test_results
-
-
-def main(model_id, hidden_layer_number=None):
-    layer_subdir = f'layer_{hidden_layer_number}' if hidden_layer_number is not None else ''
-    classifiers_dir = (CLASSIFIERS_OUTPUT_DIR / model_id / layer_subdir
-                       if layer_subdir else CLASSIFIERS_OUTPUT_DIR / model_id)
-
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                        handlers=[logging.FileHandler(
-                            classifiers_dir / 'classification_with_classic_ML_test.log', mode='w')])
-    logger = logging.getLogger(__name__)
-
-    model = joblib.load(classifiers_dir / 'model.pkl')
-    test_results = test_on_test_data(logger, model_id, model, 'test', hidden_layer_number=hidden_layer_number)
-
-    train_results = pd.read_csv(classifiers_dir / 'best_classifier_train_results.csv')
-    all_results = pd.concat([train_results, test_results], axis=1)
-
-    all_results.to_csv(classifiers_dir / 'best_classifier_all_results.csv', index=False)
+def _calc_embeddings_fn_for(model_id):
+    if model_id == 'protein_bert':
+        # Lazily imported: needs the protein_bert submodule + the separate TensorFlow conda env, so this must
+        # never be imported for the esm/pt5 codepaths (which run in the PyTorch env instead).
+        from effectidor2_paper.src.pretrained_embeddings.calc_proteinbert_embeddings import calc_embeddings
+        return calc_embeddings
+    return None  # let common auto-pick the esm/pt5 embedding calculator based on model_id
 
 
 if __name__ == "__main__":
     args = get_arguments()
-    main(args.model_id, args.hidden_layer_number)
+    test_classifiers_on_embeddings(args.model_id, embeddings_dir=EMBEDDINGS_DIR,
+                                   classifiers_output_dir=CLASSIFIERS_OUTPUT_DIR,
+                                   positive_fasta_file=FIXED_POSITIVE_TEST_FILE,
+                                   negative_fasta_file=FIXED_NEGATIVE_TEST_FILE,
+                                   hidden_layer_number=args.hidden_layer_number,
+                                   calc_embeddings_fn=_calc_embeddings_fn_for(args.model_id))

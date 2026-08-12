@@ -19,7 +19,9 @@
       "Bash(python3 *)",
       "Bash(conda env *)",
       "Bash(cd *)",
-      "Bash(/c/ProgramData/miniconda3/envs/secretion_signal/python -c ' *)"
+      "Bash(/c/ProgramData/miniconda3/envs/secretion_signal/python -c ' *)",
+      "Bash(/c/ProgramData/miniconda3/envs/secretion_signal/python -c 'import xgboost')",
+      "Bash(:)"
     ]
   }
 }

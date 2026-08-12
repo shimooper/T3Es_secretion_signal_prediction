@@ -8,19 +8,19 @@ import torch
 from transformers import AutoTokenizer, AutoModel
 
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from effectidor2_paper.src.utils.consts_paths import (FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN_FILE,
-                                                       FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE,
-                                                       EMBEDDINGS_DIR)
 from common.consts import BATCH_SIZE, MODEL_ID_TO_MODEL_NAME
-from effectidor2_paper.src.utils.read_fasta_utils import read_sequences_from_fasta_file
+from common.read_fasta_utils import read_sequences_from_fasta_file
 
 
 def get_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_id', help='The model id to use for the embeddings calculation', type=str, required=True)
     parser.add_argument('--split', help='The split to calc the embeddings for', type=str, required=True)
+    parser.add_argument('--positive_fasta_file', help='Path to the positive-class FASTA file', type=Path, required=True)
+    parser.add_argument('--negative_fasta_file', help='Path to the negative-class FASTA file', type=Path, required=True)
+    parser.add_argument('--embeddings_dir', help='Base directory to cache computed embeddings under', type=Path, required=True)
     parser.add_argument('--always_calc_embeddings', help='Whether to always calc the embeddings even if they were already calculated', action='store_true')
     parser.add_argument('--measure_time', help='Whether to measure the time it takes to calc the embeddings', action='store_true')
     return parser.parse_args()
@@ -49,17 +49,9 @@ def calc_embeddings_of_fasta_file_with_huggingface_model_esm(model_id, fasta_fil
     return Xs
 
 
-def calc_esm_embeddings(model_id, split, always_calc_embeddings=False):
-    if split == 'train':
-        positive_fasta_file = FIXED_POSITIVE_TRAIN_FILE
-        negative_fasta_file = FIXED_NEGATIVE_TRAIN_FILE
-    elif split == 'test':
-        positive_fasta_file = FIXED_POSITIVE_TEST_FILE
-        negative_fasta_file = FIXED_NEGATIVE_TEST_FILE
-    else:
-        raise ValueError(f"split must be one of ['train', 'test'], got {split}")
-
-    output_dir = EMBEDDINGS_DIR / model_id
+def calc_esm_embeddings(model_id, split, positive_fasta_file, negative_fasta_file, embeddings_dir,
+                        always_calc_embeddings=False):
+    output_dir = embeddings_dir / model_id
     output_dir.mkdir(parents=True, exist_ok=True)
     positive_embeddings_output_file_path = output_dir / f'{split}_positive_embeddings.npy'
     negative_embeddings_output_file_path = output_dir / f'{split}_negative_embeddings.npy'
@@ -87,9 +79,10 @@ if __name__ == "__main__":
     args = get_arguments()
 
     start_test_time = timer()
-    calc_esm_embeddings(args.model_id, args.split, args.always_calc_embeddings)
+    calc_esm_embeddings(args.model_id, args.split, args.positive_fasta_file, args.negative_fasta_file,
+                        args.embeddings_dir, args.always_calc_embeddings)
 
     if args.measure_time:
         end_test_time = timer()
         elapsed_time = end_test_time - start_test_time
-        print(f"Time took for embedding calculation using {args.esm_embeddings_calculation_mode}: {elapsed_time} seconds.")
+        print(f"Time took for embedding calculation: {elapsed_time} seconds.")

@@ -1,6 +1,6 @@
+import functools
 import logging
 import numpy as np
-import random
 from sklearn.neural_network import MLPClassifier
 import joblib
 import json
@@ -10,25 +10,11 @@ from sklearn import __version__ as sklearn_version
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from effectidor2_paper.src.utils.consts_paths import FINAL_RESULTS
-from effectidor2_paper.src.pretrained_embeddings.calc_pt5_embeddings import calc_embeddings
-
-
-def prepare_Xs_and_Ys(logger, model_id, split, always_calc_embeddings):
-    Xs_positive, Xs_negative = calc_embeddings(model_id, split, always_calc_embeddings=always_calc_embeddings)
-
-    Xs = np.concatenate([Xs_positive, Xs_negative])
-    Ys = [1] * Xs_positive.shape[0] + [0] * Xs_negative.shape[0]
-
-    # Shuffle
-    combined = list(zip(Xs, Ys))
-    random.shuffle(combined)
-    shuffled_Xs, shuffled_Ys = zip(*combined)
-    shuffled_Xs = np.array(shuffled_Xs)
-
-    logger.info(f"Loaded {split} data: Xs_{split}.shape = {Xs.shape}, Ys_{split}.shape = {len(Ys)}")
-
-    return shuffled_Xs, shuffled_Ys
+from effectidor2_paper.src.utils.consts_paths import (FINAL_RESULTS, EMBEDDINGS_DIR, FIXED_POSITIVE_TRAIN_FILE,
+                                                       FIXED_NEGATIVE_TRAIN_FILE, FIXED_POSITIVE_TEST_FILE,
+                                                       FIXED_NEGATIVE_TEST_FILE)
+from common.classic_ml_classifiers.utils import prepare_Xs_and_Ys
+from common.pretrained_embeddings.calc_pt5_embeddings import calc_pt5_embeddings
 
 
 def fit_on_data(Xs, Ys, output_dir):
@@ -61,8 +47,15 @@ def main():
                             output_dir / 'classification_with_classic_ML.log', mode='w')])
     logger = logging.getLogger(__name__)
 
-    Xs_train, Ys_train = prepare_Xs_and_Ys(logger, model_id, 'train', always_calc_embeddings=False)
-    Xs_test, Ys_test = prepare_Xs_and_Ys(logger, model_id, 'test', always_calc_embeddings=False)
+    calc_embeddings_fn = functools.partial(calc_pt5_embeddings, model_id)
+    Xs_train, Ys_train = prepare_Xs_and_Ys(logger, calc_embeddings_fn, 'train', always_calc_embeddings=False,
+                                            positive_fasta_file=FIXED_POSITIVE_TRAIN_FILE,
+                                            negative_fasta_file=FIXED_NEGATIVE_TRAIN_FILE,
+                                            embeddings_dir=EMBEDDINGS_DIR)
+    Xs_test, Ys_test = prepare_Xs_and_Ys(logger, calc_embeddings_fn, 'test', always_calc_embeddings=False,
+                                          positive_fasta_file=FIXED_POSITIVE_TEST_FILE,
+                                          negative_fasta_file=FIXED_NEGATIVE_TEST_FILE,
+                                          embeddings_dir=EMBEDDINGS_DIR)
 
     Xs = np.concatenate([Xs_train, Xs_test])
     Ys = np.concatenate([Ys_train, Ys_test])

@@ -7,7 +7,7 @@ PROTEIN_BERT_MODEL_NAME = 'epoch_92400_sample_23500000.pkl'
 
 FINETUNE_NUMBER_OF_EPOCHS = 10
 
-DATASETS_DIR = PAPER_DIR / 'data' / 'new_data_processed'
+DATASETS_DIR = PAPER_DIR / 'data'
 
 RESULTS_DIR = PAPER_DIR / 'results'
 EMBEDDINGS_DIR = RESULTS_DIR / 'pretrained_embeddings'

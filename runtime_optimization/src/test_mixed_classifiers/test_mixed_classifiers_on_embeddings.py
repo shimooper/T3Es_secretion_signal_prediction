@@ -15,11 +15,11 @@ from Bio import SeqIO
 
 from sklearn.metrics import matthews_corrcoef, average_precision_score
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from runtime_optimization.src.utils.consts_paths import CLASSIFIERS_OUTPUT_DIR, FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE
-from effectidor2_paper.src.pretrained_embeddings.calc_esm_embeddings import calc_embeddings_of_fasta_file_with_huggingface_model_esm
-from effectidor2_paper.src.pretrained_embeddings.calc_pt5_embeddings import calc_embeddings_of_fasta_file_with_huggingface_model_pt5
+from runtime_optimization.src.utils.consts_paths import CLASSIFIERS_OUTPUT_DIR, POSITIVE_TEST_FILE, NEGATIVE_TEST_FILE
+from common.pretrained_embeddings.calc_esm_embeddings import calc_embeddings_of_fasta_file_with_huggingface_model_esm
+from common.pretrained_embeddings.calc_pt5_embeddings import calc_embeddings_of_fasta_file_with_huggingface_model_pt5
 
 
 def filter_fasta_by_indices(input_fasta, output_fasta, indices_set):
@@ -38,9 +38,9 @@ def test_on_test_data(logger, lower_threshold, upper_threshold, output_dir):
     positive_embeddings_output_file_path = esm6_embeddings_output_dir / f'positive_embeddings.npy'
     negative_embeddings_output_file_path = esm6_embeddings_output_dir / f'negative_embeddings.npy'
     Xs_positive = calc_embeddings_of_fasta_file_with_huggingface_model_esm(
-        'esm_6', FIXED_POSITIVE_TEST_FILE, positive_embeddings_output_file_path)
+        'esm_6', POSITIVE_TEST_FILE, positive_embeddings_output_file_path)
     Xs_negative = calc_embeddings_of_fasta_file_with_huggingface_model_esm(
-        'esm_6', FIXED_NEGATIVE_TEST_FILE, negative_embeddings_output_file_path)
+        'esm_6', NEGATIVE_TEST_FILE, negative_embeddings_output_file_path)
     logger.info(f"ESM-6 embeddings calculated: positive shape {Xs_positive.shape}, negative shape {Xs_negative.shape}")
 
     Xs = np.concatenate([Xs_positive, Xs_negative])
@@ -70,8 +70,8 @@ def test_on_test_data(logger, lower_threshold, upper_threshold, output_dir):
         POS_PT5_FASTA = pt5_dir / "positive_nonsignificant.fasta"
         NEG_PT5_FASTA = pt5_dir / "negative_nonsignificant.fasta"
 
-        filter_fasta_by_indices(FIXED_POSITIVE_TEST_FILE, POS_PT5_FASTA, nonsig_pos_indices)
-        filter_fasta_by_indices(FIXED_NEGATIVE_TEST_FILE, NEG_PT5_FASTA, nonsig_neg_indices)
+        filter_fasta_by_indices(POSITIVE_TEST_FILE, POS_PT5_FASTA, nonsig_pos_indices)
+        filter_fasta_by_indices(NEGATIVE_TEST_FILE, NEG_PT5_FASTA, nonsig_neg_indices)
         logger.info(f"Filtered nonsignificant sequences for PT5 embeddings. Wrote filtered FASTA files to {POS_PT5_FASTA} and {NEG_PT5_FASTA}")
 
         pt5_embeddings_dir = pt5_dir / "embeddings"

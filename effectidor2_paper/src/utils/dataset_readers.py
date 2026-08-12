@@ -1,7 +1,7 @@
 from sklearn.model_selection import train_test_split
 
 from common.consts import RANDOM_STATE
-from .read_fasta_utils import read_sequences_from_fasta_file
+from common.read_fasta_utils import read_sequences_from_fasta_file
 from effectidor2_paper.src.utils.consts_paths import (FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN_FILE,
                                                        FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE)
 

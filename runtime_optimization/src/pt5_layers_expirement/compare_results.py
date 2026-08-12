@@ -5,20 +5,20 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from runtime_optimization.src.utils.consts_paths import CLASSIFIERS_OUTPUT_DIR
+from runtime_optimization.src.utils.consts_paths import OUTPUTS_DIR
 
 NUM_PT5_LAYERS = 24  # ProtT5 (T5-3B) has 24 encoder transformer blocks
 
-OUTPUT_DIR = CLASSIFIERS_OUTPUT_DIR / 'pt5_layers_expirement'
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+results_dir = OUTPUTS_DIR / 'pt5_layers_expirement'
+results_dir.mkdir(parents=True, exist_ok=True)
 
 
 def load_layer_results(hidden_layer_number):
     """Load best_classifier_all_results.csv for a given layer (None = default full model)."""
     if hidden_layer_number is None:
-        classifiers_dir = CLASSIFIERS_OUTPUT_DIR / 'pt5'
+        classifiers_dir = OUTPUTS_DIR / 'pt5'
         label = 'default\n(full model)'
     else:
         classifiers_dir = CLASSIFIERS_OUTPUT_DIR / 'pt5' / f'layer_{hidden_layer_number}'
