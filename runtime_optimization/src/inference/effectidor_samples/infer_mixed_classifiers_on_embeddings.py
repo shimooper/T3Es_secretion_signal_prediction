@@ -8,7 +8,6 @@ import joblib
 
 import pandas as pd
 import numpy as np
-import os
 import logging
 import sys
 from pathlib import Path
@@ -16,7 +15,7 @@ from Bio import SeqIO
 
 from sklearn.metrics import matthews_corrcoef, average_precision_score
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
 from runtime_optimization.src.utils.consts_paths import CLASSIFIERS_OUTPUT_DIR, FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE
 from effectidor2_paper.src.pretrained_embeddings.calc_esm_embeddings import calc_embeddings_of_fasta_file_with_huggingface_model_esm
@@ -33,7 +32,7 @@ def test_on_test_data(logger, fasta_path, accuracy_threshold, output_dir):
     start_test_time = timer()
 
     # First, generate embeddings of all test sequences using esm6 and predict probabilities.
-    esm6_embeddings_output_dir = Path(output_dir) / 'esm_6_embeddings'
+    esm6_embeddings_output_dir = output_dir / 'esm_6_embeddings'
     esm6_embeddings_output_dir.mkdir(parents=True, exist_ok=True)
 
     embeddings_output_file_path = esm6_embeddings_output_dir / f'embeddings.npy'
@@ -41,7 +40,7 @@ def test_on_test_data(logger, fasta_path, accuracy_threshold, output_dir):
         'esm_6', fasta_path, embeddings_output_file_path)
     logger.info(f"ESM-6 embeddings calculated: shape {Xs.shape}")
 
-    model_esm_6 = joblib.load(os.path.join(CLASSIFIERS_OUTPUT_DIR, 'esm_6', f'model.pkl'))
+    model_esm_6 = joblib.load(CLASSIFIERS_OUTPUT_DIR / 'esm_6' / 'model.pkl')
     probs_esm6 = model_esm_6.predict_proba(Xs)[:, 1]
     logger.info(f"ESM-6 model probabilities predicted.")
 
@@ -59,7 +58,7 @@ def test_on_test_data(logger, fasta_path, accuracy_threshold, output_dir):
         nonsig_pos_indices = [i for i in nonsig_indices if i < n_pos]
         nonsig_neg_indices = [i - n_pos for i in nonsig_indices if i >= n_pos]
 
-        pt5_dir = Path(output_dir) / "pt5_stage"
+        pt5_dir = output_dir / "pt5_stage"
         pt5_dir.mkdir(exist_ok=True)
 
         PT5_FASTA = pt5_dir / "nonsignificant.fasta"
@@ -74,7 +73,7 @@ def test_on_test_data(logger, fasta_path, accuracy_threshold, output_dir):
             'pt5', PT5_FASTA, pt5_embeddings_dir / "embeddings.npy")
         logger.info(f"PT5 embeddings calculated for nonsignificant sequences: shape {Xs_pt5.shape}")
 
-        model_pt5 = joblib.load(os.path.join(CLASSIFIERS_OUTPUT_DIR, 'pt5', f'model.pkl'))
+        model_pt5 = joblib.load(CLASSIFIERS_OUTPUT_DIR / 'pt5' / 'model.pkl')
         probs_pt5 = model_pt5.predict_proba(Xs_pt5)[:, 1]
         logger.info(f"PT5 model probabilities predicted for nonsignificant sequences.")
 
@@ -94,16 +93,16 @@ def test_on_test_data(logger, fasta_path, accuracy_threshold, output_dir):
 
 def main(fasta_path, accuracy_threshold):
     output_dir = fasta_path.parent / f'mixed_{accuracy_threshold}'
-    os.makedirs(output_dir, exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         handlers=[logging.FileHandler(
-                            os.path.join(output_dir, 'classification_with_classic_ML_test.log'), mode='w')])
+                            output_dir / 'classification_with_classic_ML_test.log', mode='w')])
     logger = logging.getLogger(__name__)
 
     test_results = test_on_test_data(logger, fasta_path, accuracy_threshold, output_dir)
-    test_results.to_csv(os.path.join(output_dir, 'mixed_classifier_test_results.csv'), index=False)
+    test_results.to_csv(output_dir / 'mixed_classifier_test_results.csv', index=False)
 
 
 if __name__ == "__main__":

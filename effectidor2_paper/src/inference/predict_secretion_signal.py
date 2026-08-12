@@ -1,5 +1,4 @@
 import torch
-import os
 import re
 import pandas as pd
 import argparse
@@ -12,12 +11,12 @@ from pathlib import Path
 from transformers import T5Tokenizer, T5EncoderModel
 
 
-PAPER_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-PROJECT_ROOT_DIR = os.path.dirname(PAPER_DIR)
+PAPER_DIR = Path(__file__).resolve().parents[2]
+PROJECT_ROOT_DIR = PAPER_DIR.parent
 
-PRETRAINED_MODEL_DISK_DIR = f"{PROJECT_ROOT_DIR}/common/models/prot_t5_xl_uniref50_01_08_2024/"
+PRETRAINED_MODEL_DISK_DIR = PROJECT_ROOT_DIR / 'common' / 'models' / 'prot_t5_xl_uniref50_01_08_2024'
 PRETRAINED_MODEL_HUGGINGFACE_NAME = 'Rostlab/prot_t5_xl_uniref50'
-TRAINED_HEAD_DIR = f"{PAPER_DIR}/results/trained_pt5_head/model.pkl"
+TRAINED_HEAD_DIR = PAPER_DIR / 'results' / 'trained_pt5_head' / 'model.pkl'
 
 
 def get_pt5_embeddings(sequences, load_llm_from_disk, batch_size=4):
@@ -60,13 +59,13 @@ def main(args):
 
     input_fasta_file = args.input_fasta_file
     output_file = args.output_file
-    input_fasta_file_name = Path(input_fasta_file).stem
+    input_fasta_file_name = input_fasta_file.stem
 
     if output_file is None:
-        output_file = os.path.join(os.path.dirname(input_fasta_file), f'{input_fasta_file_name}_predictions.csv')
+        output_file = input_fasta_file.parent / f'{input_fasta_file_name}_predictions.csv'
 
     logger = logging.getLogger('main')
-    log_path = os.path.join(os.path.dirname(output_file), f'secretion_signal_{input_fasta_file_name}_batch_{args.batch_size}_log.txt')
+    log_path = output_file.parent / f'secretion_signal_{input_fasta_file_name}_batch_{args.batch_size}_log.txt'
     file_handler = logging.FileHandler(log_path, mode='a')
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     file_handler.setFormatter(formatter)
@@ -102,8 +101,8 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--input_fasta_file', help='path to a fasta file', required=True)
-    parser.add_argument('--output_file', help='path to the output file with predictions. By default, the output file '
+    parser.add_argument('--input_fasta_file', type=Path, help='path to a fasta file', required=True)
+    parser.add_argument('--output_file', type=Path, help='path to the output file with predictions. By default, the output file '
                                               'will be saved in the same directory as the input file.', required=False)
     parser.add_argument('--batch_size', help='The batch size to use for the prediction', type=int, default=16)
     parser.add_argument('--load_llm_from_disk', help='Whether to load the llm from disk, or from hugging face.'

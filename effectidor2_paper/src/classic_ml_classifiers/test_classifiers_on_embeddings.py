@@ -7,13 +7,13 @@ from timeit import default_timer as timer
 import joblib
 
 import pandas as pd
-import os
 import logging
 import sys
+from pathlib import Path
 
 from sklearn.metrics import matthews_corrcoef, average_precision_score
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from effectidor2_paper.src.utils.consts_paths import CLASSIFIERS_OUTPUT_DIR
 from utils import prepare_Xs_and_Ys
@@ -51,22 +51,22 @@ def test_on_test_data(logger, model_id, model, split, hidden_layer_number=None):
 
 def main(model_id, hidden_layer_number=None):
     layer_subdir = f'layer_{hidden_layer_number}' if hidden_layer_number is not None else ''
-    classifiers_dir = (os.path.join(CLASSIFIERS_OUTPUT_DIR, model_id, layer_subdir)
-                       if layer_subdir else os.path.join(CLASSIFIERS_OUTPUT_DIR, model_id))
+    classifiers_dir = (CLASSIFIERS_OUTPUT_DIR / model_id / layer_subdir
+                       if layer_subdir else CLASSIFIERS_OUTPUT_DIR / model_id)
 
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         handlers=[logging.FileHandler(
-                            os.path.join(classifiers_dir, 'classification_with_classic_ML_test.log'), mode='w')])
+                            classifiers_dir / 'classification_with_classic_ML_test.log', mode='w')])
     logger = logging.getLogger(__name__)
 
-    model = joblib.load(os.path.join(classifiers_dir, f'model.pkl'))
+    model = joblib.load(classifiers_dir / 'model.pkl')
     test_results = test_on_test_data(logger, model_id, model, 'test', hidden_layer_number=hidden_layer_number)
 
-    train_results = pd.read_csv(os.path.join(classifiers_dir, 'best_classifier_train_results.csv'))
+    train_results = pd.read_csv(classifiers_dir / 'best_classifier_train_results.csv')
     all_results = pd.concat([train_results, test_results], axis=1)
 
-    all_results.to_csv(os.path.join(classifiers_dir, 'best_classifier_all_results.csv'), index=False)
+    all_results.to_csv(classifiers_dir / 'best_classifier_all_results.csv', index=False)
 
 
 if __name__ == "__main__":

@@ -1,13 +1,14 @@
 import sys
 import os
 import random
+from pathlib import Path
 
 import torch
 import numpy as np
 from transformers import TrainingArguments, Trainer, set_seed
 import wandb
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))))
+sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
 from .classifier import PT5_classification_model
 from .data_utils import prepare_dataset
@@ -113,9 +114,9 @@ def train_per_protein(
     wandb.login(key=WANDB_KEY)
     os.environ["WANDB_PROJECT"] = WANDB_PROJECT
     os.environ["WANDB_LOG_MODEL"] = "end"  # Upload the final model to W&B at the end of training (after loading the best model)
-    os.environ["WANDB_DIR"] = FINETUNED_MODELS_OUTPUT_DIR
+    os.environ["WANDB_DIR"] = str(FINETUNED_MODELS_OUTPUT_DIR)
     run_name = f"{model_id}_train_batch{batch * accum}_lr{lr}"
-    run_output_dir = os.path.join(FINETUNED_MODELS_OUTPUT_DIR, model_id)
+    run_output_dir = FINETUNED_MODELS_OUTPUT_DIR / model_id
 
     # Create Datasets
     train_set = prepare_dataset(train_df, tokenizer)

@@ -1,4 +1,3 @@
-import os
 import logging
 import numpy as np
 import random
@@ -6,9 +5,10 @@ from sklearn.neural_network import MLPClassifier
 import joblib
 import json
 import sys
+from pathlib import Path
 from sklearn import __version__ as sklearn_version
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from effectidor2_paper.src.utils.consts_paths import FINAL_RESULTS
 from effectidor2_paper.src.pretrained_embeddings.calc_pt5_embeddings import calc_embeddings
@@ -39,26 +39,26 @@ def fit_on_data(Xs, Ys, output_dir):
     clf.fit(Xs, Ys)
 
     # Save the best classifier to disk
-    joblib.dump(clf, os.path.join(output_dir, "model.pkl"))
+    joblib.dump(clf, output_dir / "model.pkl")
     # Save metadata
     metadata = {
         'numpy_version': np.__version__,
         'joblib_version': joblib.__version__,
         'sklearn_version': sklearn_version
     }
-    with open(os.path.join(output_dir, 'model_metadata.json'), 'w') as f:
+    with open(output_dir / 'model_metadata.json', 'w') as f:
         json.dump(metadata, f)
 
 
 def main():
     model_id = 'pt5'
-    output_dir = os.path.join(FINAL_RESULTS, 'trained_pt5_head')
-    os.makedirs(output_dir, exist_ok=True)
+    output_dir = FINAL_RESULTS / 'trained_pt5_head'
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         handlers=[logging.FileHandler(
-                            os.path.join(output_dir, 'classification_with_classic_ML.log'), mode='w')])
+                            output_dir / 'classification_with_classic_ML.log', mode='w')])
     logger = logging.getLogger(__name__)
 
     Xs_train, Ys_train = prepare_Xs_and_Ys(logger, model_id, 'train', always_calc_embeddings=False)

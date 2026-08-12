@@ -3,10 +3,10 @@ import joblib
 
 import matplotlib.pyplot as plt
 import pandas as pd
-import os
 import logging
 import sys
 import json
+from pathlib import Path
 
 import numpy as np
 from sklearn.model_selection import GridSearchCV
@@ -14,7 +14,7 @@ from sklearn.decomposition import PCA
 from sklearn.metrics import make_scorer, matthews_corrcoef
 from sklearn import __version__ as sklearn_version
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from effectidor2_paper.src.utils.consts_paths import EMBEDDINGS_DIR, CLASSIFIERS_OUTPUT_DIR
 from common.consts import MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION
@@ -39,7 +39,7 @@ def pca(Xs, Ys, output_dir, n_components=2):
     ax.set_xlabel('Principal Component 1')
     ax.set_ylabel('Principal Component 2')
     fig.colorbar(sc, label='Class')
-    fig.savefig(os.path.join(output_dir, 'train_examples_pca.png'))
+    fig.savefig(output_dir / 'train_examples_pca.png')
 
 
 def fit_on_train_data(Xs_train, Ys_train, output_dir, n_jobs):
@@ -61,9 +61,9 @@ def fit_on_train_data(Xs_train, Ys_train, output_dir, n_jobs):
         try:
             grid.fit(Xs_train, Ys_train)
             grid_results = pd.DataFrame.from_dict(grid.cv_results_)
-            grid_results.to_csv(os.path.join(output_dir, f'{class_name}_grid_results.csv'))
+            grid_results.to_csv(output_dir / f'{class_name}_grid_results.csv')
             best_classifiers[class_name] = grid.best_estimator_
-            joblib.dump(grid.best_estimator_, os.path.join(output_dir, f"best_{class_name}.pkl"))
+            joblib.dump(grid.best_estimator_, output_dir / f"best_{class_name}.pkl")
 
             # Note: grid.best_score_ == grid_results['mean_test_mcc'][grid.best_index_] (the mean cross-validated score of the best_estimator)
             logging.info(f"Best params: {grid.best_params_}, Best index: {grid.best_index_}, Best score: {grid.best_score_}")
@@ -86,20 +86,20 @@ def fit_on_train_data(Xs_train, Ys_train, output_dir, n_jobs):
                                                  columns=['best_index', 'mean_mcc_on_train_folds', 'mean_auprc_on_train_folds',
                                                           'mean_mcc_on_held_out_folds', 'mean_auprc_on_held_out_folds'])
     best_classifiers_df.index.name = 'classifier_class'
-    best_classifiers_df.to_csv(os.path.join(output_dir, 'best_classifier_from_each_class.csv'))
+    best_classifiers_df.to_csv(output_dir / 'best_classifier_from_each_class.csv')
 
     best_classifier_class = best_classifiers_df['mean_mcc_on_held_out_folds'].idxmax()
     logging.info(f"Best classifier (according to mean_mcc_on_held_out_folds): {best_classifier_class}")
 
     # Save the best classifier to disk
-    joblib.dump(best_classifiers[best_classifier_class], os.path.join(output_dir, "model.pkl"))
+    joblib.dump(best_classifiers[best_classifier_class], output_dir / "model.pkl")
     # Save metadata
     metadata = {
         'numpy_version': np.__version__,
         'joblib_version': joblib.__version__,
         'sklearn_version': sklearn_version
     }
-    with open(os.path.join(output_dir, 'model_metadata.json'), 'w') as f:
+    with open(output_dir / 'model_metadata.json', 'w') as f:
         json.dump(metadata, f)
 
     best_classifier_metrics = best_classifiers_df.loc[[best_classifier_class]].reset_index()
@@ -108,17 +108,17 @@ def fit_on_train_data(Xs_train, Ys_train, output_dir, n_jobs):
 
 
 def main(model_id, n_jobs, hidden_layer_number=None):
-    embeddings_dir = os.path.join(EMBEDDINGS_DIR, model_id)
+    embeddings_dir = EMBEDDINGS_DIR / model_id
     layer_subdir = f'layer_{hidden_layer_number}' if hidden_layer_number is not None else ''
-    classifiers_output_dir = (os.path.join(CLASSIFIERS_OUTPUT_DIR, model_id, layer_subdir)
-                              if layer_subdir else os.path.join(CLASSIFIERS_OUTPUT_DIR, model_id))
-    os.makedirs(embeddings_dir, exist_ok=True)
-    os.makedirs(classifiers_output_dir, exist_ok=True)
+    classifiers_output_dir = (CLASSIFIERS_OUTPUT_DIR / model_id / layer_subdir
+                              if layer_subdir else CLASSIFIERS_OUTPUT_DIR / model_id)
+    embeddings_dir.mkdir(parents=True, exist_ok=True)
+    classifiers_output_dir.mkdir(parents=True, exist_ok=True)
 
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         handlers=[logging.FileHandler(
-                            os.path.join(classifiers_output_dir, 'classification_with_classic_ML.log'), mode='w')])
+                            classifiers_output_dir / 'classification_with_classic_ML.log', mode='w')])
     logger = logging.getLogger(__name__)
 
     Xs_train, Ys_train = prepare_Xs_and_Ys(logger, model_id, 'train', always_calc_embeddings=False,
@@ -134,7 +134,7 @@ def main(model_id, n_jobs, hidden_layer_number=None):
     best_classifier_metrics['training_mode'] = ['only_head']
     best_classifier_metrics['number_of_parameters (millions)'] = [MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION[model_id]]
 
-    best_classifier_metrics.to_csv(os.path.join(classifiers_output_dir, 'best_classifier_train_results.csv'), index=False)
+    best_classifier_metrics.to_csv(classifiers_output_dir / 'best_classifier_train_results.csv', index=False)
 
     logging.info(f"Finished training classifiers on embeddings for model {model_id}")
 

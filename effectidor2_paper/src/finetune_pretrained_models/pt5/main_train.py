@@ -1,9 +1,9 @@
 import torch  # Important - without this I get weird error when trying to import torch in another module imported here
-import os.path
 import sys
+from pathlib import Path
 import pandas as pd
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))))
+sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
 from effectidor2_paper.src.utils.dataset_readers import read_train_data
 from effectidor2_paper.src.finetune_pretrained_models.pt5.training_utils import train_per_protein, save_model, FINETUNED_WEIGHTS_FILE
@@ -20,7 +20,7 @@ def main():
     model = train_per_protein(model_id, train_df, valid_df, num_labels=2, batch=1, accum=BATCH_SIZE, deepspeed=False)
 
     # Save model (only the finetuned parameters)
-    save_model(model, os.path.join(FINETUNED_MODELS_OUTPUT_DIR, model_id, FINETUNED_WEIGHTS_FILE))
+    save_model(model, FINETUNED_MODELS_OUTPUT_DIR / model_id / FINETUNED_WEIGHTS_FILE)
 
 
 if __name__ == "__main__":

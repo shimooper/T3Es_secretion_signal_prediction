@@ -7,15 +7,15 @@ from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, MSELoss
 import re
 import numpy as np
 import copy
-import os
 import sys
+from pathlib import Path
 
 from transformers.modeling_outputs import SequenceClassifierOutput
 from transformers.models.t5.modeling_t5 import T5Config, T5PreTrainedModel, T5Stack
 from transformers.utils.model_parallel_utils import assert_device_map, get_device_map
 from transformers import T5EncoderModel, T5Tokenizer
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))))
+sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
 from .lora import modify_with_lora, LoRAConfig
 from common.consts import MODEL_ID_TO_MODEL_NAME

@@ -1,4 +1,3 @@
-import os
 import argparse
 from timeit import default_timer as timer
 import re
@@ -9,7 +8,7 @@ import numpy as np
 import torch
 from transformers import T5Tokenizer, T5EncoderModel
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from effectidor2_paper.src.utils.consts_paths import (FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN_FILE,
                                                        FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE,
@@ -76,13 +75,13 @@ def calc_pt5_embeddings(model_id, split, always_calc_embeddings=False, hidden_la
     else:
         raise ValueError(f"split must be one of ['train', 'test'], got {split}")
 
-    output_dir = Path(EMBEDDINGS_DIR) / model_id
-    os.makedirs(output_dir, exist_ok=True)
+    output_dir = EMBEDDINGS_DIR / model_id
+    output_dir.mkdir(parents=True, exist_ok=True)
     layer_suffix = f'_layer{hidden_layer_number}' if hidden_layer_number is not None else ''
-    positive_embeddings_output_file_path = os.path.join(output_dir, f'{split}_positive_embeddings{layer_suffix}.npy')
-    negative_embeddings_output_file_path = os.path.join(output_dir, f'{split}_negative_embeddings{layer_suffix}.npy')
+    positive_embeddings_output_file_path = output_dir / f'{split}_positive_embeddings{layer_suffix}.npy'
+    negative_embeddings_output_file_path = output_dir / f'{split}_negative_embeddings{layer_suffix}.npy'
 
-    if not os.path.exists(positive_embeddings_output_file_path) or always_calc_embeddings:
+    if not positive_embeddings_output_file_path.exists() or always_calc_embeddings:
         print(f"Calculating embeddings of {positive_fasta_file} into {positive_embeddings_output_file_path}")
         positive_embeddings = calc_embeddings_of_fasta_file_with_huggingface_model_pt5(
             model_id, positive_fasta_file, positive_embeddings_output_file_path, hidden_layer_number)
@@ -90,7 +89,7 @@ def calc_pt5_embeddings(model_id, split, always_calc_embeddings=False, hidden_la
         print(f"Found embeddings of {positive_fasta_file} in {positive_embeddings_output_file_path}")
         positive_embeddings = np.load(positive_embeddings_output_file_path)
 
-    if not os.path.exists(negative_embeddings_output_file_path) or always_calc_embeddings:
+    if not negative_embeddings_output_file_path.exists() or always_calc_embeddings:
         print(f"Calculating embeddings of {negative_fasta_file} into {negative_embeddings_output_file_path}")
         negative_embeddings = calc_embeddings_of_fasta_file_with_huggingface_model_pt5(
             model_id, negative_fasta_file, negative_embeddings_output_file_path, hidden_layer_number)

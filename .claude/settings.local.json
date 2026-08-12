@@ -15,7 +15,11 @@
       "Bash(python -c ' *)",
       "Bash(awk '{print $1}')",
       "Bash(xargs -0 python -m py_compile)",
-      "Bash(echo \"PYCOMPILE_EXIT:$?\")"
+      "Bash(echo \"PYCOMPILE_EXIT:$?\")",
+      "Bash(python3 *)",
+      "Bash(conda env *)",
+      "Bash(cd *)",
+      "Bash(/c/ProgramData/miniconda3/envs/secretion_signal/python -c ' *)"
     ]
   }
 }

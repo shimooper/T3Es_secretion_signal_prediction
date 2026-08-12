@@ -1,5 +1,4 @@
 import torch  # Important to import torch first - without this I get weird error when trying to import torch later
-import os
 import argparse
 import time
 import sys
@@ -13,7 +12,7 @@ import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from datasets import Dataset
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))))
+sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
 from effectidor2_paper.src.utils.consts_paths import FINETUNED_MODELS_OUTPUT_DIR
 from common.consts import MODEL_ID_TO_MODEL_NAME, BATCH_SIZE, MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION
@@ -63,7 +62,7 @@ def evaluate_model_on_dataset(model, tokenizer, sequences, labels, device):
 def main(model_id):
     model_name = MODEL_ID_TO_MODEL_NAME[model_id]
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForSequenceClassification.from_pretrained(Path(FINETUNED_MODELS_OUTPUT_DIR) / model_id / "best_model", num_labels=2)
+    model = AutoModelForSequenceClassification.from_pretrained(FINETUNED_MODELS_OUTPUT_DIR / model_id / "best_model", num_labels=2)
 
     # Set the device to use
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -96,7 +95,7 @@ def main(model_id):
     }
 
     results_df = pd.DataFrame(all_scores)
-    output_path = Path(FINETUNED_MODELS_OUTPUT_DIR) / model_id / 'best_model_results.csv'
+    output_path = FINETUNED_MODELS_OUTPUT_DIR / model_id / 'best_model_results.csv'
     print(f"Writing scores to {output_path}")
     results_df.to_csv(output_path, index=False)
 

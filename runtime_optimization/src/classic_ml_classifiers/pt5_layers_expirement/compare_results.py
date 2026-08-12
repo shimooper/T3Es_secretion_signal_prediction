@@ -1,4 +1,3 @@
-import os
 import sys
 from pathlib import Path
 
@@ -12,21 +11,21 @@ from runtime_optimization.src.utils.consts_paths import CLASSIFIERS_OUTPUT_DIR
 
 NUM_PT5_LAYERS = 24  # ProtT5 (T5-3B) has 24 encoder transformer blocks
 
-OUTPUT_DIR = os.path.join(CLASSIFIERS_OUTPUT_DIR, 'pt5_layers_expirement')
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+OUTPUT_DIR = CLASSIFIERS_OUTPUT_DIR / 'pt5_layers_expirement'
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def load_layer_results(hidden_layer_number):
     """Load best_classifier_all_results.csv for a given layer (None = default full model)."""
     if hidden_layer_number is None:
-        classifiers_dir = os.path.join(CLASSIFIERS_OUTPUT_DIR, 'pt5')
+        classifiers_dir = CLASSIFIERS_OUTPUT_DIR / 'pt5'
         label = 'default\n(full model)'
     else:
-        classifiers_dir = os.path.join(CLASSIFIERS_OUTPUT_DIR, 'pt5', f'layer_{hidden_layer_number}')
+        classifiers_dir = CLASSIFIERS_OUTPUT_DIR / 'pt5' / f'layer_{hidden_layer_number}'
         label = str(hidden_layer_number)
 
-    results_file = os.path.join(classifiers_dir, 'best_classifier_all_results.csv')
-    if not os.path.exists(results_file):
+    results_file = classifiers_dir / 'best_classifier_all_results.csv'
+    if not results_file.exists():
         print(f"Missing: {results_file}")
         return None
 
@@ -52,7 +51,7 @@ def main():
 
     combined = pd.concat(rows, ignore_index=True)
     combined_with_baseline = pd.concat(rows + ([baseline] if baseline is not None else []), ignore_index=True)
-    combined_with_baseline.to_csv(os.path.join(OUTPUT_DIR, 'pt5_layers_comparison.csv'), index=False)
+    combined_with_baseline.to_csv(OUTPUT_DIR / 'pt5_layers_comparison.csv', index=False)
     print(f"Saved pt5_layers_comparison.csv ({len(combined_with_baseline)} rows)")
 
     # --- plots ---
@@ -89,7 +88,7 @@ def main():
 
     fig.tight_layout()
     filename = 'pt5_layers_comparison.png'
-    fig.savefig(os.path.join(OUTPUT_DIR, filename), dpi=150)
+    fig.savefig(OUTPUT_DIR / filename, dpi=150)
     plt.close(fig)
     print(f"Saved {filename}")
 

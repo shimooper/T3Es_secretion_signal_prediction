@@ -1,4 +1,3 @@
-import os
 import argparse
 from timeit import default_timer as timer
 from pathlib import Path
@@ -9,7 +8,7 @@ import torch
 from transformers import AutoTokenizer, AutoModel
 
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from effectidor2_paper.src.utils.consts_paths import (FIXED_POSITIVE_TRAIN_FILE, FIXED_NEGATIVE_TRAIN_FILE,
                                                        FIXED_POSITIVE_TEST_FILE, FIXED_NEGATIVE_TEST_FILE,
@@ -60,12 +59,12 @@ def calc_esm_embeddings(model_id, split, always_calc_embeddings=False):
     else:
         raise ValueError(f"split must be one of ['train', 'test'], got {split}")
 
-    output_dir = Path(EMBEDDINGS_DIR) / model_id
-    os.makedirs(output_dir, exist_ok=True)
-    positive_embeddings_output_file_path = os.path.join(output_dir, f'{split}_positive_embeddings.npy')
-    negative_embeddings_output_file_path = os.path.join(output_dir, f'{split}_negative_embeddings.npy')
+    output_dir = EMBEDDINGS_DIR / model_id
+    output_dir.mkdir(parents=True, exist_ok=True)
+    positive_embeddings_output_file_path = output_dir / f'{split}_positive_embeddings.npy'
+    negative_embeddings_output_file_path = output_dir / f'{split}_negative_embeddings.npy'
 
-    if not os.path.exists(positive_embeddings_output_file_path) or always_calc_embeddings:
+    if not positive_embeddings_output_file_path.exists() or always_calc_embeddings:
         print(f"Calculating embeddings of {positive_fasta_file} into {positive_embeddings_output_file_path}")
         positive_embeddings = calc_embeddings_of_fasta_file_with_huggingface_model_esm(
             model_id, positive_fasta_file, positive_embeddings_output_file_path)
@@ -73,7 +72,7 @@ def calc_esm_embeddings(model_id, split, always_calc_embeddings=False):
         print(f"Found embeddings of {positive_fasta_file} in {positive_embeddings_output_file_path}")
         positive_embeddings = np.load(positive_embeddings_output_file_path)
 
-    if not os.path.exists(negative_embeddings_output_file_path) or always_calc_embeddings:
+    if not negative_embeddings_output_file_path.exists() or always_calc_embeddings:
         print(f"Calculating embeddings of {negative_fasta_file} into {negative_embeddings_output_file_path}")
         negative_embeddings = calc_embeddings_of_fasta_file_with_huggingface_model_esm(
             model_id, negative_fasta_file, negative_embeddings_output_file_path)

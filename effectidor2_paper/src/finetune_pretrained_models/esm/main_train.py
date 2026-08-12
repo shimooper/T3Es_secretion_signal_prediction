@@ -7,7 +7,7 @@ import sys
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer
 from datasets import Dataset
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))))
+sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
 from effectidor2_paper.src.utils.consts_paths import FINETUNED_MODELS_OUTPUT_DIR, FINETUNE_NUMBER_OF_EPOCHS
 from common.consts import MODEL_ID_TO_MODEL_NAME, BATCH_SIZE, RANDOM_STATE
@@ -38,7 +38,7 @@ def create_dataset(tokenizer, sequences, labels=None):
 def train_model(model_name, tokenizer, train_dataset, validation_dataset, output_dir, run_name: str):
     # Set up Weights & Biases
     os.environ["WANDB_PROJECT"] = WANDB_PROJECT
-    os.environ["WANDB_DIR"] = FINETUNED_MODELS_OUTPUT_DIR
+    os.environ["WANDB_DIR"] = str(FINETUNED_MODELS_OUTPUT_DIR)
     os.environ["WANDB_LOG_MODEL"] = "end"  # Upload the final model to W&B at the end of training (after loading the best model)
     wandb.login(key=WANDB_KEY)
 
@@ -85,8 +85,8 @@ def main(model_id):
 
     model_name = MODEL_ID_TO_MODEL_NAME[model_id]
     run_name = f"{model_id}_train_batch{BATCH_SIZE}_lr{LEARNING_RATE}"
-    output_dir = os.path.join(FINETUNED_MODELS_OUTPUT_DIR, model_id)
-    os.makedirs(output_dir, exist_ok=True)
+    output_dir = FINETUNED_MODELS_OUTPUT_DIR / model_id
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     train_dataset = create_dataset(tokenizer, train_sequences, train_labels)
@@ -95,7 +95,7 @@ def main(model_id):
     model = train_model(model_name, tokenizer, train_dataset, validation_dataset, output_dir, run_name)
 
     # Save model
-    model.save_pretrained(Path(output_dir) / "best_model")
+    model.save_pretrained(output_dir / "best_model")
 
 
 if __name__ == "__main__":

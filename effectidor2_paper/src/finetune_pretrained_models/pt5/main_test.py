@@ -4,11 +4,10 @@ from tqdm import tqdm
 import pandas as pd
 from torch.utils.data import DataLoader
 import sys
-import os
 import torch.nn.functional as F
 from pathlib import Path
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))))
+sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
 from effectidor2_paper.src.finetune_pretrained_models.pt5.classifier import PT5_classification_model
 from effectidor2_paper.src.finetune_pretrained_models.pt5.data_utils import prepare_dataset
@@ -61,7 +60,7 @@ def evaluate_model_on_dataset(model, tokenizer, sequences, labels, device):
 
 def main():
     model_id = 'pt5'
-    tokenizer, model = load_model(model_id, os.path.join(FINETUNED_MODELS_OUTPUT_DIR, model_id, FINETUNED_WEIGHTS_FILE), half_precision=False)
+    tokenizer, model = load_model(model_id, FINETUNED_MODELS_OUTPUT_DIR / model_id / FINETUNED_WEIGHTS_FILE, half_precision=False)
 
     # Set the device to use
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -93,7 +92,7 @@ def main():
     }
 
     results_df = pd.DataFrame(all_scores)
-    output_path = Path(FINETUNED_MODELS_OUTPUT_DIR) / model_id / 'best_model_results.csv'
+    output_path = FINETUNED_MODELS_OUTPUT_DIR / model_id / 'best_model_results.csv'
     print(f"Writing scores to {output_path}")
     results_df.to_csv(output_path, index=False)
 

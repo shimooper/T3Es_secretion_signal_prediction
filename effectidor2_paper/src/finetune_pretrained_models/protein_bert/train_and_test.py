@@ -1,19 +1,19 @@
-import os
 import sys
+from pathlib import Path
 from timeit import default_timer as timer
 
 import pandas as pd
 from tensorflow import keras
 from sklearn.metrics import average_precision_score, matthews_corrcoef
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))))
+sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
 from effectidor2_paper.src.utils.consts_paths import (FINETUNED_MODELS_OUTPUT_DIR, PROTEIN_BERT_DIR,
                                                        FINETUNE_NUMBER_OF_EPOCHS, PROTEIN_BERT_MODEL_NAME)
 from common.consts import BATCH_SIZE, MODEL_ID_TO_MODEL_NAME, USE_LOCAL_MODELS, MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION
 from effectidor2_paper.src.utils.dataset_readers import read_train_data, read_test_data
 
-sys.path.append(PROTEIN_BERT_DIR)
+sys.path.append(str(PROTEIN_BERT_DIR))
 
 from proteinbert import OutputType, OutputSpec, FinetuningModelGenerator, load_pretrained_model, finetune, evaluate_by_len
 from proteinbert.conv_and_global_attention_model import get_model_with_hidden_layers_as_outputs
@@ -86,9 +86,9 @@ def main():
         'number_of_parameters (millions)': MODEL_ID_TO_PARAMETERS_COUNT_IN_MILLION[model_id]
     })
 
-    output_dir = os.path.join(FINETUNED_MODELS_OUTPUT_DIR, model_id)
-    os.makedirs(output_dir, exist_ok=True)
-    results_df.to_csv(os.path.join(output_dir, f'best_model_results.csv'), index=False)
+    output_dir = FINETUNED_MODELS_OUTPUT_DIR / model_id
+    output_dir.mkdir(parents=True, exist_ok=True)
+    results_df.to_csv(output_dir / 'best_model_results.csv', index=False)
 
 
 if __name__ == "__main__":

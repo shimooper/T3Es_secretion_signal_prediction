@@ -2,15 +2,14 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 from pathlib import Path
-import os
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from effectidor2_paper.src.utils.consts_paths import FINAL_RESULTS
 
-CLASSIC_CLASSIFIERS_PATH = Path(FINAL_RESULTS) / 'all_classic_classifiers_results.csv'
-FINETUNED_CLASSIFIERS_PATH = Path(FINAL_RESULTS) / 'all_finetuned_classifiers_results.csv'
+CLASSIC_CLASSIFIERS_PATH = FINAL_RESULTS / 'all_classic_classifiers_results.csv'
+FINETUNED_CLASSIFIERS_PATH = FINAL_RESULTS / 'all_finetuned_classifiers_results.csv'
 
 ADD_BASELINES_TO_FIG = False
 
@@ -48,9 +47,9 @@ def plot_full(all_results_df):
     fig.text(0.75, 0.90, 'Elapsed time (in seconds)', ha='center', fontsize=14)
 
     if ADD_BASELINES_TO_FIG:
-        plt.savefig(Path(FINAL_RESULTS) / 'results_with_hlines.png')
+        plt.savefig(FINAL_RESULTS / 'results_with_hlines.png')
     else:
-        plt.savefig(Path(FINAL_RESULTS) / 'results.png')
+        plt.savefig(FINAL_RESULTS / 'results.png')
 
 
 def plot_for_paper(all_results_df):
@@ -93,13 +92,13 @@ def plot_for_paper(all_results_df):
     plt.tight_layout()
 
     if ADD_BASELINES_TO_FIG:
-        plt.savefig(Path(FINAL_RESULTS, dpi=600) / 'results_with_hlines_for_paper.png')
+        plt.savefig(FINAL_RESULTS / 'results_with_hlines_for_paper.png', dpi=600)
     else:
-        plt.savefig(Path(FINAL_RESULTS, dpi=600) / 'results_for_paper.png')
+        plt.savefig(FINAL_RESULTS / 'results_for_paper.png', dpi=600)
 
 
 def main():
-    all_results_path = Path(FINAL_RESULTS) / 'all_results.csv'
+    all_results_path = FINAL_RESULTS / 'all_results.csv'
     if not all_results_path.is_file():
         classic_classifiers_df = pd.read_csv(CLASSIC_CLASSIFIERS_PATH)
         finetuned_classifiers_df = pd.read_csv(FINETUNED_CLASSIFIERS_PATH)
@@ -113,7 +112,7 @@ def main():
         all_results_df = pd.concat([classic_classifiers_df, finetuned_classifiers_df], ignore_index=True)
 
         all_results_df.sort_values('number_of_parameters (millions)', inplace=True)
-        all_results_df.to_csv(Path(FINAL_RESULTS) / 'all_results.csv', index=False)
+        all_results_df.to_csv(FINAL_RESULTS / 'all_results.csv', index=False)
     else:
         all_results_df = pd.read_csv(all_results_path)
 
