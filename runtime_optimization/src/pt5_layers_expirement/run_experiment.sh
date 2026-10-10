@@ -8,8 +8,8 @@
 #SBATCH --cpus-per-task=10                     # CPU cores for classifier grid search
 #SBATCH --mem=64G                              # Memory
 #SBATCH --array=1-24                           # One job per encoder layer (ProtT5 has 24 transformer blocks)
-#SBATCH --output=/groups/pupko/yairshimony/secretion_signal_prediction/runtime_optimization/outputs/embeddings_classifiers/pt5_layers_expirement/%A_%a.out
-#SBATCH --error=/groups/pupko/yairshimony/secretion_signal_prediction/runtime_optimization/outputs/embeddings_classifiers/pt5_layers_expirement/%A_%a.err
+#SBATCH --output=/groups/pupko/yairshimony/secretion_signal_prediction/runtime_optimization/outputs/pt5_layers_expirement/%A_%a.out
+#SBATCH --error=/groups/pupko/yairshimony/secretion_signal_prediction/runtime_optimization/outputs/pt5_layers_expirement/%A_%a.err
 
 export HOME=/groups/pupko/yairshimony
 
@@ -25,7 +25,7 @@ export PATH=$CONDA_PREFIX/bin:$PATH
 
 LAYER=$SLURM_ARRAY_TASK_ID
 
-cd ~/secretion_signal_prediction/effectidor2_paper/src/classic_ml_classifiers
+cd ~/secretion_signal_prediction/runtime_optimization/src/classic_ml_classifiers
 
 echo "--- Training layer $LAYER ---"
 python train_classifiers_on_embeddings.py \

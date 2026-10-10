@@ -27,9 +27,9 @@ export PATH=$CONDA_PREFIX/bin:$PATH
 
 cd ~/secretion_signal_prediction/runtime_optimization/src/inference/effectidor_samples
 
-python infer_mixed_classifiers_on_embeddings.py --fasta_path effectidor_samples/3/N_terminals_3.faa --accuracy_threshold 1
-python infer_mixed_classifiers_on_embeddings.py --fasta_path effectidor_samples/3/N_terminals_3.faa --accuracy_threshold 0.4
-python infer_mixed_classifiers_on_embeddings.py --fasta_path effectidor_samples/3/N_terminals_3.faa --accuracy_threshold 0.3
-python infer_mixed_classifiers_on_embeddings.py --fasta_path effectidor_samples/3/N_terminals_3.faa --accuracy_threshold 0.2
-python infer_mixed_classifiers_on_embeddings.py --fasta_path effectidor_samples/3/N_terminals_3.faa --accuracy_threshold 0.1
-python infer_mixed_classifiers_on_embeddings.py --fasta_path effectidor_samples/3/N_terminals_3.faa --accuracy_threshold 0
+python infer_mixed_classifiers_on_embeddings.py --fasta_path results/3/N_terminals_3.faa --accuracy_threshold 1
+python infer_mixed_classifiers_on_embeddings.py --fasta_path results/3/N_terminals_3.faa --accuracy_threshold 0.4
+python infer_mixed_classifiers_on_embeddings.py --fasta_path results/3/N_terminals_3.faa --accuracy_threshold 0.3
+python infer_mixed_classifiers_on_embeddings.py --fasta_path results/3/N_terminals_3.faa --accuracy_threshold 0.2
+python infer_mixed_classifiers_on_embeddings.py --fasta_path results/3/N_terminals_3.faa --accuracy_threshold 0.1
+python infer_mixed_classifiers_on_embeddings.py --fasta_path results/3/N_terminals_3.faa --accuracy_threshold 0

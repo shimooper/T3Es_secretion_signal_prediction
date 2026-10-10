@@ -21,7 +21,7 @@ def load_layer_results(hidden_layer_number):
         classifiers_dir = OUTPUTS_DIR / 'pt5'
         label = 'default\n(full model)'
     else:
-        classifiers_dir = CLASSIFIERS_OUTPUT_DIR / 'pt5' / f'layer_{hidden_layer_number}'
+        classifiers_dir = OUTPUTS_DIR / 'pt5' / f'layer_{hidden_layer_number}'
         label = str(hidden_layer_number)
 
     results_file = classifiers_dir / 'best_classifier_all_results.csv'
@@ -51,7 +51,7 @@ def main():
 
     combined = pd.concat(rows, ignore_index=True)
     combined_with_baseline = pd.concat(rows + ([baseline] if baseline is not None else []), ignore_index=True)
-    combined_with_baseline.to_csv(OUTPUT_DIR / 'pt5_layers_comparison.csv', index=False)
+    combined_with_baseline.to_csv(results_dir /'pt5_layers_comparison.csv', index=False)
     print(f"Saved pt5_layers_comparison.csv ({len(combined_with_baseline)} rows)")
 
     # --- plots ---
@@ -88,7 +88,7 @@ def main():
 
     fig.tight_layout()
     filename = 'pt5_layers_comparison.png'
-    fig.savefig(OUTPUT_DIR / filename, dpi=150)
+    fig.savefig(results_dir / filename, dpi=150)
     plt.close(fig)
     print(f"Saved {filename}")
 

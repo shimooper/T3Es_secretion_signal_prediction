@@ -17,7 +17,7 @@ from sklearn.metrics import matthews_corrcoef, average_precision_score
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from runtime_optimization.src.utils.consts_paths import CLASSIFIERS_OUTPUT_DIR, POSITIVE_TEST_FILE, NEGATIVE_TEST_FILE
+from runtime_optimization.src.utils.consts_paths import OUTPUTS_DIR, MIXED_MODELS_DIR, POSITIVE_TEST_FILE, NEGATIVE_TEST_FILE
 from common.pretrained_embeddings.calc_esm_embeddings import calc_embeddings_of_fasta_file_with_huggingface_model_esm
 from common.pretrained_embeddings.calc_pt5_embeddings import calc_embeddings_of_fasta_file_with_huggingface_model_pt5
 
@@ -46,7 +46,7 @@ def test_on_test_data(logger, lower_threshold, upper_threshold, output_dir):
     Xs = np.concatenate([Xs_positive, Xs_negative])
     Ys = [1] * Xs_positive.shape[0] + [0] * Xs_negative.shape[0]
 
-    model_esm_6 = joblib.load(CLASSIFIERS_OUTPUT_DIR / 'esm_6' / 'model.pkl')
+    model_esm_6 = joblib.load(OUTPUTS_DIR / 'esm_6' / 'model.pkl')
     probs_esm6 = model_esm_6.predict_proba(Xs)[:, 1]
     logger.info(f"ESM-6 model probabilities predicted.")
 
@@ -84,7 +84,7 @@ def test_on_test_data(logger, lower_threshold, upper_threshold, output_dir):
         Xs_pt5 = np.concatenate([Xs_positive_pt5, Xs_negative_pt5])
         logger.info(f"PT5 embeddings calculated for nonsignificant sequences: shape {Xs_pt5.shape}")
 
-        model_pt5 = joblib.load(CLASSIFIERS_OUTPUT_DIR / 'pt5' / 'model.pkl')
+        model_pt5 = joblib.load(OUTPUTS_DIR / 'pt5' / 'model.pkl')
         probs_pt5 = model_pt5.predict_proba(Xs_pt5)[:, 1]
         logger.info(f"PT5 model probabilities predicted for nonsignificant sequences.")
 
@@ -109,7 +109,7 @@ def test_on_test_data(logger, lower_threshold, upper_threshold, output_dir):
 
 
 def main(lower_threshold, upper_threshold):
-    output_classifiers_dir = CLASSIFIERS_OUTPUT_DIR / f'mixed_{lower_threshold}_{upper_threshold}'
+    output_classifiers_dir = MIXED_MODELS_DIR / f'mixed_{lower_threshold}_{upper_threshold}'
     output_classifiers_dir.mkdir(parents=True, exist_ok=True)
 
     logging.basicConfig(level=logging.INFO,

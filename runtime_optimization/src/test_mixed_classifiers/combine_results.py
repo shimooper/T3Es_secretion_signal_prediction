@@ -8,9 +8,9 @@ import seaborn as sns
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from runtime_optimization.src.utils.consts_paths import CLASSIFIERS_OUTPUT_DIR
+from runtime_optimization.src.utils.consts_paths import MIXED_MODELS_DIR
 
-RESULTS_DIR = Path(CLASSIFIERS_OUTPUT_DIR)
+RESULTS_DIR = MIXED_MODELS_DIR
 
 metrics = ["test_mcc", "test_auprc", "test_elapsed_time"]
 metric_labels = {

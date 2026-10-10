@@ -7,8 +7,8 @@
 #SBATCH --ntasks=1                             # Number of tasks (processes)
 #SBATCH --cpus-per-task=1                      # Number of CPU cores per task
 #SBATCH --mem=8G                               # Memory
-#SBATCH --output=/groups/pupko/yairshimony/secretion_signal_prediction/runtime_optimization/outputs/embeddings_classifiers/pt5_layers_expirement/%j.out
-#SBATCH --error=/groups/pupko/yairshimony/secretion_signal_prediction/runtime_optimization/outputs/embeddings_classifiers/pt5_layers_expirement/%j.err
+#SBATCH --output=/groups/pupko/yairshimony/secretion_signal_prediction/runtime_optimization/outputs/pt5_layers_expirement/%j.out
+#SBATCH --error=/groups/pupko/yairshimony/secretion_signal_prediction/runtime_optimization/outputs/pt5_layers_expirement/%j.err
 
 export HOME=/groups/pupko/yairshimony
 
@@ -20,7 +20,7 @@ source ~/miniconda3/etc/profile.d/conda.sh
 conda activate secretion_signal
 export PATH=$CONDA_PREFIX/bin:$PATH
 
-cd ~/secretion_signal_prediction/runtime_optimization/src/classic_ml_classifiers/pt5_layers_expirement
+cd ~/secretion_signal_prediction/runtime_optimization/src/pt5_layers_expirement
 python compare_results.py
 
 echo "Done"

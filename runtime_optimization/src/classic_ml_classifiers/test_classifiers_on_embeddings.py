@@ -5,7 +5,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from common.classic_ml_classifiers.test_classifiers_on_embeddings import main as test_classifiers_on_embeddings
-from runtime_optimization.src.utils.consts_paths import (EMBEDDINGS_DIR, CLASSIFIERS_OUTPUT_DIR,
+from runtime_optimization.src.utils.consts_paths import (EMBEDDINGS_DIR, OUTPUTS_DIR,
                                                          POSITIVE_TEST_FILE, NEGATIVE_TEST_FILE)
 
 
@@ -18,8 +18,9 @@ def get_arguments():
 
 if __name__ == "__main__":
     args = get_arguments()
-    test_classifiers_on_embeddings(args.model_id, args.hidden_layer_number,
-                                   classifiers_output_dir=CLASSIFIERS_OUTPUT_DIR,
+    test_classifiers_on_embeddings(args.model_id,
+                                   embeddings_dir=EMBEDDINGS_DIR,
+                                   classifiers_output_dir=OUTPUTS_DIR,
                                    positive_fasta_file=POSITIVE_TEST_FILE,
                                    negative_fasta_file=NEGATIVE_TEST_FILE,
-                                   embeddings_dir=EMBEDDINGS_DIR)
+                                   hidden_layer_number=args.hidden_layer_number)

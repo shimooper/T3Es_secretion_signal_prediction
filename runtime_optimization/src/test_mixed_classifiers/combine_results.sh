@@ -7,8 +7,8 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=4G
-#SBATCH --output=/groups/pupko/yairshimony/secretion_signal_prediction/runtime_optimization/src/classic_ml_classifiers/test_mixed_classifiers/%j.out
-#SBATCH --error=/groups/pupko/yairshimony/secretion_signal_prediction/runtime_optimization/src/classic_ml_classifiers/test_mixed_classifiers/%j.err
+#SBATCH --output=/groups/pupko/yairshimony/secretion_signal_prediction/runtime_optimization/src/test_mixed_classifiers/%j.out
+#SBATCH --error=/groups/pupko/yairshimony/secretion_signal_prediction/runtime_optimization/src/test_mixed_classifiers/%j.err
 
 export HOME=/groups/pupko/yairshimony
 
@@ -22,5 +22,5 @@ source ~/miniconda3/etc/profile.d/conda.sh
 conda activate secretion_signal
 export PATH=$CONDA_PREFIX/bin:$PATH
 
-cd ~/secretion_signal_prediction/runtime_optimization/src/classic_ml_classifiers/test_mixed_classifiers
+cd ~/secretion_signal_prediction/runtime_optimization/src/test_mixed_classifiers
 python combine_results.py

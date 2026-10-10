@@ -17,7 +17,7 @@ from sklearn.metrics import matthews_corrcoef, average_precision_score
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
-from runtime_optimization.src.utils.consts_paths import CLASSIFIERS_OUTPUT_DIR, POSITIVE_TEST_FILE, NEGATIVE_TEST_FILE
+from runtime_optimization.src.utils.consts_paths import OUTPUTS_DIR, POSITIVE_TEST_FILE, NEGATIVE_TEST_FILE
 from common.pretrained_embeddings.calc_esm_embeddings import calc_embeddings_of_fasta_file_with_huggingface_model_esm
 from common.pretrained_embeddings.calc_pt5_embeddings import calc_embeddings_of_fasta_file_with_huggingface_model_pt5
 
@@ -40,7 +40,7 @@ def test_on_test_data(logger, fasta_path, accuracy_threshold, output_dir):
         'esm_6', fasta_path, embeddings_output_file_path)
     logger.info(f"ESM-6 embeddings calculated: shape {Xs.shape}")
 
-    model_esm_6 = joblib.load(CLASSIFIERS_OUTPUT_DIR / 'esm_6' / 'model.pkl')
+    model_esm_6 = joblib.load(OUTPUTS_DIR / 'esm_6' / 'model.pkl')
     probs_esm6 = model_esm_6.predict_proba(Xs)[:, 1]
     logger.info(f"ESM-6 model probabilities predicted.")
 
@@ -73,7 +73,7 @@ def test_on_test_data(logger, fasta_path, accuracy_threshold, output_dir):
             'pt5', PT5_FASTA, pt5_embeddings_dir / "embeddings.npy")
         logger.info(f"PT5 embeddings calculated for nonsignificant sequences: shape {Xs_pt5.shape}")
 
-        model_pt5 = joblib.load(CLASSIFIERS_OUTPUT_DIR / 'pt5' / 'model.pkl')
+        model_pt5 = joblib.load(OUTPUTS_DIR / 'pt5' / 'model.pkl')
         probs_pt5 = model_pt5.predict_proba(Xs_pt5)[:, 1]
         logger.info(f"PT5 model probabilities predicted for nonsignificant sequences.")
 
