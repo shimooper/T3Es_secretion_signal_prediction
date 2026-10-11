@@ -13,6 +13,7 @@ def get_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_id', help='The pretrained model id', type=str, required=True)
     parser.add_argument('--hidden_layer_number', help='Encoder layer index used during training (must match)', type=int, default=None)
+    parser.add_argument('--device', help='Device to compute embeddings on (esm/pt5 only)', type=str, choices=['cpu', 'cuda'], default='cpu')
     return parser.parse_args()
 
 
@@ -32,4 +33,5 @@ if __name__ == "__main__":
                                    positive_fasta_file=FIXED_POSITIVE_TEST_FILE,
                                    negative_fasta_file=FIXED_NEGATIVE_TEST_FILE,
                                    hidden_layer_number=args.hidden_layer_number,
+                                   device=args.device,
                                    calc_embeddings_fn=_calc_embeddings_fn_for(args.model_id))

@@ -7,10 +7,10 @@ USE_LOCAL_MODELS = True
 
 MODEL_ID_TO_MODEL_NAME = {
     'esm_6': PRETRAINED_MODELS_DIR / 'esm2_t6_8M_UR50D_01_08_2024' if USE_LOCAL_MODELS else 'facebook/esm2_t6_8M_UR50D',
-    # 'esm_12': PRETRAINED_MODELS_DIR / 'esm2_t12_35M_UR50D_01_08_2024' if USE_LOCAL_MODELS else 'facebook/esm2_t12_35M_UR50D',
-    # 'esm_30': PRETRAINED_MODELS_DIR / 'esm2_t30_150M_UR50D_01_08_2024' if USE_LOCAL_MODELS else 'facebook/esm2_t30_150M_UR50D',
-    # 'esm_33': PRETRAINED_MODELS_DIR / 'esm2_t33_650M_UR50D_01_08_2024' if USE_LOCAL_MODELS else 'facebook/esm2_t33_650M_UR50D',
-    # 'esm_36': PRETRAINED_MODELS_DIR / 'esm2_t36_3B_UR50D_01_08_2024' if USE_LOCAL_MODELS else 'facebook/esm2_t36_3B_UR50D',
+    'esm_12': PRETRAINED_MODELS_DIR / 'esm2_t12_35M_UR50D_01_08_2024' if USE_LOCAL_MODELS else 'facebook/esm2_t12_35M_UR50D',
+    'esm_30': PRETRAINED_MODELS_DIR / 'esm2_t30_150M_UR50D_01_08_2024' if USE_LOCAL_MODELS else 'facebook/esm2_t30_150M_UR50D',
+    'esm_33': PRETRAINED_MODELS_DIR / 'esm2_t33_650M_UR50D_01_08_2024' if USE_LOCAL_MODELS else 'facebook/esm2_t33_650M_UR50D',
+    'esm_36': PRETRAINED_MODELS_DIR / 'esm2_t36_3B_UR50D_01_08_2024' if USE_LOCAL_MODELS else 'facebook/esm2_t36_3B_UR50D',
     # 'protein_bert': PRETRAINED_MODELS_DIR / 'protein_bert',
     'pt5': PRETRAINED_MODELS_DIR / 'prot_t5_xl_uniref50_01_08_2024' if USE_LOCAL_MODELS else 'Rostlab/prot_t5_xl_uniref50',
     # 'pt5_half_precision': PRETRAINED_MODELS_DIR / 'prot_t5_xl_half_uniref50_01_08_2024' if USE_LOCAL_MODELS else 'Rostlab/prot_t5_xl_half_uniref50-enc',

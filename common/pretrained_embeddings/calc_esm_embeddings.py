@@ -23,13 +23,19 @@ def get_arguments():
     parser.add_argument('--embeddings_dir', help='Base directory to cache computed embeddings under', type=Path, required=True)
     parser.add_argument('--always_calc_embeddings', help='Whether to always calc the embeddings even if they were already calculated', action='store_true')
     parser.add_argument('--measure_time', help='Whether to measure the time it takes to calc the embeddings', action='store_true')
+    parser.add_argument('--device', help='Device to run the model on', type=str, choices=['cpu', 'cuda'], default='cpu')
     return parser.parse_args()
 
 
-def calc_embeddings_of_fasta_file_with_huggingface_model_esm(model_id, fasta_file_path, embeddings_file_path):
+def calc_embeddings_of_fasta_file_with_huggingface_model_esm(model_id, fasta_file_path, embeddings_file_path,
+                                                             device='cpu'):
+    if device.startswith('cuda') and not torch.cuda.is_available():
+        raise RuntimeError(f"device='{device}' was requested but CUDA is not available")
+    device = torch.device(device)
+
     model_name = MODEL_ID_TO_MODEL_NAME[model_id]
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModel.from_pretrained(model_name)
+    model = AutoModel.from_pretrained(model_name).to(device)
     sequences = read_sequences_from_fasta_file(fasta_file_path)
 
     model.eval()
@@ -38,10 +44,10 @@ def calc_embeddings_of_fasta_file_with_huggingface_model_esm(model_id, fasta_fil
     embeddings = []
     with torch.no_grad():
         for i in range(0, len(sequences), BATCH_SIZE):
-            batch_inputs = {key: value[i:i+BATCH_SIZE] for key, value in tokenized_sequences.items()}
+            batch_inputs = {key: value[i:i+BATCH_SIZE].to(device) for key, value in tokenized_sequences.items()}
             outputs = model(**batch_inputs)
             sequence_representation = outputs.last_hidden_state[:, 1: -1, :].mean(1)
-            embeddings.append(sequence_representation)
+            embeddings.append(sequence_representation.cpu())
 
     Xs = torch.cat(embeddings, dim=0).numpy()
 
@@ -50,7 +56,7 @@ def calc_embeddings_of_fasta_file_with_huggingface_model_esm(model_id, fasta_fil
 
 
 def calc_esm_embeddings(model_id, split, positive_fasta_file, negative_fasta_file, embeddings_dir,
-                        always_calc_embeddings=False):
+                        always_calc_embeddings=False, device='cpu'):
     output_dir = embeddings_dir / model_id
     output_dir.mkdir(parents=True, exist_ok=True)
     positive_embeddings_output_file_path = output_dir / f'{split}_positive_embeddings.npy'
@@ -59,7 +65,7 @@ def calc_esm_embeddings(model_id, split, positive_fasta_file, negative_fasta_fil
     if not positive_embeddings_output_file_path.exists() or always_calc_embeddings:
         print(f"Calculating embeddings of {positive_fasta_file} into {positive_embeddings_output_file_path}")
         positive_embeddings = calc_embeddings_of_fasta_file_with_huggingface_model_esm(
-            model_id, positive_fasta_file, positive_embeddings_output_file_path)
+            model_id, positive_fasta_file, positive_embeddings_output_file_path, device)
     else:
         print(f"Found embeddings of {positive_fasta_file} in {positive_embeddings_output_file_path}")
         positive_embeddings = np.load(positive_embeddings_output_file_path)
@@ -67,7 +73,7 @@ def calc_esm_embeddings(model_id, split, positive_fasta_file, negative_fasta_fil
     if not negative_embeddings_output_file_path.exists() or always_calc_embeddings:
         print(f"Calculating embeddings of {negative_fasta_file} into {negative_embeddings_output_file_path}")
         negative_embeddings = calc_embeddings_of_fasta_file_with_huggingface_model_esm(
-            model_id, negative_fasta_file, negative_embeddings_output_file_path)
+            model_id, negative_fasta_file, negative_embeddings_output_file_path, device)
     else:
         print(f"Found embeddings of {negative_fasta_file} in {negative_embeddings_output_file_path}")
         negative_embeddings = np.load(negative_embeddings_output_file_path)
@@ -80,7 +86,7 @@ if __name__ == "__main__":
 
     start_test_time = timer()
     calc_esm_embeddings(args.model_id, args.split, args.positive_fasta_file, args.negative_fasta_file,
-                        args.embeddings_dir, args.always_calc_embeddings)
+                        args.embeddings_dir, args.always_calc_embeddings, args.device)
 
     if args.measure_time:
         end_test_time = timer()

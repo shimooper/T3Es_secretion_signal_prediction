@@ -24,17 +24,21 @@ def get_arguments():
     parser.add_argument('--always_calc_embeddings', help='Whether to always calc the embeddings even if they were already calculated', action='store_true')
     parser.add_argument('--measure_time', help='Whether to measure the time it takes to calc the embeddings', action='store_true')
     parser.add_argument('--hidden_layer_number', help='Index of the encoder hidden layer to use (0=embedding layer, 1=first transformer block, etc.). Defaults to the last layer.', type=int, default=None)
+    parser.add_argument('--device', help='Device to run the model on', type=str, choices=['cpu', 'cuda'], default='cpu')
     return parser.parse_args()
 
 
-def calc_embeddings_of_fasta_file_with_huggingface_model_pt5(model_id, fasta_file_path, embeddings_file_path, hidden_layer_number=None):
+def calc_embeddings_of_fasta_file_with_huggingface_model_pt5(model_id, fasta_file_path, embeddings_file_path,
+                                                             hidden_layer_number=None, device='cpu'):
     sequences = read_sequences_from_fasta_file(fasta_file_path)
 
     # replace all rare/ambiguous amino acids by X and introduce white-space between all amino acids
     sequences = [" ".join(list(re.sub(r"[UZOB]", "X", sequence))) for sequence in sequences]
 
     model_name = MODEL_ID_TO_MODEL_NAME[model_id]
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    if device.startswith('cuda') and not torch.cuda.is_available():
+        raise RuntimeError(f"device='{device}' was requested but CUDA is not available")
+    device = torch.device(device)
 
     tokenizer = T5Tokenizer.from_pretrained(model_name, do_lower_case=False)
     model = T5EncoderModel.from_pretrained(model_name).to(device)
@@ -66,7 +70,7 @@ def calc_embeddings_of_fasta_file_with_huggingface_model_pt5(model_id, fasta_fil
 
 
 def calc_pt5_embeddings(model_id, split, positive_fasta_file, negative_fasta_file, embeddings_dir,
-                        always_calc_embeddings=False, hidden_layer_number=None):
+                        always_calc_embeddings=False, hidden_layer_number=None, device='cpu'):
     output_dir = embeddings_dir / model_id
     output_dir.mkdir(parents=True, exist_ok=True)
     layer_suffix = f'_layer{hidden_layer_number}' if hidden_layer_number is not None else ''
@@ -76,7 +80,7 @@ def calc_pt5_embeddings(model_id, split, positive_fasta_file, negative_fasta_fil
     if not positive_embeddings_output_file_path.exists() or always_calc_embeddings:
         print(f"Calculating embeddings of {positive_fasta_file} into {positive_embeddings_output_file_path}")
         positive_embeddings = calc_embeddings_of_fasta_file_with_huggingface_model_pt5(
-            model_id, positive_fasta_file, positive_embeddings_output_file_path, hidden_layer_number)
+            model_id, positive_fasta_file, positive_embeddings_output_file_path, hidden_layer_number, device)
     else:
         print(f"Found embeddings of {positive_fasta_file} in {positive_embeddings_output_file_path}")
         positive_embeddings = np.load(positive_embeddings_output_file_path)
@@ -84,7 +88,7 @@ def calc_pt5_embeddings(model_id, split, positive_fasta_file, negative_fasta_fil
     if not negative_embeddings_output_file_path.exists() or always_calc_embeddings:
         print(f"Calculating embeddings of {negative_fasta_file} into {negative_embeddings_output_file_path}")
         negative_embeddings = calc_embeddings_of_fasta_file_with_huggingface_model_pt5(
-            model_id, negative_fasta_file, negative_embeddings_output_file_path, hidden_layer_number)
+            model_id, negative_fasta_file, negative_embeddings_output_file_path, hidden_layer_number, device)
     else:
         print(f"Found embeddings of {negative_fasta_file} in {negative_embeddings_output_file_path}")
         negative_embeddings = np.load(negative_embeddings_output_file_path)
@@ -97,7 +101,7 @@ if __name__ == "__main__":
 
     start_test_time = timer()
     calc_pt5_embeddings(args.model_id, args.split, args.positive_fasta_file, args.negative_fasta_file,
-                        args.embeddings_dir, args.always_calc_embeddings, args.hidden_layer_number)
+                        args.embeddings_dir, args.always_calc_embeddings, args.hidden_layer_number, args.device)
 
     if args.measure_time:
         end_test_time = timer()

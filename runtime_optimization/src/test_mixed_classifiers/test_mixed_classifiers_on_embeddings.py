@@ -17,7 +17,7 @@ from sklearn.metrics import matthews_corrcoef, average_precision_score
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from runtime_optimization.src.utils.consts_paths import OUTPUTS_DIR, MIXED_MODELS_DIR, POSITIVE_TEST_FILE, NEGATIVE_TEST_FILE
+from runtime_optimization.src.utils.consts_paths import CLASSIFIERS_OUTPUT_DIR, MIXED_MODELS_DIR, POSITIVE_TEST_FILE, NEGATIVE_TEST_FILE
 from common.pretrained_embeddings.calc_esm_embeddings import calc_embeddings_of_fasta_file_with_huggingface_model_esm
 from common.pretrained_embeddings.calc_pt5_embeddings import calc_embeddings_of_fasta_file_with_huggingface_model_pt5
 
@@ -28,7 +28,7 @@ def filter_fasta_by_indices(input_fasta, output_fasta, indices_set):
     SeqIO.write(selected, output_fasta, "fasta")
 
 
-def test_on_test_data(logger, lower_threshold, upper_threshold, output_dir):
+def test_on_test_data(logger, lower_threshold, upper_threshold, output_dir, device='cpu'):
     start_test_time = timer()
 
     # First, generate embeddings of all test sequences using esm6 and predict probabilities.
@@ -38,15 +38,15 @@ def test_on_test_data(logger, lower_threshold, upper_threshold, output_dir):
     positive_embeddings_output_file_path = esm6_embeddings_output_dir / f'positive_embeddings.npy'
     negative_embeddings_output_file_path = esm6_embeddings_output_dir / f'negative_embeddings.npy'
     Xs_positive = calc_embeddings_of_fasta_file_with_huggingface_model_esm(
-        'esm_6', POSITIVE_TEST_FILE, positive_embeddings_output_file_path)
+        'esm_6', POSITIVE_TEST_FILE, positive_embeddings_output_file_path, device=device)
     Xs_negative = calc_embeddings_of_fasta_file_with_huggingface_model_esm(
-        'esm_6', NEGATIVE_TEST_FILE, negative_embeddings_output_file_path)
+        'esm_6', NEGATIVE_TEST_FILE, negative_embeddings_output_file_path, device=device)
     logger.info(f"ESM-6 embeddings calculated: positive shape {Xs_positive.shape}, negative shape {Xs_negative.shape}")
 
     Xs = np.concatenate([Xs_positive, Xs_negative])
     Ys = [1] * Xs_positive.shape[0] + [0] * Xs_negative.shape[0]
 
-    model_esm_6 = joblib.load(OUTPUTS_DIR / 'esm_6' / 'model.pkl')
+    model_esm_6 = joblib.load(CLASSIFIERS_OUTPUT_DIR / 'esm_6' / 'model.pkl')
     probs_esm6 = model_esm_6.predict_proba(Xs)[:, 1]
     logger.info(f"ESM-6 model probabilities predicted.")
 
@@ -78,13 +78,13 @@ def test_on_test_data(logger, lower_threshold, upper_threshold, output_dir):
         pt5_embeddings_dir.mkdir(exist_ok=True)
 
         Xs_positive_pt5 = calc_embeddings_of_fasta_file_with_huggingface_model_pt5(
-            'pt5', POS_PT5_FASTA, pt5_embeddings_dir / "positive.npy")
+            'pt5', POS_PT5_FASTA, pt5_embeddings_dir / "positive.npy", device=device)
         Xs_negative_pt5 = calc_embeddings_of_fasta_file_with_huggingface_model_pt5(
-            'pt5', NEG_PT5_FASTA, pt5_embeddings_dir / "negative.npy")
+            'pt5', NEG_PT5_FASTA, pt5_embeddings_dir / "negative.npy", device=device)
         Xs_pt5 = np.concatenate([Xs_positive_pt5, Xs_negative_pt5])
         logger.info(f"PT5 embeddings calculated for nonsignificant sequences: shape {Xs_pt5.shape}")
 
-        model_pt5 = joblib.load(OUTPUTS_DIR / 'pt5' / 'model.pkl')
+        model_pt5 = joblib.load(CLASSIFIERS_OUTPUT_DIR / 'pt5' / 'model.pkl')
         probs_pt5 = model_pt5.predict_proba(Xs_pt5)[:, 1]
         logger.info(f"PT5 model probabilities predicted for nonsignificant sequences.")
 
@@ -108,7 +108,7 @@ def test_on_test_data(logger, lower_threshold, upper_threshold, output_dir):
     return test_results
 
 
-def main(lower_threshold, upper_threshold):
+def main(lower_threshold, upper_threshold, device='cpu'):
     output_classifiers_dir = MIXED_MODELS_DIR / f'mixed_{lower_threshold}_{upper_threshold}'
     output_classifiers_dir.mkdir(parents=True, exist_ok=True)
 
@@ -118,7 +118,7 @@ def main(lower_threshold, upper_threshold):
                             output_classifiers_dir / 'classification_with_classic_ML_test.log', mode='w')])
     logger = logging.getLogger(__name__)
 
-    test_results = test_on_test_data(logger, lower_threshold, upper_threshold, output_classifiers_dir)
+    test_results = test_on_test_data(logger, lower_threshold, upper_threshold, output_classifiers_dir, device)
     test_results.to_csv(output_classifiers_dir / 'mixed_classifier_test_results.csv', index=False)
 
 
@@ -129,5 +129,6 @@ if __name__ == "__main__":
     parser.add_argument('--upper_threshold', type=float, default=0.6,
                         help='ESM-6 probabilities above this are classified directly (positive). '
                              'Sequences with probabilities in [lower_threshold, upper_threshold] are escalated to PT5.')
+    parser.add_argument('--device', help='Device to compute embeddings on', type=str, choices=['cpu', 'cuda'], default='cpu')
     args = parser.parse_args()
-    main(args.lower_threshold, args.upper_threshold)
+    main(args.lower_threshold, args.upper_threshold, args.device)

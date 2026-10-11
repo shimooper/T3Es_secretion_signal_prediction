@@ -31,18 +31,20 @@ def get_arguments():
     parser.add_argument('--classifiers_output_dir', help='Base directory to write classifier results to', type=Path, required=True)
     parser.add_argument('--positive_fasta_file', help='Path to the positive-class train FASTA file', type=Path, required=True)
     parser.add_argument('--negative_fasta_file', help='Path to the negative-class train FASTA file', type=Path, required=True)
+    parser.add_argument('--device', help='Device to compute embeddings on (esm/pt5 only)', type=str, choices=['cpu', 'cuda'], default='cpu')
     return parser.parse_args()
 
 
-def _default_calc_embeddings_fn(model_id, hidden_layer_number):
+def _default_calc_embeddings_fn(model_id, hidden_layer_number, device='cpu'):
     # Lazily imported: these pull in torch/transformers, which must stay optional here so that this module can
     # still be imported (e.g. for the protein_bert model_id, via an explicitly-passed calc_embeddings_fn) in
     # environments that don't have the PyTorch stack installed (protein_bert runs in a separate TensorFlow env).
     if model_id == 'pt5':
         from common.pretrained_embeddings.calc_pt5_embeddings import calc_pt5_embeddings
-        return functools.partial(calc_pt5_embeddings, model_id, hidden_layer_number=hidden_layer_number)
+        return functools.partial(calc_pt5_embeddings, model_id, hidden_layer_number=hidden_layer_number,
+                                 device=device)
     from common.pretrained_embeddings.calc_esm_embeddings import calc_esm_embeddings
-    return functools.partial(calc_esm_embeddings, model_id)
+    return functools.partial(calc_esm_embeddings, model_id, device=device)
 
 
 def pca(Xs, Ys, output_dir, n_components=2):
@@ -123,9 +125,9 @@ def fit_on_train_data(Xs_train, Ys_train, output_dir, n_jobs):
 
 
 def main(model_id, n_jobs, embeddings_dir, classifiers_output_dir, positive_fasta_file, negative_fasta_file,
-         hidden_layer_number=None, calc_embeddings_fn=None):
+         hidden_layer_number=None, calc_embeddings_fn=None, device='cpu'):
     if calc_embeddings_fn is None:
-        calc_embeddings_fn = _default_calc_embeddings_fn(model_id, hidden_layer_number)
+        calc_embeddings_fn = _default_calc_embeddings_fn(model_id, hidden_layer_number, device)
 
     model_embeddings_dir = embeddings_dir / model_id
     layer_subdir = f'layer_{hidden_layer_number}' if hidden_layer_number is not None else ''
@@ -163,4 +165,4 @@ def main(model_id, n_jobs, embeddings_dir, classifiers_output_dir, positive_fast
 if __name__ == "__main__":
     args = get_arguments()
     main(args.model_id, args.n_jobs, args.embeddings_dir, args.classifiers_output_dir, args.positive_fasta_file,
-         args.negative_fasta_file, args.hidden_layer_number)
+         args.negative_fasta_file, args.hidden_layer_number, device=args.device)

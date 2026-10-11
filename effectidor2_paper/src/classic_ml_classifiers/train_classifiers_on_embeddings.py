@@ -14,6 +14,7 @@ def get_arguments():
     parser.add_argument('--model_id', help='The pretrained model id', type=str, required=True)
     parser.add_argument('--n_jobs', help='The number of jobs to run in parallel', type=int, default=1)
     parser.add_argument('--hidden_layer_number', help='Encoder layer index to use for embeddings (1=first block, None=last hidden state)', type=int, default=None)
+    parser.add_argument('--device', help='Device to compute embeddings on (esm/pt5 only)', type=str, choices=['cpu', 'cuda'], default='cpu')
     return parser.parse_args()
 
 
@@ -33,4 +34,5 @@ if __name__ == "__main__":
                                     positive_fasta_file=FIXED_POSITIVE_TRAIN_FILE,
                                     negative_fasta_file=FIXED_NEGATIVE_TRAIN_FILE,
                                     hidden_layer_number=args.hidden_layer_number,
+                                    device=args.device,
                                     calc_embeddings_fn=_calc_embeddings_fn_for(args.model_id))

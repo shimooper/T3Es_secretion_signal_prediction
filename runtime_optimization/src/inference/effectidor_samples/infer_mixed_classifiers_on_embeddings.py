@@ -17,7 +17,7 @@ from sklearn.metrics import matthews_corrcoef, average_precision_score
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
-from runtime_optimization.src.utils.consts_paths import OUTPUTS_DIR, POSITIVE_TEST_FILE, NEGATIVE_TEST_FILE
+from runtime_optimization.src.utils.consts_paths import CLASSIFIERS_OUTPUT_DIR, POSITIVE_TEST_FILE, NEGATIVE_TEST_FILE
 from common.pretrained_embeddings.calc_esm_embeddings import calc_embeddings_of_fasta_file_with_huggingface_model_esm
 from common.pretrained_embeddings.calc_pt5_embeddings import calc_embeddings_of_fasta_file_with_huggingface_model_pt5
 
@@ -28,7 +28,7 @@ def filter_fasta_by_indices(input_fasta, output_fasta, indices_set):
     SeqIO.write(selected, output_fasta, "fasta")
 
 
-def test_on_test_data(logger, fasta_path, accuracy_threshold, output_dir):
+def test_on_test_data(logger, fasta_path, accuracy_threshold, output_dir, device='cpu'):
     start_test_time = timer()
 
     # First, generate embeddings of all test sequences using esm6 and predict probabilities.
@@ -37,10 +37,10 @@ def test_on_test_data(logger, fasta_path, accuracy_threshold, output_dir):
 
     embeddings_output_file_path = esm6_embeddings_output_dir / f'embeddings.npy'
     Xs = calc_embeddings_of_fasta_file_with_huggingface_model_esm(
-        'esm_6', fasta_path, embeddings_output_file_path)
+        'esm_6', fasta_path, embeddings_output_file_path, device=device)
     logger.info(f"ESM-6 embeddings calculated: shape {Xs.shape}")
 
-    model_esm_6 = joblib.load(OUTPUTS_DIR / 'esm_6' / 'model.pkl')
+    model_esm_6 = joblib.load(CLASSIFIERS_OUTPUT_DIR / 'esm_6' / 'model.pkl')
     probs_esm6 = model_esm_6.predict_proba(Xs)[:, 1]
     logger.info(f"ESM-6 model probabilities predicted.")
 
@@ -70,10 +70,10 @@ def test_on_test_data(logger, fasta_path, accuracy_threshold, output_dir):
         pt5_embeddings_dir.mkdir(exist_ok=True)
 
         Xs_pt5 = calc_embeddings_of_fasta_file_with_huggingface_model_pt5(
-            'pt5', PT5_FASTA, pt5_embeddings_dir / "embeddings.npy")
+            'pt5', PT5_FASTA, pt5_embeddings_dir / "embeddings.npy", device=device)
         logger.info(f"PT5 embeddings calculated for nonsignificant sequences: shape {Xs_pt5.shape}")
 
-        model_pt5 = joblib.load(OUTPUTS_DIR / 'pt5' / 'model.pkl')
+        model_pt5 = joblib.load(CLASSIFIERS_OUTPUT_DIR / 'pt5' / 'model.pkl')
         probs_pt5 = model_pt5.predict_proba(Xs_pt5)[:, 1]
         logger.info(f"PT5 model probabilities predicted for nonsignificant sequences.")
 
@@ -91,7 +91,7 @@ def test_on_test_data(logger, fasta_path, accuracy_threshold, output_dir):
     return test_results
 
 
-def main(fasta_path, accuracy_threshold):
+def main(fasta_path, accuracy_threshold, device='cpu'):
     output_dir = fasta_path.parent / f'mixed_{accuracy_threshold}'
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -101,7 +101,7 @@ def main(fasta_path, accuracy_threshold):
                             output_dir / 'classification_with_classic_ML_test.log', mode='w')])
     logger = logging.getLogger(__name__)
 
-    test_results = test_on_test_data(logger, fasta_path, accuracy_threshold, output_dir)
+    test_results = test_on_test_data(logger, fasta_path, accuracy_threshold, output_dir, device)
     test_results.to_csv(output_dir / 'mixed_classifier_test_results.csv', index=False)
 
 
@@ -109,5 +109,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--fasta_path', type=Path, help='Path to the input FASTA file', required=True)
     parser.add_argument('--accuracy_threshold', help='The threshold required to calculate the accurate model', type=float, default=0.4)
+    parser.add_argument('--device', help='Device to compute embeddings on', type=str, choices=['cpu', 'cuda'], default='cpu')
     args = parser.parse_args()
-    main(args.fasta_path, args.accuracy_threshold)
+    main(args.fasta_path, args.accuracy_threshold, args.device)

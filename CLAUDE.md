@@ -20,7 +20,7 @@ The repo is split into three top-level areas:
 - `common/classic_ml_classifiers/` — `classifiers_params_grids.py` (sklearn/xgboost/lightgbm param grids), `utils.py` (`prepare_Xs_and_Ys`, which takes an injected `calc_embeddings_fn` callable rather than knowing about specific model families), and `{train,test}_classifiers_on_embeddings.py` (`main()` takes `embeddings_dir`/`classifiers_output_dir`/`positive_fasta_file`/`negative_fasta_file` as required arguments, plus an optional `calc_embeddings_fn` override — omit it and it auto-picks the ESM or ProtT5 calculator based on `model_id`, via a lazy import so the PyTorch stack is never pulled in unless actually needed).
 - `effectidor2_paper/src/classic_ml_classifiers/{train,test}_classifiers_on_embeddings.py` and `runtime_optimization/src/classic_ml_classifiers/{train,test}_classifiers_on_embeddings.py` — thin per-track wrapper scripts: same CLI as before, calling `common`'s `main()` with that track's own paths from its `consts_paths.py`. The paper's wrapper additionally passes an explicit `calc_embeddings_fn` for `model_id='protein_bert'` (lazily imported, so it's only ever touched when that model is requested).
 - `effectidor2_paper/src/utils/consts_paths.py` — paper-specific data/output paths (`DATASETS_DIR`, `EMBEDDINGS_DIR`, `CLASSIFIERS_OUTPUT_DIR`, `FINAL_RESULTS`, `FIXED_*_FILE`, `PROTEIN_BERT_DIR`, `FINETUNE_NUMBER_OF_EPOCHS`, `PROTEIN_BERT_MODEL_NAME`) plus `dataset_readers.py` (reads the paper's train/test FASTA files, using `common/read_fasta_utils.py`).
-- `runtime_optimization/src/utils/consts_paths.py` — optimization-specific data/output paths, same style as the paper's (`EMBEDDINGS_DIR`, `OUTPUTS_DIR` — per-model classifier results live directly under it, `MIXED_MODELS_DIR`, `*_TRAIN_FILE`/`*_TEST_FILE`, ...), pointing at `runtime_optimization/data` and `runtime_optimization/outputs` instead.
+- `runtime_optimization/src/utils/consts_paths.py` — optimization-specific data/output paths, same style as the paper's (`EMBEDDINGS_DIR`, `OUTPUTS_DIR`, `CLASSIFIERS_OUTPUT_DIR` — per-model classifier results live under it, `MIXED_MODELS_DIR`, `*_TRAIN_FILE`/`*_TEST_FILE`, ...), pointing at `runtime_optimization/data` and `runtime_optimization/outputs` instead.
 
 Imports are absolute from the repo root, e.g. `from common.consts import BATCH_SIZE` or `from effectidor2_paper.src.utils.consts_paths import FINAL_RESULTS`.
 
@@ -133,7 +133,7 @@ This work-in-progress, under `runtime_optimization/`, explores a two-stage casca
 
 | Script | Purpose |
 |--------|---------|
-| `runtime_optimization/src/classic_ml_classifiers/train_classifiers_on_embeddings.py` | Thin wrapper that calls `common.classic_ml_classifiers.train_classifiers_on_embeddings.main()` with this track's own `EMBEDDINGS_DIR`/`OUTPUTS_DIR`/FASTA files (single model_id, e.g. `esm_6` or `pt5` — the base for the cascade) |
+| `runtime_optimization/src/classic_ml_classifiers/train_classifiers_on_embeddings.py` | Thin wrapper that calls `common.classic_ml_classifiers.train_classifiers_on_embeddings.main()` with this track's own `EMBEDDINGS_DIR`/`CLASSIFIERS_OUTPUT_DIR`/FASTA files (single model_id, e.g. `esm_6` or `pt5` — the base for the cascade) |
 | `runtime_optimization/src/classic_ml_classifiers/test_classifiers_on_embeddings.py` | Same, wrapping `common.classic_ml_classifiers.test_classifiers_on_embeddings.main()` |
 | `runtime_optimization/src/test_mixed_classifiers/test_mixed_classifiers_on_embeddings.py` | Benchmarks the cascade on the labeled test set; reports MCC, AUPRC, and elapsed time at a given threshold |
 | `runtime_optimization/src/inference/effectidor_samples/infer_mixed_classifiers_on_embeddings.py` | Runs the cascade on real (unlabeled) effectidor sample FASTA files; records inference time only |
@@ -146,7 +146,7 @@ This work-in-progress, under `runtime_optimization/`, explores a two-stage casca
 
 **Output directories:**
 - `runtime_optimization/outputs/pretrained_embeddings/{esm_6,pt5}/` — this track's own cached embeddings (`EMBEDDINGS_DIR` in `runtime_optimization/src/utils/consts_paths.py`)
-- `runtime_optimization/outputs/{esm_6,pt5,pt5/layer_N}/` — this track's own per-model classifier results (under `OUTPUTS_DIR`), kept separate from the paper's `effectidor2_paper/results/embeddings_classifiers/`
+- `runtime_optimization/outputs/embeddings_classifiers/{esm_6,pt5,pt5/layer_N}/` — this track's own per-model classifier results (`CLASSIFIERS_OUTPUT_DIR`), kept separate from the paper's `effectidor2_paper/results/embeddings_classifiers/`
 - `runtime_optimization/outputs/mixed_models/two_thresholds/` — cascade sweep results (`MIXED_MODELS_DIR`)
 - `runtime_optimization/outputs/pt5_layers_expirement/` — layer-sweep comparison plot/CSV and SLURM logs
 - `runtime_optimization/src/inference/effectidor_samples/results/<sample_id>/mixed_<threshold>/` — per-sample timing results from real effectidor runs

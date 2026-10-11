@@ -1,3 +1,4 @@
+import argparse
 import functools
 import logging
 import numpy as np
@@ -36,7 +37,7 @@ def fit_on_data(Xs, Ys, output_dir):
         json.dump(metadata, f)
 
 
-def main():
+def main(device='cpu'):
     model_id = 'pt5'
     output_dir = FINAL_RESULTS / 'trained_pt5_head'
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -47,7 +48,7 @@ def main():
                             output_dir / 'classification_with_classic_ML.log', mode='w')])
     logger = logging.getLogger(__name__)
 
-    calc_embeddings_fn = functools.partial(calc_pt5_embeddings, model_id)
+    calc_embeddings_fn = functools.partial(calc_pt5_embeddings, model_id, device=device)
     Xs_train, Ys_train = prepare_Xs_and_Ys(logger, calc_embeddings_fn, 'train', always_calc_embeddings=False,
                                             positive_fasta_file=FIXED_POSITIVE_TRAIN_FILE,
                                             negative_fasta_file=FIXED_NEGATIVE_TRAIN_FILE,
@@ -65,4 +66,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--device', help='Device to compute embeddings on', type=str, choices=['cpu', 'cuda'], default='cpu')
+    args = parser.parse_args()
+    main(args.device)
